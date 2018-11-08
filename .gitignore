@@ -24,7 +24,9 @@ hs_err_pid*
 
 # IntelliJ files.
 .idea
+*.iml
 
 # Intermediate build files and folders.
 build/
 .gradle/
+.terraform/
