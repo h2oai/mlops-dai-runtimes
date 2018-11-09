@@ -30,4 +30,4 @@ hs_err_pid*
 build/
 .gradle/
 .terraform/
-terraform.tfstate
+terraform.tfstate*

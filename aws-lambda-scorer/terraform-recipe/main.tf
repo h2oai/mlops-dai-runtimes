@@ -20,7 +20,7 @@ resource "aws_lambda_function" "scorer_lambda" {
   function_name = "${var.lambda_id}_function"
   description = "H2O Driverless AI Mojo Scorer"
   filename = "${var.lambda_zip_path}"
-  handler = "ai.h2o.deploy.aws.lambda.MojoScorer::handleRequest"
+  handler = "ai.h2o.dia.deploy.aws.lambda.MojoScorer::handleRequest"
   source_code_hash = "${base64sha256(file(var.lambda_zip_path))}"
   role = "${aws_iam_role.scorer_lambda_iam_role.arn}"
   runtime = "java8"
@@ -29,11 +29,7 @@ resource "aws_lambda_function" "scorer_lambda" {
   timeout = 120
   memory_size = 1024
 
-  environment {
-    variables = {
-      // TODO(osery): Pass in a location of the mojo in S3.
-    }
-  }
+  // TODO(osery): Pass in a location of the mojo in S3 as an environment variable.
 }
 
 # IAM role which dictates what other AWS services the lambda function may access.
