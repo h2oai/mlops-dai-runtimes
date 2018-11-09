@@ -1,17 +1,42 @@
 plugins {
     id "java"
+    id 'org.hidetake.swagger.generator' version '2.15.0'
 }
 
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+
+    def localNexusLocation = "http://nexus:8081/nexus/repository"
+    maven {
+        url "$localNexusLocation/releases/"
+    }
 }
 
 dependencies {
     compile group: 'ai.h2o', name: 'mojo2-runtime-api', version: '0.13.7'
+    compile group: 'ai.h2o', name: 'mojo2-runtime-impl', version: '0.13.7'
     compile group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.0'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.445'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.3.1'
+    compile group: 'io.swagger.core.v3', name: 'swagger-annotations', version: '2.0.5'
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.0'
 }
+
+swaggerSources {
+    scorer {
+        inputFile = file('swagger.yaml')
+        code {
+            language = 'java'
+            configFile = file('swagger_codegen.json')
+            components = [models: true]
+            dependsOn validation
+        }
+    }
+}
+compileJava.dependsOn swaggerSources.scorer.code
+sourceSets.main.java.srcDir "${swaggerSources.scorer.code.outputDir}/src/main/java"
 
 task buildZip(type: Zip) {
     from compileJava
