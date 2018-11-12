@@ -27,9 +27,6 @@ public final class MojoScorer {
     private static final String MOJO_S3_OBJECT_KEY = System.getenv("MOJO_S3_OBJECT_KEY");
     private static final AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
 
-    // TODO(osery): Load mojo path, from env variable so that the same lambda code can be deployed without being
-    // specific to any particular mojo.
-
     public ScoreResponse score(ScoreRequest request, Context context) throws IOException, LicenseException {
         LambdaLogger logger = context.getLogger();
         logger.log(String.format("Loading Mojo pipeline from S3 object %s/%s", DEPLOYMENT_S3_BUCKET_NAME,
@@ -40,7 +37,6 @@ public final class MojoScorer {
         // TODO(osery):
         //  - Score the input and return the result.
         //  - Map errors to HTTP error codes.
-        //  - Decide on how to pass in the license key.
         throw new AssertionError("Mojo pipeline loaded but scoring is not implemented yet.");
     }
 
