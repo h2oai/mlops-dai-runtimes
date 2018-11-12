@@ -9,6 +9,7 @@ variable "lambda_id" {
 variable "lambda_zip_path" {
   default = "../lambda-template/build/distributions/lambda-template.zip"
 }
+variable "license_key" {}
 variable "mojo_zip_path" {}
 
 provider "aws" {
@@ -50,6 +51,7 @@ resource "aws_lambda_function" "scorer_lambda" {
     variables = {
       DEPLOYMENT_S3_BUCKET_NAME = "${aws_s3_bucket.deployment.id}"
       MOJO_S3_OBJECT_KEY = "${aws_s3_bucket_object.mojo.key}"
+      DRIVERLESS_AI_LICENSE_KEY = "${var.license_key}"
     }
   }
 }
@@ -93,11 +95,6 @@ resource "aws_iam_policy" "s3_policy" {
       "Effect": "Allow",
       "Action": ["s3:GetObject"],
       "Resource": ["${aws_s3_bucket.deployment.arn}/${aws_s3_bucket_object.mojo.key}"]
-    },
-    {
-      "Effect" : "Allow",
-      "Action" : ["kms:Decrypt"],
-      "Resource" : ["*"]
     }
   ]
 }
