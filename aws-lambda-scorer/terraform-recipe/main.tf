@@ -48,7 +48,7 @@ resource "aws_lambda_function" "scorer_lambda" {
   function_name = "${var.lambda_id}_function"
   description = "H2O Driverless AI Mojo Scorer (${var.lambda_id})"
   filename = "${var.lambda_zip_path}"
-  handler = "ai.h2o.dia.deploy.aws.lambda.ApiGatewayWrapper::handleRequest"
+  handler = "ai.h2o.mojos.deploy.aws.lambda.ApiGatewayWrapper::handleRequest"
   source_code_hash = "${base64sha256(file(var.lambda_zip_path))}"
   role = "${aws_iam_role.scorer_lambda_iam_role.arn}"
   runtime = "java8"

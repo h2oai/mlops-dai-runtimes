@@ -1,4 +1,4 @@
 {
-  "modelPackage": "ai.h2o.dai.deploy.aws.lambda.model",
-  "invokerPackage": "ai.h2o.dai.deploy.aws.lambda"
+  "modelPackage": "ai.h2o.mojos.deploy.aws.lambda.model",
+  "invokerPackage": "ai.h2o.mojos.deploy.aws.lambda"
 }
