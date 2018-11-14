@@ -1,0 +1,24 @@
+plugins {
+    id "java"
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'ai.h2o', name: 'mojo2-runtime-api', version: '0.13.7'
+    compile group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.0'
+}
+
+task buildZip(type: Zip) {
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.compileClasspath
+    }
+}
+
+build.dependsOn buildZip
