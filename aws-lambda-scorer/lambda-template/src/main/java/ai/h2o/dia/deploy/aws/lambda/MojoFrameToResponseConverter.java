@@ -37,8 +37,9 @@ class MojoFrameToResponseConverter implements BiFunction<MojoFrame, ScoreRequest
         if (includedFields.isEmpty()) {
             return;
         }
+        List<Row> inputRows = scoreRequest.getRows();
         for (int row = 0; row < outputRows.size(); row++) {
-            Row inputRow = scoreRequest.getRows().get(row);
+            Row inputRow = inputRows.get(row);
             Row outputRow = outputRows.get(row);
             List<String> inputFields = scoreRequest.getFields();
             for (int col = 0; col < inputFields.size(); col++) {
