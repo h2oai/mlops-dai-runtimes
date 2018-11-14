@@ -1,0 +1,212 @@
+swagger: '2.0'
+info:
+  description: >-
+    This is a definition of the REST API for scoring from H2O. This API is
+    intended to be used within DAI and eventually across all H2O scoring systems
+  version: 1.0.0
+  title: Scoring API - v1
+  termsOfService: ''
+  contact:
+    email: support@h2o.ai
+  license:
+    name: License
+    url: 'http://www.h2o.ai'
+host: localhost
+basePath: /
+schemes:
+  - https
+  - http
+paths:
+  /models:
+    get:
+      tags:
+        - models
+      summary: Returns a list of models loaded in the server
+      description: Returns a list of models loaded in the server
+      operationId: getModels
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        '200':
+          description: list of model ids that are available to score
+          schema:
+            type: array
+            items:
+              type: string
+      security:
+        - api_key: []
+  '/models/{id}':
+    get:
+      tags:
+        - models
+      summary: describe a model
+      description: describe a model
+      operationId: getModelInfo
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: unique model indetifier
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Model'
+        '404':
+          description: 'Model not found, please verify model id'
+  '/models/{id}/score':
+    post:
+      tags:
+        - models
+      summary: score a model
+      description: score a model
+      operationId: getScore
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: ID of model to be scored
+          required: true
+          type: string
+        - name: payload
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ScoreRequest'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ScoreResponse'
+        '400':
+          description: Invalid payload
+        '404':
+          description: Model not found
+    get:
+      tags:
+        - models
+      summary: score a model
+      description: score a model
+      operationId: getScoreByFile
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of model to be scored
+          required: true
+          type: string
+        - in: query
+          name: file
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ScoreResponse'
+        '400':
+          description: Invalid payload
+        '404':
+          description: Model not found
+securityDefinitions:
+  petstore_auth:
+    type: oauth2
+    authorizationUrl: 'http://petstore.swagger.io/oauth/dialog'
+    flow: implicit
+    scopes:
+      'write:pets': modify pets in your account
+      'read:pets': read your pets
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+definitions:
+  Model:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      properties:
+        type: object
+        properties:
+          scoringType:
+            type: string
+            enum:
+              - REGRESSION
+              - CLASSIFICATION
+              - BINOMIAL
+          scoringResponLabels:
+            type: array
+            items:
+              type: string
+      schema:
+        type: object
+        properties:
+          inputFields:
+            type: array
+            items:
+              $ref: '#/definitions/DataField'
+          targetFields:
+            type: array
+            items:
+              $ref: '#/definitions/DataField'
+          outputFields:
+            type: array
+            items:
+              $ref: '#/definitions/DataField'
+  Row:
+    type: array
+    items:
+      type: string
+  ScoreRequest:
+    type: object
+    properties:
+      id:
+        type: string
+      includeFieldsInOutput:
+        type: array
+        items:
+          type: string
+      fields:
+        type: array
+        items:
+          type: string
+      rows:
+        type: array
+        items:
+          $ref: '#/definitions/Row'
+  ScoreResponse:
+    type: object
+    properties:
+      id:
+        type: string
+      score:
+        type: array
+        items:
+          $ref: '#/definitions/Row'
+  DataField:
+    type: object
+    properties:
+      name:
+        type: string
+      dataType:
+        type: string
+        enum:
+          - Bool
+          - Int32
+          - Int64
+          - Float32
+          - Float64
+          - Str
+          - Time64
+      example:
+        type: string
