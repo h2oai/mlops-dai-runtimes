@@ -34,7 +34,7 @@ test {
 
 swaggerSources {
     scorer {
-        inputFile = file('swagger.yaml')
+        inputFile = file('../../common/rest-api/swagger.yaml')
         code {
             language = 'java'
             configFile = file('swagger_codegen.json')
