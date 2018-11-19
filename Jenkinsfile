@@ -25,10 +25,6 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
-    parameters {
-        booleanParam(name: 'doRelease', defaultValue: false, description: 'Release build artifacts to AWS S3')
-    }
-
     stages {
 
         stage('Test') {
@@ -37,14 +33,11 @@ pipeline {
                     VERSION = getVersion()
                     echo "Version: ${VERSION}"
                     sh "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew check"
-                    if (isRelease(VERSION)) {
-                        utilsLib.appendBuildDescription("Release ${VERSION}")
-                    }
                 }
             }
             post {
                 always {
-                    testReport '*/*/build/reports/tests/test', 'JUnit tests'
+                    testReport 'aws-lambda-scorer/lambda-template/build/reports/tests/test', 'JUnit tests'
                 }
             }
         }
@@ -52,20 +45,15 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    VERSION = getVersion()
-                    echo "Version: ${VERSION}"
                     sh "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew distributionZip"
-                }
-                if (isRelease(VERSION)) {
-                    utilsLib.appendBuildDescription("Release ${VERSION}")
+                    if (isRelease(VERSION)) {
+                        utilsLib.appendBuildDescription("Release ${VERSION}")
+                    }
                 }
             }
             post {
                 success {
-                    arch "build/*-${VERSION}.zip"
-                }
-                always {
-                    testReport '*/*/build/reports/tests/test', 'JUnit tests'
+                    arch "build/dai-deployment-templates-${VERSION}.zip"
                 }
             }
         }
@@ -79,7 +67,7 @@ pipeline {
             steps {
                 script {
                     s3upDocker {
-                        localArtifact = "build/*-${VERSION}.zip"
+                        localArtifact = "build/dai-deployment-templates-${VERSION}.zip"
                         artifactId = 'dai-deployment-template'
                         version = VERSION
                         keepPrivate = true
@@ -105,7 +93,7 @@ def isRelease(version) {
  * @return version specified in gradle.properties
  */
 def getVersion() {
-    def version = sh(script: "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew -q printVersion", returnStdout: true).trim()
+    def version = sh(script: "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew -q printVersion -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false", returnStdout: true).trim()
     if (!version) {
         error "Version must be set"
     }
