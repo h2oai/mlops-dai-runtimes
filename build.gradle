@@ -20,7 +20,7 @@
 // }
 //
 task distributionZip(type: Zip) {
-    archiveName "${project.name}-${version}.zip"
+    archiveName "${project.name}-${project.version}.zip"
     destinationDir(file(buildDir))
 }
 
