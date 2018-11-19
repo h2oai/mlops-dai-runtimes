@@ -1,0 +1,10 @@
+// Include all the terraform files in the root package distribution zip file.
+rootProject.distributionZip {
+    into(this.project.path.replace(":", "/")) {
+        from(this.project.projectDir) {
+            include '**/*.tf'
+            includeEmptyDirs false
+        }
+    }
+}
+

@@ -46,6 +46,7 @@ swaggerSources {
 compileJava.dependsOn swaggerSources.scorer.code
 sourceSets.main.java.srcDir "${swaggerSources.scorer.code.outputDir}/src/main/java"
 
+// Build an the AWS lambda distribution zip file.
 task buildZip(type: Zip) {
     from compileJava
     from processResources
@@ -53,5 +54,13 @@ task buildZip(type: Zip) {
         from configurations.compileClasspath
     }
 }
-
 build.dependsOn buildZip
+
+// Include the AWS lambda distribution zip file in the root package distribution zip file.
+rootProject.distributionZip {
+    dependsOn buildZip
+    into(this.project.path.replace(":", "/")) {
+        from buildZip.archivePath
+    }
+}
+
