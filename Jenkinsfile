@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-@Library('test-shared-library@1.1') _
+@Library('test-shared-library@1.17') _
 
 import ai.h2o.ci.Utils
 
@@ -106,7 +106,7 @@ def isRelease(version) {
  */
 def getVersion() {
     def version = sh(script: "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew -q printVersion", returnStdout: true).trim()
-    if (version == null || version == '') {
+    if (!version) {
         error "Version must be set"
     }
     return version
