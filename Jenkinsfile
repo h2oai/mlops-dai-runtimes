@@ -24,6 +24,11 @@ pipeline {
 
     stages {
 
+        stage('Init') {
+            deleteDir()
+            checkout scm
+        }
+
         stage('Test') {
             agent {
                 docker { // run inside JAVA_IMAGE container on NODE_LABEL host
