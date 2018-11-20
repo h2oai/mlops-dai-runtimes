@@ -6,12 +6,13 @@ import ai.h2o.ci.Utils
 
 JAVA_IMAGE = 'nimmis/java-centos:openjdk-8-jdk'
 DOCKER_JAVA_HOME = '/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.161-0.b14.el7_4.x86_64'
+NODE_LABEL = 'master'
 
 def VERSION = null
 def utilsLib = new Utils()
 
 pipeline {
-    agent {label 'master'}
+    agent none // specify agent on a per stage basis
 
     // Setup job options
     options {
@@ -25,8 +26,9 @@ pipeline {
 
         stage('Test') {
             agent {
-                docker {
+                docker { // run inside JAVA_IMAGE container on NODE_LABEL host
                     image JAVA_IMAGE
+                    label NODE_LABEL
                 }
             }
             steps {
@@ -45,8 +47,9 @@ pipeline {
 
         stage('Build') {
             agent {
-                docker {
+                docker { // run inside JAVA_IMAGE container on NODE_LABEL host
                     image JAVA_IMAGE
+                    label NODE_LABEL
                 }
             }
             steps {
@@ -65,6 +68,7 @@ pipeline {
         }
 
         stage('Publish to S3') {
+            agent { label NODE_LABEL } // run on host
             when {
                 expression {
                     return doPublish()
