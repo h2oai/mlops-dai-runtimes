@@ -62,6 +62,10 @@ resource "aws_lambda_function" "scorer_lambda" {
       DEPLOYMENT_S3_BUCKET_NAME = "${aws_s3_bucket.deployment.id}"
       MOJO_S3_OBJECT_KEY = "${aws_s3_bucket_object.mojo.key}"
       DRIVERLESS_AI_LICENSE_KEY = "${var.license_key}"
+      // This is not used yet by the scorer, but it is here to enforce code reload when only the mojo itself changes.
+      // Otherwise, Terraform wouldn't push a lambda change and any instance still live in AWS would keep using the
+      // mojo already loaded in memory.
+      MOJO_FINGERPRINT = "${aws_s3_bucket_object.mojo.etag}"
     }
   }
 }

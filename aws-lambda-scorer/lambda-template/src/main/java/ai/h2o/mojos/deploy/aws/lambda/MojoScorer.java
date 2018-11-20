@@ -28,17 +28,16 @@ public final class MojoScorer {
     private static final String DEPLOYMENT_S3_BUCKET_NAME = System.getenv("DEPLOYMENT_S3_BUCKET_NAME");
     private static final String MOJO_S3_OBJECT_KEY = System.getenv("MOJO_S3_OBJECT_KEY");
     private static final AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
+    private static final Object pipelineLock = new Object();
+    private static MojoPipeline pipeline;
+
     private final RequestToMojoFrameConverter requestConverter = new RequestToMojoFrameConverter();
     private final MojoFrameToResponseConverter responseConverter = new MojoFrameToResponseConverter();
 
     public ScoreResponse score(ScoreRequest request, Context context) throws IOException, LicenseException {
         LambdaLogger logger = context.getLogger();
         logger.log(String.format("Got scoring request: %s", request));
-        logger.log(String.format("Loading Mojo pipeline from S3 object %s/%s", DEPLOYMENT_S3_BUCKET_NAME,
-                MOJO_S3_OBJECT_KEY));
-        MojoPipeline mojoPipeline = loadMojoPipelineFromS3();
-        logger.log(String.format("Mojo pipeline successfully loaded (%s).", mojoPipeline));
-
+        MojoPipeline mojoPipeline = getMojoPipeline(logger);
         MojoFrame requestFrame = requestConverter.apply(request, mojoPipeline.getInputMeta());
         logger.log(String.format("Input has %d rows, %d columns: %s", requestFrame.getNrows(), requestFrame.getNcols(),
                 Arrays.toString(requestFrame.getColumnNames())));
@@ -47,19 +46,28 @@ public final class MojoScorer {
                 responseFrame.getNcols(), Arrays.toString(responseFrame.getColumnNames())));
 
         return responseConverter.apply(responseFrame, request);
-
-        // TODO(osery):
-        //  - Map errors to HTTP error codes.
-        //  - Cache the pipeline so that it is not recreated for every request.
     }
 
-    private static MojoPipeline loadMojoPipelineFromS3() throws IOException, LicenseException {
+    private static MojoPipeline getMojoPipeline(LambdaLogger logger) throws IOException, LicenseException {
+        synchronized (pipelineLock) {
+            if (pipeline == null) {
+                pipeline = loadMojoPipelineFromS3(logger);
+            }
+            return pipeline;
+        }
+    }
+
+    private static MojoPipeline loadMojoPipelineFromS3(LambdaLogger logger) throws IOException, LicenseException {
         try (
                 S3Object s3Object = s3Client.getObject(DEPLOYMENT_S3_BUCKET_NAME, MOJO_S3_OBJECT_KEY);
                 InputStream mojoInput = s3Object.getObjectContent()
         ) {
+            logger.log(String.format("Loading Mojo pipeline from S3 object %s/%s", DEPLOYMENT_S3_BUCKET_NAME,
+                    MOJO_S3_OBJECT_KEY));
             MojoReaderBackend mojoReaderBackend = MojoPipelineReaderBackendFactory.createReaderBackend(mojoInput);
-            return MojoPipeline.loadFrom(mojoReaderBackend);
+            MojoPipeline mojoPipeline = MojoPipeline.loadFrom(mojoReaderBackend);
+            logger.log(String.format("Mojo pipeline successfully loaded (%s).", mojoPipeline));
+            return mojoPipeline;
         }
     }
 }
