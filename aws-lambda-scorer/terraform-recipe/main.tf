@@ -1,16 +1,26 @@
-variable "access_key" {}
-variable "secret_key" {}
+variable "access_key" {
+  description = "Access key to an AWS account to use."
+}
+variable "secret_key" {
+  description = "Secret key to an AWS account to use."
+}
 variable "region" {
+  description = "AWS region to push into."
   default = "us-east-1"
 }
 variable "lambda_id" {
-  default = "h2oai_dai_lambda"
+  description = "Id of the resulting AWS lambda. Keep unique, it is used to store other fragments, e.g., mojo in S3."
 }
 variable "lambda_zip_path" {
+  description = "Local path to the actual lambda scorer distribution."
   default = "../lambda-template/build/distributions/lambda-template.zip"
 }
-variable "license_key" {}
-variable "mojo_zip_path" {}
+variable "license_key" {
+  description = "Driverless AI license key."
+}
+variable "mojo_path" {
+  description = "Local path to the mojo file to be pushed to S3."
+}
 
 provider "aws" {
   access_key = "${var.access_key}"
@@ -28,9 +38,9 @@ resource "aws_s3_bucket" "deployment" {
 
 resource "aws_s3_bucket_object" "mojo" {
   bucket = "${aws_s3_bucket.deployment.id}"
-  key = "mojo_${var.lambda_id}.zip"
-  source = "${var.mojo_zip_path}"
-  etag = "${md5(file(var.mojo_zip_path))}"
+  key = "${var.lambda_id}.mojo"
+  source = "${var.mojo_path}"
+  etag = "${md5(file(var.mojo_path))}"
 }
 
 // AWS Lambda function with a Java implementation of the Mojo scorer.
