@@ -1,7 +1,7 @@
 package ai.h2o.mojos.deploy.aws.lambda;
 
-import ai.h2o.dai.deploy.aws.lambda.model.ScoreRequest;
-import ai.h2o.dai.deploy.aws.lambda.model.ScoreResponse;
+import ai.h2o.mojos.deploy.aws.lambda.model.ScoreRequest;
+import ai.h2o.mojos.deploy.aws.lambda.model.ScoreResponse;
 import ai.h2o.mojos.runtime.lic.LicenseException;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
