@@ -1,4 +1,4 @@
-package ai.h2o.dia.deploy.aws.lambda;
+package ai.h2o.mojos.deploy.aws.lambda;
 
 import ai.h2o.dai.deploy.aws.lambda.model.Row;
 import ai.h2o.dai.deploy.aws.lambda.model.ScoreRequest;
