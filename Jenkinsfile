@@ -6,18 +6,16 @@ import ai.h2o.ci.Utils
 
 JAVA_IMAGE = 'nimmis/java-centos:openjdk-8-jdk'
 DOCKER_JAVA_HOME = '/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.161-0.b14.el7_4.x86_64'
+NODE_LABEL = 'master'
 
 def VERSION = null
 def utilsLib = new Utils()
 
 pipeline {
-    agent {
-        docker {
-            image JAVA_IMAGE
-        }
-    }
+    // Specify agent on a per stage basis.
+    agent none
 
-    // Setup job options
+    // Setup job options.
     options {
         ansiColor('xterm')
         timestamps()
@@ -27,7 +25,24 @@ pipeline {
 
     stages {
 
+        stage('Init') {
+            agent { label NODE_LABEL }
+            steps {
+                script {
+                    deleteDir()
+                    checkout scm
+                }
+            }
+        }
+
         stage('Test') {
+            // Run inside JAVA_IMAGE container on NODE_LABEL host.
+            agent {
+                docker {
+                    image JAVA_IMAGE
+                    label NODE_LABEL
+                }
+            }
             steps {
                 script {
                     VERSION = getVersion()
@@ -43,6 +58,13 @@ pipeline {
         }
 
         stage('Build') {
+            // Run inside JAVA_IMAGE container on NODE_LABEL host.
+            agent {
+                docker {
+                    image JAVA_IMAGE
+                    label NODE_LABEL
+                }
+            }
             steps {
                 script {
                     sh "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew distributionZip"
@@ -59,6 +81,8 @@ pipeline {
         }
 
         stage('Publish to S3') {
+            // Run on NODE_LABEL host.
+            agent { label NODE_LABEL }
             when {
                 expression {
                     return doPublish()

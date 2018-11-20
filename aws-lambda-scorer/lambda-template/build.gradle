@@ -49,6 +49,7 @@ sourceSets.main.java.srcDir "${swaggerSources.scorer.code.outputDir}/src/main/ja
 
 // Build an the AWS lambda distribution zip file.
 task buildZip(type: Zip) {
+    archiveName "${project.name}.zip"
     from compileJava
     from processResources
     into('lib') {
