@@ -93,7 +93,9 @@ def isRelease(version) {
  * @return version specified in gradle.properties
  */
 def getVersion() {
-    def version = sh(script: "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew -q printVersion -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false", returnStdout: true).trim()
+    def version = sh(
+            script: "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew -q -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false printVersion",
+            returnStdout: true).trim()
     if (!version) {
         error "Version must be set"
     }
