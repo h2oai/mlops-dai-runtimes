@@ -12,9 +12,10 @@ def VERSION = null
 def utilsLib = new Utils()
 
 pipeline {
-    agent none // specify agent on a per stage basis
+    // Specify agent on a per stage basis.
+    agent none
 
-    // Setup job options
+    // Setup job options.
     options {
         ansiColor('xterm')
         timestamps()
@@ -35,8 +36,9 @@ pipeline {
         }
 
         stage('Test') {
+            // Run inside JAVA_IMAGE container on NODE_LABEL host.
             agent {
-                docker { // run inside JAVA_IMAGE container on NODE_LABEL host
+                docker {
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
@@ -56,8 +58,9 @@ pipeline {
         }
 
         stage('Build') {
+            // Run inside JAVA_IMAGE container on NODE_LABEL host.
             agent {
-                docker { // run inside JAVA_IMAGE container on NODE_LABEL host
+                docker {
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
@@ -78,7 +81,8 @@ pipeline {
         }
 
         stage('Publish to S3') {
-            agent { label NODE_LABEL } // run on host
+            // Run on NODE_LABEL host.
+            agent { label NODE_LABEL }
             when {
                 expression {
                     return doPublish()
@@ -126,6 +130,5 @@ def getVersion() {
  * @return true, if we are building master or rel-* branch
  */
 def doPublish() {
-    return  true
-    //return env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith("rel-")
+    return env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith("rel-")
 }
