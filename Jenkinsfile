@@ -11,11 +11,7 @@ def VERSION = null
 def utilsLib = new Utils()
 
 pipeline {
-    agent {
-        docker {
-            image JAVA_IMAGE
-        }
-    }
+    agent {label 'master'}
 
     // Setup job options
     options {
@@ -28,6 +24,11 @@ pipeline {
     stages {
 
         stage('Test') {
+            agent {
+                docker {
+                    image JAVA_IMAGE
+                }
+            }
             steps {
                 script {
                     VERSION = getVersion()
@@ -43,6 +44,11 @@ pipeline {
         }
 
         stage('Build') {
+            agent {
+                docker {
+                    image JAVA_IMAGE
+                }
+            }
             steps {
                 script {
                     sh "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew distributionZip"
@@ -59,9 +65,6 @@ pipeline {
         }
 
         stage('Publish to S3') {
-            agent {
-                label 'master'
-            }
             when {
                 expression {
                     return doPublish()
@@ -109,5 +112,6 @@ def getVersion() {
  * @return true, if we are building master or rel-* branch
  */
 def doPublish() {
-    return env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith("rel-")
+    return  true
+    //return env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith("rel-")
 }
