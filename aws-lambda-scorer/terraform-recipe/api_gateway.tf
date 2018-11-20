@@ -14,6 +14,7 @@ resource "aws_api_gateway_method" "proxy_method" {
   resource_id = "${aws_api_gateway_resource.proxy_resource.id}"
   http_method = "POST"
   authorization = "NONE"
+  api_key_required = true
 }
 
 resource "aws_api_gateway_integration" "scorer_integration" {
@@ -35,6 +36,30 @@ resource "aws_api_gateway_deployment" "scorer_api_deployment" {
   stage_name = "test"
 }
 
+resource "aws_api_gateway_usage_plan" "scorer_usage_plan" {
+  name = "${var.lambda_id}_usage_plan"
+
+  api_stages {
+    api_id = "${aws_api_gateway_rest_api.scorer_api.id}"
+    stage = "${aws_api_gateway_deployment.scorer_api_deployment.stage_name}"
+  }
+}
+
+resource "aws_api_gateway_api_key" "scorer_api_key" {
+  name = "${var.lambda_id}_api_key"
+
+  stage_key {
+    rest_api_id = "${aws_api_gateway_rest_api.scorer_api.id}"
+    stage_name  = "${aws_api_gateway_deployment.scorer_api_deployment.stage_name}"
+  }
+}
+
+resource "aws_api_gateway_usage_plan_key" "scorer_usage_plan" {
+  key_id = "${aws_api_gateway_api_key.scorer_api_key.id}"
+  key_type = "API_KEY"
+  usage_plan_id = "${aws_api_gateway_usage_plan.scorer_usage_plan.id}"
+}
+
 resource "aws_lambda_permission" "apigw" {
   statement_id = "AllowExecutionFromAPIGateway"
   action = "lambda:InvokeFunction"
@@ -48,5 +73,8 @@ resource "aws_lambda_permission" "apigw" {
 
 output "base_url" {
   value = "${aws_api_gateway_deployment.scorer_api_deployment.invoke_url}"
+}
+output "api_key" {
+  value = "${aws_api_gateway_api_key.scorer_api_key.value}"
 }
 

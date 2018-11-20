@@ -54,21 +54,26 @@ environmental variables (using the prefix `TF_VAR_`):
 Once all the non-optional variables are set, the following command will push
 the lambda (or update any changes thereof): `terraform apply`.
 
-Upon successful push, Terraform will output the URL of the lambda endpoint.
+Upon successful push, Terraform will output the URL of the lambda endpoint and
+the corresponding `api_key`.
 Note that the recipe sets up AWS API Gateway proxy, see `api_gateway.tf`.
-Look for `base_url` in the output.
+Look for `base_url` and `api_key` in the output.
 
 ```text
 Outputs:
 
+api_key = DXQtiCbqEY6xjXWP1MMCu4nkDTwRgfdX2qZoKm3e
 base_url = https://mslmi91tni.execute-api.us-east-1.amazonaws.com/test
 ```
 
-To test the endpoint, send a request to this URL appended by `score`, e.g.,
-as follows.
+To test the endpoint, send a request to this URL appended by `score` and include
+the `api_key` in the request header `x-api-key`, e.g., as follows.
 
 ```bash
-$ curl -X POST -d @test.json https://mslmi91tni.execute-api.us-east-1.amazonaws.com/test/score
+$ curl \
+    -X POST \
+    -H "x-api-key: DXQtiCbqEY6xjXWP1MMCu4nkDTwRgfdX2qZoKm3e" \
+    -d @test.json https://mslmi91tni.execute-api.us-east-1.amazonaws.com/test/score
 ```
 
 This expects a file `test.json` with the actual scoring request payload.
