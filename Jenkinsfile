@@ -59,6 +59,9 @@ pipeline {
         }
 
         stage('Publish to S3') {
+            agent {
+                label 'master'
+            }
             when {
                 expression {
                     return doPublish()
