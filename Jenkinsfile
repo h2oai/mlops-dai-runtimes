@@ -26,8 +26,12 @@ pipeline {
 
         stage('Init') {
             agent { label NODE_LABEL }
-            deleteDir()
-            checkout scm
+            steps {
+                script {
+                    deleteDir()
+                    checkout scm
+                }
+            }
         }
 
         stage('Test') {
