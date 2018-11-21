@@ -92,7 +92,7 @@ pipeline {
                 script {
                     s3upDocker {
                         localArtifact = "build/dai-deployment-templates-${VERSION}.zip"
-                        artifactId = 'dai-deployment-template'
+                        artifactId = 'dai-deployment-templates'
                         version = VERSION
                         keepPrivate = true
                         isRelease = isRelease(VERSION)
