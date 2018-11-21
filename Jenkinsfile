@@ -94,7 +94,7 @@ pipeline {
                         localArtifact = "build/dai-deployment-templates-${VERSION}.zip"
                         artifactId = 'dai-deployment-templates'
                         version = VERSION
-                        keepPrivate = true
+                        keepPrivate = false
                         isRelease = isRelease(VERSION)
                         platform = "any"
                     }
