@@ -1,5 +1,5 @@
 resource "aws_api_gateway_rest_api" "scorer_api" {
-  name = "${var.lambda_id}_api"
+  name = "${local.escaped_id}"
   description = "H2O Driverless AI Mojo Scorer API (${var.lambda_id})"
 }
 
@@ -24,7 +24,7 @@ resource "aws_api_gateway_integration" "scorer_integration" {
 
   integration_http_method = "POST"
   type = "AWS_PROXY"
-  uri = "${aws_lambda_function.scorer_lambda.invoke_arn}"
+  uri = "${aws_lambda_function.scorer.invoke_arn}"
 }
 
 resource "aws_api_gateway_deployment" "scorer_api_deployment" {
@@ -37,7 +37,7 @@ resource "aws_api_gateway_deployment" "scorer_api_deployment" {
 }
 
 resource "aws_api_gateway_usage_plan" "scorer_usage_plan" {
-  name = "${var.lambda_id}_usage_plan"
+  name = "${local.escaped_id}"
 
   api_stages {
     api_id = "${aws_api_gateway_rest_api.scorer_api.id}"
@@ -46,7 +46,7 @@ resource "aws_api_gateway_usage_plan" "scorer_usage_plan" {
 }
 
 resource "aws_api_gateway_api_key" "scorer_api_key" {
-  name = "${var.lambda_id}_api_key"
+  name = "${local.escaped_id}"
 
   stage_key {
     rest_api_id = "${aws_api_gateway_rest_api.scorer_api.id}"
@@ -63,7 +63,7 @@ resource "aws_api_gateway_usage_plan_key" "scorer_usage_plan" {
 resource "aws_lambda_permission" "apigw" {
   statement_id = "AllowExecutionFromAPIGateway"
   action = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.scorer_lambda.arn}"
+  function_name = "${aws_lambda_function.scorer.arn}"
   principal = "apigateway.amazonaws.com"
 
   # The /*/*/* part allows invocation from any stage, method and resource path
