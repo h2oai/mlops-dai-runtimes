@@ -23,7 +23,7 @@ variable "mojo_path" {
 }
 
 locals {
-  escaped_id = "${replace("${var.lambda_id}", "/[^-_a-zA-Z0-9]/", "")}"
+  escaped_id = "${replace("h2oai_${var.lambda_id}", "/[^-_a-zA-Z0-9]/", "")}"
 }
 
 provider "aws" {
