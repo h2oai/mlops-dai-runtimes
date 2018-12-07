@@ -1,0 +1,7 @@
+{
+  "basePackage":"ai.h2o.mojos.deploy.local.rest",
+  "configPackage":"ai.h2o.mojos.deploy.local.rest.config",
+  "modelPackage": "ai.h2o.mojos.deploy.local.rest.model",
+  "apiPackage" : "ai.h2o.mojos.deploy.local.rest.api",
+  "interfaceOnly" : true
+}
