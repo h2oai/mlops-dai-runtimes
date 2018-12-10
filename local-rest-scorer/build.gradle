@@ -1,31 +1,19 @@
-plugins {
-    id "java"
-    id 'org.hidetake.swagger.generator' version '2.15.0'
-
-    id 'org.springframework.boot' version '2.1.1.RELEASE'
-}
-
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'org.hidetake.swagger.generator'
 
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-
-    def localNexusLocation = "http://nexus:8081/nexus/repository"
-    maven {
-        url "$localNexusLocation/releases/"
-    }
-}
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 dependencies {
-    compile group: 'ai.h2o', name: 'mojo2-runtime-api', version: '0.13.7'
-    compile group: 'ai.h2o', name: 'mojo2-runtime-impl', version: '0.13.7'
-    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
-    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
-    compile group: 'io.swagger.core.v3', name: 'swagger-annotations', version: '2.0.5'
+    compile group: 'ai.h2o', name: 'mojo2-runtime-api', version: mojoRuntimeVersion
+    compile group: 'ai.h2o', name: 'mojo2-runtime-impl', version: mojoRuntimeVersion
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: springFoxVersion
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: springFoxVersion
+    compile group: 'io.swagger.core.v3', name: 'swagger-annotations', version: swaggerCoreVersion
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.0'
+    swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
 }
 
 test {
