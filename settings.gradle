@@ -1,3 +1,4 @@
 rootProject.name = 'dai-deployment-templates'
 include 'aws-lambda-scorer:lambda-template'
 include 'aws-lambda-scorer:terraform-recipe'
+include 'local-rest-scorer'
