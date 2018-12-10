@@ -1,0 +1,33 @@
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'org.hidetake.swagger.generator'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile group: 'io.swagger', name: 'swagger-annotations', version: swaggerCoreSpringVersion
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
+}
+
+swaggerSources {
+    api {
+        inputFile = file('../swagger/swagger.yaml')
+        code {
+            language = 'spring'
+            configFile = file('../swagger/swagger_codegen.json')
+            components = [models: true, apis: true]
+            dependsOn validation
+        }
+    }
+}
+
+jar {
+    // As a SpringBoot module, we need to enable the jar file generation.
+    enabled=true
+}
+
+compileJava.dependsOn swaggerSources.api.code
+sourceSets.main.java.srcDir "${swaggerSources.api.code.outputDir}/src/main/java"

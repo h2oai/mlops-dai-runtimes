@@ -1,37 +1,23 @@
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'org.hidetake.swagger.generator'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 dependencies {
+    compile project(':common:rest-spring-api')
+    compile project(':common:transform')
+
     compile group: 'ai.h2o', name: 'mojo2-runtime-api', version: mojoRuntimeVersion
     compile group: 'ai.h2o', name: 'mojo2-runtime-impl', version: mojoRuntimeVersion
     compile group: 'io.springfox', name: 'springfox-swagger2', version: springFoxVersion
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: springFoxVersion
-    compile group: 'io.swagger.core.v3', name: 'swagger-annotations', version: swaggerCoreVersion
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
 }
 
 test {
     useJUnitPlatform()
 }
-
-swaggerSources {
-    scorer {
-        inputFile = file('../common/rest-api/swagger.yaml')
-        code {
-            language = 'spring'
-            configFile = file('swagger_codegen.json')
-            components = [models: true, apis: true]
-            dependsOn validation
-        }
-    }
-}
-compileJava.dependsOn swaggerSources.scorer.code
-sourceSets.main.java.srcDir "${swaggerSources.scorer.code.outputDir}/src/main/java"
 
 // TODO(osery): Include the executable StringBoot jar in the distribution zip file here.

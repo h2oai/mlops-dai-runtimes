@@ -1,10 +1,11 @@
-package ai.h2o.mojos.deploy.aws.lambda;
+package ai.h2o.mojos.deploy.common.transform;
 
-import ai.h2o.mojos.deploy.aws.lambda.model.Row;
-import ai.h2o.mojos.deploy.aws.lambda.model.ScoreRequest;
+import ai.h2o.mojos.deploy.common.rest.model.Row;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.runtime.frame.MojoColumn.Type;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
+import com.google.common.truth.Truth;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

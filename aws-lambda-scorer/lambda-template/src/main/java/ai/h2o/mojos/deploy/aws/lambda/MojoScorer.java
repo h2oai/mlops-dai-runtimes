@@ -1,8 +1,10 @@
 
 package ai.h2o.mojos.deploy.aws.lambda;
 
-import ai.h2o.mojos.deploy.aws.lambda.model.ScoreRequest;
-import ai.h2o.mojos.deploy.aws.lambda.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.transform.MojoFrameToResponseConverter;
+import ai.h2o.mojos.deploy.common.transform.RequestToMojoFrameConverter;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;

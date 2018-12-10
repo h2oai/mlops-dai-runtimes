@@ -1,9 +1,11 @@
 package ai.h2o.mojos.deploy.local.rest.controller;
 
-import ai.h2o.mojos.deploy.local.rest.api.ModelsApi;
-import ai.h2o.mojos.deploy.local.rest.model.Model;
-import ai.h2o.mojos.deploy.local.rest.model.ScoreRequest;
-import ai.h2o.mojos.deploy.local.rest.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.api.ModelsApi;
+import ai.h2o.mojos.deploy.common.rest.model.Model;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.transform.MojoFrameToResponseConverter;
+import ai.h2o.mojos.deploy.common.transform.RequestToMojoFrameConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -17,8 +19,14 @@ public class ModelsApiController implements ModelsApi {
 
     private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
+    private final MojoFrameToResponseConverter requestConverter;
+    private final RequestToMojoFrameConverter responseConverter;
+
     @org.springframework.beans.factory.annotation.Autowired
-    public ModelsApiController() {
+    public ModelsApiController(MojoFrameToResponseConverter requestConverter,
+                               RequestToMojoFrameConverter responseConverter) {
+        this.requestConverter = requestConverter;
+        this.responseConverter = responseConverter;
     }
 
     public ResponseEntity<Model> getModelInfo(String id) {

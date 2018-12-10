@@ -1,8 +1,8 @@
-package ai.h2o.mojos.deploy.aws.lambda;
+package ai.h2o.mojos.deploy.common.transform;
 
-import ai.h2o.mojos.deploy.aws.lambda.model.Row;
-import ai.h2o.mojos.deploy.aws.lambda.model.ScoreRequest;
-import ai.h2o.mojos.deploy.aws.lambda.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.model.Row;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 
 import java.util.HashSet;
@@ -18,7 +18,7 @@ import static java.util.Collections.emptyList;
 /**
  * Converts the resulting predicted {@link MojoFrame} into the API response object {@link ScoreResponse}.
  */
-class MojoFrameToResponseConverter implements BiFunction<MojoFrame, ScoreRequest, ScoreResponse> {
+public class MojoFrameToResponseConverter implements BiFunction<MojoFrame, ScoreRequest, ScoreResponse> {
 
     @Override
     public ScoreResponse apply(MojoFrame mojoFrame, ScoreRequest scoreRequest) {
