@@ -1,3 +1,29 @@
+allprojects {
+    buildscript {
+        repositories {
+            maven {
+                url "https://plugins.gradle.org/m2/"
+            }
+        }
+        dependencies {
+            classpath group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin',
+                    version: springBootPluginVersion
+            classpath group: 'gradle.plugin.org.hidetake', name: 'gradle-swagger-generator-plugin',
+                    version: swaggerGradlePluginVersion
+        }
+    }
+
+    repositories {
+        mavenCentral()
+
+        // Local H2O Nexus for fetching internal dependencies, e.g., mojo runtime.
+        def localNexusLocation = "http://nexus:8081/nexus/repository"
+        maven {
+            url "$localNexusLocation/releases/"
+        }
+    }
+}
+
 // Collect artifacts from all the deployment templates into a signle ZIP to be released.
 //
 // This task is to be injected content from the individual deployment templates (in their child build.gradle files)
