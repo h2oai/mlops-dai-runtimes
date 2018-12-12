@@ -15,13 +15,18 @@ import java.io.InputStream;
 public class CsvToMojoFrameConverter {
     public MojoFrame apply(InputStream inputStream, MojoFrameMeta meta) throws IOException {
         SimpleCSV csv = SimpleCSV.read(inputStream);
-        MojoFrameBuilder frameBuilder = new MojoFrameBuilder(meta);
-
         String[] labels = csv.getLabels();
-        String[][] data = csv.getData();
+        if (labels.length != meta.size()) {
+            throw new IllegalArgumentException(
+                    String.format("Mismatch between column counts of CSV file and the mojo (csv=%d, mojo=%d).",
+                            labels.length, meta.size()));
+        }
+
+        MojoFrameBuilder frameBuilder = new MojoFrameBuilder(meta);
         MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
+        String[][] data = csv.getData();
         for (String[] row : data) {
-            for (int c = 0; c < row.length; c += 1) {
+            for (int c = 0; c < row.length; c++) {
                 rowBuilder.setValue(labels[c], row[c]);
             }
             // Reuse the builder.

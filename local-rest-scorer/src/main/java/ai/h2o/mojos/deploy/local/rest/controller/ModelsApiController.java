@@ -52,7 +52,13 @@ public class ModelsApiController implements ModelsApi {
             log.info("Model {} not found", id);
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(scorer.score(request));
+        try {
+            return ResponseEntity.ok(scorer.score(request));
+        } catch (Exception e) {
+            log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
+            log.debug(" - failure cause: ", e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     public ResponseEntity<ScoreResponse> getScoreByFile(String id, String file) {
@@ -71,7 +77,11 @@ public class ModelsApiController implements ModelsApi {
         try {
             return ResponseEntity.ok(scorer.scoreCsv(file));
         } catch (IOException e) {
-            log.info(String.format("Failed loading CSV file: %s", file));
+            log.info("Failed loading CSV file: {}, due to: {}", file, e.getMessage());
+            log.debug(" - failure cause: ", e);
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            log.info("Failed scoring CSV file: {}, due to: {}", file, e.getMessage());
             log.debug(" - failure cause: ", e);
             return ResponseEntity.badRequest().build();
         }
