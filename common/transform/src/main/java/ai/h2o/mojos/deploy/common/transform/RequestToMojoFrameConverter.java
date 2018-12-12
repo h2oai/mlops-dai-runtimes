@@ -1,7 +1,7 @@
-package ai.h2o.mojos.deploy.aws.lambda;
+package ai.h2o.mojos.deploy.common.transform;
 
-import ai.h2o.mojos.deploy.aws.lambda.model.Row;
-import ai.h2o.mojos.deploy.aws.lambda.model.ScoreRequest;
+import ai.h2o.mojos.deploy.common.rest.model.Row;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
@@ -13,7 +13,7 @@ import java.util.function.BiFunction;
 /**
  * Converts the original API request object {@link ScoreRequest} into the input {@link MojoFrame}.
  */
-class RequestToMojoFrameConverter implements BiFunction<ScoreRequest, MojoFrameMeta, MojoFrame> {
+public class RequestToMojoFrameConverter implements BiFunction<ScoreRequest, MojoFrameMeta, MojoFrame> {
     @Override
     public MojoFrame apply(ScoreRequest scoreRequest, MojoFrameMeta meta) {
         MojoFrameBuilder frameBuilder = new MojoFrameBuilder(meta);

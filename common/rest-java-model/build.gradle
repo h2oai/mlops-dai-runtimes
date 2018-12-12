@@ -1,0 +1,26 @@
+apply plugin: 'java'
+apply plugin: 'org.hidetake.swagger.generator'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile group: 'com.google.code.gson', name: 'gson', version: gsonVersion
+    compile group: 'io.swagger.core.v3', name: 'swagger-annotations', version: swaggerCoreVersion
+    swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
+}
+
+swaggerSources {
+    model {
+        inputFile = file('../swagger/swagger.yaml')
+        code {
+            language = 'java'
+            configFile = file('../swagger/swagger_codegen.json')
+            components = [models: true]
+            dependsOn validation
+        }
+    }
+}
+
+compileJava.dependsOn swaggerSources.model.code
+sourceSets.main.java.srcDir "${swaggerSources.model.code.outputDir}/src/main/java"
