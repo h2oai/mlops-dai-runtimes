@@ -30,8 +30,8 @@ import java.util.Arrays;
 @Component
 class MojoScorer {
     private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
-
-    private static final String MOJO_PIPELINE_PATH = System.getenv("MOJO_PATH");
+    private static final String MOJO_PIPELINE_PATH_VARIABLE = "MOJO_PATH";
+    private static final String MOJO_PIPELINE_PATH = System.getenv(MOJO_PIPELINE_PATH_VARIABLE);
     private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
 
     private final RequestToMojoFrameConverter requestConverter;
@@ -96,7 +96,8 @@ class MojoScorer {
 
     private static MojoPipeline loadMojoPipelineFromFile() {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(MOJO_PIPELINE_PATH),
-                "Path to mojo pipeline not specified, set the MOJO_PIPELINE environment variable.");
+                "Path to mojo pipeline not specified, set the %s environment variable.",
+                MOJO_PIPELINE_PATH_VARIABLE);
         log.info("Loading Mojo pipeline from path {}", MOJO_PIPELINE_PATH);
         File mojoFile = new File(MOJO_PIPELINE_PATH);
         if (!mojoFile.isFile()) {
