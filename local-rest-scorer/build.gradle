@@ -20,4 +20,14 @@ test {
     useJUnitPlatform()
 }
 
-// TODO(osery): Include the executable StringBoot jar in the distribution zip file here.
+bootJar {
+    mainClassName = 'ai.h2o.mojos.deploy.local.rest.ScorerApplication'
+}
+
+// Include the local rest scorer executable jar in the root package distribution zip file.
+rootProject.distributionZip {
+    dependsOn bootJar
+    into(this.project.path.replace(":", "/")) {
+        from bootJar.archivePath
+    }
+}
