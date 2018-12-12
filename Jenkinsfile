@@ -52,7 +52,7 @@ pipeline {
             }
             post {
                 always {
-                    testReport 'aws-lambda-scorer/lambda-template/build/reports/tests/test', 'JUnit tests'
+                    testReport 'common/transform/build/reports/tests/test', 'JUnit tests: common/transform'
                 }
             }
         }
