@@ -22,16 +22,16 @@ import java.net.URL;
 import java.util.Arrays;
 
 /*
- * AWS lambda request handler that implements scoring using a H2O DAI mojo.
+ * H2O DAI mojo scorer.
  *
- * <p>The scorer code is shared for all mojo deployments and is only parameterized by environment variables that define,
- * e.g., the location of the mojo file in AWS S3.
+ * <p>The scorer code is shared for all mojo deployments and is only parameterized by the {@code mojo.path}
+ * property to define the mojo to use.
  */
 @Component
 class MojoScorer {
     private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
-    private static final String MOJO_PIPELINE_PATH_VARIABLE = "MOJO_PATH";
-    private static final String MOJO_PIPELINE_PATH = System.getenv(MOJO_PIPELINE_PATH_VARIABLE);
+    private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
+    private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
     private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
 
     private final RequestToMojoFrameConverter requestConverter;
@@ -96,8 +96,8 @@ class MojoScorer {
 
     private static MojoPipeline loadMojoPipelineFromFile() {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(MOJO_PIPELINE_PATH),
-                "Path to mojo pipeline not specified, set the %s environment variable.",
-                MOJO_PIPELINE_PATH_VARIABLE);
+                "Path to mojo pipeline not specified, set the %s property.",
+                MOJO_PIPELINE_PATH_PROPERTY);
         log.info("Loading Mojo pipeline from path {}", MOJO_PIPELINE_PATH);
         File mojoFile = new File(MOJO_PIPELINE_PATH);
         if (!mojoFile.isFile()) {

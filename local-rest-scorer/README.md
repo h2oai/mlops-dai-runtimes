@@ -16,7 +16,7 @@ The resulting executable jar is located in the `build/libs` folder.
 To run the local scorer, you can either use `bootRun` gradle task or run directly the executable jar:
 
 ```bash
-$ MOJO_PATH={PATH_TO_MOJO_PIPELINE} java -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}.jar
+$ java -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}.jar -Dmojo.pipeline={PATH_TO_MOJO_PIPELINE}
 ``` 
 
 
