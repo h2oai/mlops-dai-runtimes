@@ -1,5 +1,6 @@
 package ai.h2o.mojos.deploy.local.rest.config;
 
+import ai.h2o.mojos.deploy.common.transform.CsvToMojoFrameConverter;
 import ai.h2o.mojos.deploy.common.transform.MojoFrameToResponseConverter;
 import ai.h2o.mojos.deploy.common.transform.MojoPipelineToModelInfoConverter;
 import ai.h2o.mojos.deploy.common.transform.RequestToMojoFrameConverter;
@@ -21,5 +22,10 @@ class ScorerConfiguration {
     @Bean
     public MojoPipelineToModelInfoConverter modelConverter() {
         return new MojoPipelineToModelInfoConverter();
+    }
+
+    @Bean
+    public CsvToMojoFrameConverter csvConverter() {
+        return new CsvToMojoFrameConverter();
     }
 }
