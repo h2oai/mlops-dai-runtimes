@@ -29,5 +29,9 @@ jar {
     enabled=true
 }
 
+bootJar {
+    enabled=false
+}
+
 compileJava.dependsOn swaggerSources.api.code
 sourceSets.main.java.srcDir "${swaggerSources.api.code.outputDir}/src/main/java"

@@ -20,6 +20,10 @@ test {
     useJUnitPlatform()
 }
 
+bootRun {
+    systemProperties System.properties
+}
+
 bootJar {
     mainClassName = 'ai.h2o.mojos.deploy.local.rest.ScorerApplication'
 }

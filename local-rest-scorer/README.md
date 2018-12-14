@@ -8,23 +8,31 @@ This package contains sources of a generic Java scorer implementation based on S
 The code of the local SpringBoot scorer is a gradle project build as usual by
 `./gradlew build`.
 
-> TODO(osery): Describe how we get the executable SpringBoot jar, which needs to be embedded in the
-> distribution zip archive.
-
-> TODO(osery): Describe score configuration to pass in the model(s), the license key, and the port.
+The resulting executable jar is located in the `build/libs` folder.
 
 
 ## Running
 
-> TODO(osery): How to best run the scorer locally + what params to pass in.
+To run the local scorer, you can either use `bootRun` gradle task or run directly the executable jar:
+
+```bash
+$ java -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}.jar -Dmojo.pipeline={PATH_TO_MOJO_PIPELINE}
+``` 
+
+
+### Score JSON Request
 
 To test the endpoint, send a request to http://localhost:8080 as follows:
 
 ```bash
 $ curl \
     -X POST \
-    -d @test.json http://localhost:8080
+    -d @test.json http://localhost:8080/models/{UUID_OF_YOUR_MOJO_PIPELINE}/score
 ```
+
+If you don't know the UUID of the mojo pipeline, see the scorer log and search for text like:
+`Mojo pipeline successfully loaded (a12e7390-b8ac-406a-ade9-0d5ea4b63ea9).`
+The hex string in parenthesis is the UUID of you mojo pipeline.
 
 This expects a file `test.json` with the actual scoring request payload.
 If you are using the mojo trained in `test/data/iris.csv` as suggested above,
@@ -79,8 +87,24 @@ The expected response should follow this structure, but the actual values may di
 }
 ```
 
-Alternatively, you can use SpringFox endpoints that allow both programmatic and manual inspection
-of the API:
+
+### Score CSV File
+
+Alternatively, you can score an existing file on the local filesystem using `GET` request to the same endpoint:
+
+```bash
+$ curl \
+    -X GET \
+    http://localhost:8080/models/{UUID_OF_YOUR_MOJO_PIPELINE}/score/?file=/tmp/test.csv
+```
+
+This expects a CSV file `/tmp/test.csv` to exist on the machine where the scorer runs (i.e., it is not send to it
+over HTTP).
+
+
+### API Inspection
+
+You can use SpringFox endpoints that allow both programmatic and manual inspection of the API:
 
 * Swagger JSON representation for programmatic access: http://localhost:8080/v2/api-docs.
 * The UI for manual API inspection: http://localhost:8080/swagger-ui.html.
