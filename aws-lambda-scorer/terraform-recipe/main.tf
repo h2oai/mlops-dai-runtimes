@@ -56,8 +56,8 @@ resource "aws_lambda_function" "scorer" {
   runtime = "java8"
 
   // Increase resource constraints from the defaults of 3s and 128MB.
-  timeout = 120
-  memory_size = 1024
+  timeout = 900
+  memory_size = 3008
 
   environment {
     variables = {
