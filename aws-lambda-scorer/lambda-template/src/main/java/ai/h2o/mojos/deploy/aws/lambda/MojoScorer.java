@@ -4,7 +4,9 @@ package ai.h2o.mojos.deploy.aws.lambda;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoFrameToResponseConverter;
+import ai.h2o.mojos.deploy.common.transform.RequestChecker;
 import ai.h2o.mojos.deploy.common.transform.RequestToMojoFrameConverter;
+import ai.h2o.mojos.deploy.common.transform.ScoreRequestFormatException;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;
@@ -35,11 +37,15 @@ public final class MojoScorer {
 
     private final RequestToMojoFrameConverter requestConverter = new RequestToMojoFrameConverter();
     private final MojoFrameToResponseConverter responseConverter = new MojoFrameToResponseConverter();
+    private final RequestChecker requestChecker = new RequestChecker();
 
-    public ScoreResponse score(ScoreRequest request, Context context) throws IOException, LicenseException {
+    public ScoreResponse score(ScoreRequest request, Context context) throws IOException, LicenseException,
+            ScoreRequestFormatException {
         LambdaLogger logger = context.getLogger();
         logger.log(String.format("Got scoring request: %s", request));
         MojoPipeline mojoPipeline = getMojoPipeline(logger);
+        requestChecker.verify(request, mojoPipeline.getInputMeta());
+        logger.log("Scoring request verified");
         MojoFrame requestFrame = requestConverter.apply(request, mojoPipeline.getInputMeta());
         logger.log(String.format("Input has %d rows, %d columns: %s", requestFrame.getNrows(), requestFrame.getNcols(),
                 Arrays.toString(requestFrame.getColumnNames())));
