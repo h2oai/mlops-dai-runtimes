@@ -4,14 +4,5 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile group: 'com.github.cliftonlabs', name: 'json-simple',   version: '2.1.2'
-    compile group: 'com.google.code.gson',   name: 'gson',          version:'2.7'
-    compile 'org.json:json:20171018'
-    testCompile group: 'com.google.truth.extensions', name: 'truth-java8-extension', version: truthVersion
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
-    testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
-}
-
-test {
-    useJUnitPlatform()
+    compile group: 'com.google.code.gson',   name: 'gson',          version: gsonVersion
 }

@@ -10,7 +10,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package deps.javakdb;
+package kx;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -55,7 +55,7 @@ import javax.net.ssl.SSLSocketFactory;
  *       When the connection is no longer required, it may be closed via connection.close();
  *   </ol>
  */
-public class c implements AutoCloseable {
+public class c {
   /**
    * Encoding specifies the character encoding to use when [de]-serializing strings.
    */
