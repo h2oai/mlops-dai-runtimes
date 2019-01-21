@@ -4,8 +4,12 @@ import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import h2oai.dai.kdb.mojo.KdbMojoInterface;
 import deps.javakdb.c;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public class KdbExample {
+
+    private static final Logger log = LoggerFactory.getLogger(KdbExample.class);
 
     public static void main(final String[] args) {
         String mojoFilePath = "";
@@ -19,43 +23,53 @@ public class KdbExample {
             switch (args[i]) {
                 case "-f":
                     mojoFilePath = args[i + 1];
-                    System.out.println("mojoFilePath: " + mojoFilePath);
+                    log.info("mojoFilePath: " + mojoFilePath);
                     break;
                 case "-h":
                     kdbHost = args[i + 1];
-                    System.out.println("kdbHost: " + kdbHost);
+                    log.info("kdbHost: " + kdbHost);
                     break;
                 case "-p":
                     kdbPort = Integer.parseInt(args[i + 1]);
-                    System.out.println("kdbPort: " + kdbPort);
+                    log.info("kdbPort: " + kdbPort);
                     break;
                 case "-auth":
                     kdbAuthFilePath = args[i + 1];
-                    System.out.println("kdbAuth: " + kdbAuthFilePath);
+                    log.info("kdbAuth: " + kdbAuthFilePath);
                     break;
                 case "-sub":
                     qExpression = args[i + 1]; // something like ".u.sub[`walmarttick;`]"
-                    System.out.println("qExpression: " + qExpression);
+                    log.info("qExpression: " + qExpression);
                     break;
                 case "-pub":
                     qPubTable = args[i + 1];
-                    System.out.println("qPubTable: " + qPubTable);
+                    log.info("qPubTable: " + qPubTable);
                     break;
                 default:
                     break;
             }
         }
         try {
+            int counter = 0;
             MojoPipeline model = MojoKdbTransform.loadMojo(mojoFilePath);
-            c subscribedKdbClient = KdbMojoInterface.Subscribe(kdbHost, kdbPort, kdbAuthFilePath, qExpression);
-            while(true) {
-                MojoFrame iframe = KdbMojoInterface.Retrieve(subscribedKdbClient, model);
+            log.info("Loaded Mojo Model");
+            c subscribedKdbClient = KdbMojoInterface.Subscribe(kdbHost, kdbPort, kdbAuthFilePath);
+            subscribedKdbClient.k(qExpression);
+            log.info("Subscribed to KDB Tickerplant at: " + kdbHost + ":" + kdbPort);
+            while (true) {
+                Object kdbResponse = subscribedKdbClient.k();
+                if ((counter % 10) == 0) {
+                    log.info("Processed " + counter + " responses from KDB");
+                }
+                MojoFrame iframe = KdbMojoInterface.Retrieve(kdbResponse, model);
                 MojoFrame oframe = model.transform(iframe);
-                KdbMojoInterface.Publish(subscribedKdbClient, qPubTable, oframe);
+                KdbMojoInterface.Publish(subscribedKdbClient, kdbResponse, qPubTable, oframe);
+                counter++;
             }
+        } catch (c.KException e) {
+            log.info("Exception from KDB Client", e);
         } catch(Exception e) {
-            System.out.println(e);
+            log.info("Exception during process", e);
         }
-
     }
 }

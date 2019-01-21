@@ -8,39 +8,44 @@ import java.io.IOException;
 import java.util.HashMap;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class KdbMojoInterface {
 
-    public static c Subscribe(String kdbHost, Integer kdbPort, String kdbAuthFilePath, String qSubExpression) throws IOException, c.KException {
-        HashMap <String, String> kdbAuth = KdbClient.getKdbCredentials(kdbAuthFilePath);
-        c kdbJavaClient = KdbClient.createKdbClient(kdbHost, kdbPort, kdbAuth);
-        kdbJavaClient.k(qSubExpression);
-        return kdbJavaClient;
+    private static final Logger log = LoggerFactory.getLogger(KdbMojoInterface.class);
+
+    public static c Subscribe(String kdbHost, Integer kdbPort, String kdbAuthFilePath) throws IOException, c.KException {
+        HashMap <String, String> kdbAuth = null;
+        if (kdbAuthFilePath.equals("")) {
+            log.info("kdbAuthFilePath was an empty string, no credentials were gathered");
+        } else {
+            kdbAuth = KdbClient.getKdbCredentials(kdbAuthFilePath);
+        }
+        return KdbClient.createKdbClient(kdbHost, kdbPort, kdbAuth);
     }
 
-    public static MojoFrame Retrieve(c subscribedKdbClient, MojoPipeline model) throws IOException, c.KException {
-        Object r = subscribedKdbClient.k();
+    public static MojoFrame Retrieve(Object kdbResponse, MojoPipeline model) throws IOException {
         MojoFrame iframe = null;
-        if (r != null) {
-            Object[] data = (Object[]) r;
+        if (kdbResponse != null) {
+            Object[] data = (Object[]) kdbResponse;
             Flip kdbFlipTable = (c.Flip) data[2];
             iframe =  MojoKdbTransform.createMojoFrameFromKdbFlip(model, kdbFlipTable);
         } else {
-            // have logger make note that r was null
+            log.info("DEBUG: Nothing to do as object received from KDB was null");
         }
         return iframe;
     }
 
-    public static void Publish (c subscribedKdbClient, String qPubTable, MojoFrame oframe) throws IOException, c.KException {
-        Object r = subscribedKdbClient.k();
-        if (r != null) {
-            Object[] data = (Object[]) r;
+    public static void Publish (c subscribedKdbClient, Object kdbResponse, String qPubTable, MojoFrame oframe) throws IOException, c.KException {
+        if (kdbResponse != null) {
+            Object[] data = (Object[]) kdbResponse;
             Flip kdbFlipTable = (c.Flip) data[2];
             Object[] pubObject = MojoKdbTransform.generateMojoPredictionPublishObject(qPubTable, oframe, kdbFlipTable);
             subscribedKdbClient.k(pubObject);
         } else {
-            // have logger make a note that r was null
+            log.info("DEBUG: Nothing to do as object received from KDB was null");
         }
     }
 }

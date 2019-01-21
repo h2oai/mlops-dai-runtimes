@@ -9,10 +9,13 @@ import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;
 import java.io.UnsupportedEncodingException;
-
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import java.io.IOException;
 
 public class MojoKdbTransform {
+
+    private static final Logger log = LoggerFactory.getLogger(MojoKdbTransform.class);
 
     public static MojoPipeline loadMojo(String pathToMojoFile) throws IOException, LicenseException {
         return MojoPipeline.loadFrom(pathToMojoFile);
@@ -26,7 +29,7 @@ public class MojoKdbTransform {
             MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
             for (int col = 0; col < colNames.length; col++) {
                 if (colNames[col].equals("time") || colNames[col].equals("sym")) {
-                    System.out.println("skipping KDB enforced columns that are not part of the mojo");
+                    log.info("skipping KDB enforced columns that are not part of the mojo");
                 } else {
                     rowBuilder.setValue(colNames[col], c.at(colData[col], row).toString());
                 }
@@ -46,8 +49,8 @@ public class MojoKdbTransform {
             String[] prediction = oframe.getColumn(r).getDataAsStrings();
             Float[] predOutLoc = new Float[prediction.length];
             for (int a=0; a < prediction.length; a++) {
-                System.out.println("Prediction #" + a + " of batch:");
-                System.out.println("Column: " + result + " Prediction: " + prediction[a]);
+                log.info("Prediction #" + a + " of batch:");
+                log.info("Column: " + result + " Prediction: " + prediction[a]);
                 predOutLoc[a] = Float.parseFloat(prediction[a]);
             }
             predOut = predOutLoc;
