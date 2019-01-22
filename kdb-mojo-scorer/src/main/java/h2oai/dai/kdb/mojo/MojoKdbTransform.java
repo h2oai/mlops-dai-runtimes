@@ -1,35 +1,34 @@
 package h2oai.dai.kdb.mojo;
 
-import deps.javakdb.c;
-import deps.javakdb.c.Flip;
-import static deps.javakdb.c.n;
+import kx.c;
+import kx.c.Flip;
+import static kx.c.n;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
-import ai.h2o.mojos.runtime.lic.LicenseException;
 import java.io.UnsupportedEncodingException;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
-public class MojoKdbTransform {
+
+class MojoKdbTransform {
 
     private static final Logger log = LoggerFactory.getLogger(MojoKdbTransform.class);
 
-    public static MojoPipeline loadMojo(String pathToMojoFile) throws IOException, LicenseException {
-        return MojoPipeline.loadFrom(pathToMojoFile);
-    }
-
-    public static MojoFrame createMojoFrameFromKdbFlip(MojoPipeline model, Flip kdbFlipTable) throws UnsupportedEncodingException {
+    static MojoFrame createMojoFrameFromKdbFlip(MojoPipeline model, Flip kdbFlipTable, String dropCols) throws UnsupportedEncodingException {
         String[] colNames = kdbFlipTable.x;
         Object[] colData = kdbFlipTable.y;
+        String[] colsToDrop = dropCols.split(",");
+        List<String> dropColsList = Arrays.asList(colsToDrop);
         MojoFrameBuilder frameBuilder = model.getInputFrameBuilder();
         for (int row = 0; row < n(colData[0]); row++) {
             MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
             for (int col = 0; col < colNames.length; col++) {
-                if (colNames[col].equals("time") || colNames[col].equals("sym")) {
-                    log.info("skipping KDB enforced columns that are not part of the mojo");
+                if (dropColsList.contains(colNames[col])) {
+                    log.info("skipping user specified column to drop: " + colNames[col]);
                 } else {
                     rowBuilder.setValue(colNames[col], c.at(colData[col], row).toString());
                 }
@@ -39,7 +38,7 @@ public class MojoKdbTransform {
         return frameBuilder.toMojoFrame();
     }
 
-    public static Object[] generateMojoPredictionPublishObject(String qPubTab, MojoFrame oframe, Flip kdbFlipTable) {
+    static Object[] generateMojoPredictionPublishObject(String qPubTab, MojoFrame oframe, Flip kdbFlipTable) {
         Object[] colData = kdbFlipTable.y;
         Float[] predOut = null;
         Object[] predData = new Object[colData.length + 1];

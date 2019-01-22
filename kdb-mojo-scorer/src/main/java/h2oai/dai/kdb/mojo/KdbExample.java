@@ -3,7 +3,7 @@ package h2oai.dai.kdb.mojo;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import h2oai.dai.kdb.mojo.KdbMojoInterface;
-import deps.javakdb.c;
+import kx.c;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -18,6 +18,7 @@ public class KdbExample {
         String kdbAuthFilePath = "";
         String qExpression = "";
         String qPubTable = "";
+        String dropColumns = "";
 
         for (int i = 0; i < args.length; i += 2) {
             switch (args[i]) {
@@ -45,31 +46,47 @@ public class KdbExample {
                     qPubTable = args[i + 1];
                     log.info("qPubTable: " + qPubTable);
                     break;
+                case "-drop":
+                    dropColumns = args[i + 1];
+                    log.info("dropColumns: " + dropColumns);
                 default:
                     break;
             }
         }
         try {
             int counter = 0;
-            MojoPipeline model = MojoKdbTransform.loadMojo(mojoFilePath);
-            log.info("Loaded Mojo Model");
-            c subscribedKdbClient = KdbMojoInterface.Subscribe(kdbHost, kdbPort, kdbAuthFilePath);
-            subscribedKdbClient.k(qExpression);
-            log.info("Subscribed to KDB Tickerplant at: " + kdbHost + ":" + kdbPort);
-            while (true) {
-                Object kdbResponse = subscribedKdbClient.k();
-                if ((counter % 10) == 0) {
-                    log.info("Processed " + counter + " responses from KDB");
+            int errorCounter = 0;
+            MojoPipeline model = KdbMojoInterface.loadMojo(mojoFilePath);
+            c subscribedKdbClient = KdbMojoInterface.Subscribe(kdbHost, kdbPort, kdbAuthFilePath, qExpression);
+            try {
+                while (true) {
+                    Object kdbResponse = KdbMojoInterface.Retrieve(subscribedKdbClient);
+                    if ((counter % 10) == 0) {
+                        log.info("Processed " + counter + " responses from KDB");
+                    }
+                    MojoFrame iframe = KdbMojoInterface.Parse(kdbResponse, model, dropColumns);
+                    MojoFrame oframe = model.transform(iframe);
+                    KdbMojoInterface.Publish(subscribedKdbClient, kdbResponse, qPubTable, oframe);
+                    counter++;
                 }
-                MojoFrame iframe = KdbMojoInterface.Retrieve(kdbResponse, model);
-                MojoFrame oframe = model.transform(iframe);
-                KdbMojoInterface.Publish(subscribedKdbClient, kdbResponse, qPubTable, oframe);
-                counter++;
+            } catch (ArrayIndexOutOfBoundsException e) {
+                log.warn("ArrayIndexOutOfBoundsException", e);
+                incrementErrorCounter(errorCounter);
+            } catch (NullPointerException e) {
+                log.warn("NullPointerException", e);
+                incrementErrorCounter(errorCounter);
             }
         } catch (c.KException e) {
-            log.info("Exception from KDB Client", e);
+            log.error("Exception from KDB Client", e);
         } catch(Exception e) {
-            log.info("Exception during process", e);
+            log.error("Exception during process", e);
+        }
+    }
+
+    private static void incrementErrorCounter(int errorCounter) throws Exception {
+        errorCounter++;
+        if (errorCounter > 10) {
+            throw new Exception("Too many error, Exiting as number of exceptions has reached above threshold of 10.");
         }
     }
 }
