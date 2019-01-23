@@ -10,7 +10,7 @@ import ai.h2o.mojos.deploy.common.kdb.KdbCredentials;
 
 public class KdbClientFactory {
 
-    private static KdbCredentials getKdbCredentialsFromJsonFile(String authFileInputPath) throws IOException {
+    public static KdbCredentials getKdbCredentialsFromJsonFile(String authFileInputPath) throws IOException {
         JsonReader reader = new JsonReader(new FileReader(authFileInputPath));
         Gson gson = new Gson();
         return gson.fromJson(reader, KdbCredentials.class);
@@ -65,5 +65,3 @@ public class KdbClientFactory {
         return createKdbClient(kdbHost, kdbPort, kdbAuth);
     }
 }
-
-@Test
