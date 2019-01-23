@@ -33,6 +33,12 @@ public class KdbExample {
         log.info("KDB Table to publish to: {}", qPubTable);
         String dropColumns = commandLine.getOptionValue("d", "");
         log.info("Columns to Drop from KDB Tickerplant Response: {}", dropColumns);
+
+        runKdbMojoDeployment(mojoFilePath, kdbHost, kdbPort, kdbAuthFilePath, qExpression, qPubTable, dropColumns);
+    }
+
+    private static void runKdbMojoDeployment(String mojoFilePath, String kdbHost, Integer kdbPort, String kdbAuthFilePath,
+                                             String qExpression, String qPubTable, String dropColumns) {
         try {
             int counter = 0;
             c kdbClient;
