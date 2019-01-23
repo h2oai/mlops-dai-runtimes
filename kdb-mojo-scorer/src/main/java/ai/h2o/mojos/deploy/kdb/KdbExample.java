@@ -36,15 +36,17 @@ public class KdbExample {
         try {
             int counter = 0;
             c kdbClient;
+            log.info("Beginning to load mojo pipeline");
             MojoPipeline model = MojoPipeline.loadFrom(mojoFilePath);
+            log.info("Successfully Loaded Mojo Pipeline.");
             if (!kdbAuthFilePath.equals("")) {
                 kdbClient = KdbClientFactory.createKdbClient(kdbHost, kdbPort, kdbAuthFilePath);
             } else {
-                kdbClient = KdbClientFactory.createKdbClient(kdbHost, kdbPort);
+                kdbClient = KdbClientFactory.createKdbClientNoAuth(kdbHost, kdbPort);
             }
             c kdbSubscribedClient = KdbMojoInterface.Subscribe(kdbClient, qExpression);
             while (true) {
-                Object kdbResponse = KdbMojoInterface.Retrieve(kdbSubscribedClient);
+                Object[] kdbResponse = KdbMojoInterface.Retrieve(kdbSubscribedClient);
                 if ((counter % 10) == 0) {
                     log.info("Processed {} responses from KDB", counter);
                 }
