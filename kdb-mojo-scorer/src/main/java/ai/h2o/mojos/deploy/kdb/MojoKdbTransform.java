@@ -1,4 +1,4 @@
-package h2oai.dai.kdb.mojo;
+package ai.h2o.mojos.deploy.kdb;
 
 import kx.c;
 import kx.c.Flip;
@@ -28,7 +28,7 @@ class MojoKdbTransform {
             MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
             for (int col = 0; col < colNames.length; col++) {
                 if (dropColsList.contains(colNames[col])) {
-                    log.info("skipping user specified column to drop: " + colNames[col]);
+                    log.info("skipping user specified column to drop: {}", colNames[col]);
                 } else {
                     rowBuilder.setValue(colNames[col], c.at(colData[col], row).toString());
                 }
@@ -48,8 +48,8 @@ class MojoKdbTransform {
             String[] prediction = oframe.getColumn(r).getDataAsStrings();
             Float[] predOutLoc = new Float[prediction.length];
             for (int a=0; a < prediction.length; a++) {
-                log.info("Prediction #" + a + " of batch:");
-                log.info("Column: " + result + " Prediction: " + prediction[a]);
+                log.info("Prediction #{} of batch:", a);
+                log.info("Column: {}, Prediction: {}", result, prediction[a]);
                 predOutLoc[a] = Float.parseFloat(prediction[a]);
             }
             predOut = predOutLoc;
