@@ -1,9 +1,11 @@
 package ai.h2o.mojos.deploy.common.kdb;
 
+
 /**
  * Simple java class to house credentials for KDB
  */
 public class KdbCredentials {
+
     private final String username;
     private final String password;
 
