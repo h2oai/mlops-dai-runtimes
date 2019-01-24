@@ -1,15 +1,14 @@
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
 apply plugin: 'org.hidetake.swagger.generator'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile group: 'io.swagger', name: 'swagger-annotations', version: swaggerCoreSpringVersion
+    compile group: 'io.swagger', name: 'swagger-annotations'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
+    swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
 }
 
 swaggerSources {

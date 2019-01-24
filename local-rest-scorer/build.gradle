@@ -1,6 +1,5 @@
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -9,10 +8,10 @@ dependencies {
     compile project(':common:rest-spring-api')
     compile project(':common:transform')
 
-    compile group: 'ai.h2o', name: 'mojo2-runtime-api', version: mojoRuntimeVersion
-    compile group: 'ai.h2o', name: 'mojo2-runtime-impl', version: mojoRuntimeVersion
-    compile group: 'io.springfox', name: 'springfox-swagger2', version: springFoxVersion
-    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: springFoxVersion
+    compile group: 'ai.h2o', name: 'mojo2-runtime-api'
+    compile group: 'ai.h2o', name: 'mojo2-runtime-impl'
+    compile group: 'io.springfox', name: 'springfox-swagger2'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
 }
 

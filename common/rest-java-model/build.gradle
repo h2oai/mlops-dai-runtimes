@@ -5,9 +5,10 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile group: 'com.google.code.gson', name: 'gson', version: gsonVersion
-    compile group: 'io.swagger.core.v3', name: 'swagger-annotations', version: swaggerCoreVersion
-    swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
+    compile group: 'com.google.code.gson', name: 'gson'
+    compile group: 'javax.annotation', name: 'javax.annotation-api'
+    compile group: 'io.swagger.core.v3', name: 'swagger-annotations'
+    swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
 }
 
 swaggerSources {
