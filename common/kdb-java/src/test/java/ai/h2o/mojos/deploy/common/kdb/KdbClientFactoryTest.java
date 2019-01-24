@@ -4,6 +4,7 @@ import com.google.gson.stream.MalformedJsonException;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class KdbClientFactoryTest {
 
@@ -15,21 +16,17 @@ class KdbClientFactoryTest {
     }
 
     @Test
-    void validateMalformedKeyUsernameJsonCredentials() {
-        try {
-            KdbCredentials kdbAuth = KdbClientFactory.getKdbCredentialsFromJsonFile("src/test/resources/testincorrectkeyusername.json");
-        } catch (Exception e) {
-            assertThat(e instanceof MalformedJsonException);
-        }
+    void validateMalformedKeyUsernameJsonCredentials() throws IOException {
+        MalformedJsonException exception =
+                assertThrows(MalformedJsonException.class, () -> KdbClientFactory.getKdbCredentialsFromJsonFile("src/test/resources/testincorrectkeyusername.json"));
+        assertThat(exception.getMessage()).contains("Json provided does not have correct fields: [uesrname, password], instead of 'username' and 'password'");
     }
 
     @Test
     void validateMalformedKeyPasswordJsonCredentials() {
-        try {
-            KdbCredentials kdbAuth = KdbClientFactory.getKdbCredentialsFromJsonFile("src/test/resources/testincorrectkeypassword.json");
-        } catch (Exception e) {
-            assertThat(e instanceof MalformedJsonException);
-        }
+        MalformedJsonException exception =
+                assertThrows(MalformedJsonException.class, () -> KdbClientFactory.getKdbCredentialsFromJsonFile("src/test/resources/testincorrectkeypassword.json"));
+        assertThat(exception.getMessage()).contains("Json provided does not have correct fields: [username, pasword], instead of 'username' and 'password'");
     }
 
     @Test
@@ -41,10 +38,8 @@ class KdbClientFactoryTest {
 
     @Test
     void validateMissingKey() {
-        try {
-            KdbCredentials kdbAuth = KdbClientFactory.getKdbCredentialsFromJsonFile("src/test/resources/testmissingkey.json");
-        } catch (Exception e) {
-            assertThat(e instanceof MalformedJsonException);
-        }
+        MalformedJsonException exception =
+                assertThrows(MalformedJsonException.class, () -> KdbClientFactory.getKdbCredentialsFromJsonFile("src/test/resources/testmissingkey.json"));
+        assertThat(exception.getMessage()).contains("Json provided does not have correct fields: [password], instead of 'username' and 'password'");
     }
 }
