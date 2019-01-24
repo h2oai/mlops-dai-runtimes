@@ -38,7 +38,7 @@ public class KdbExample {
 
             runKdbMojoDeployment(mojoFilePath, kdbHost, kdbPort, kdbAuthFilePath, qExpression, qPubTable, dropColumns);
         } catch(ParseException e) {
-            log.error(e.getMessage());
+            log.error("Unable to parse command-line arguments %s, try passing flag -help (With no other flags) for cli help information", e);
         }
     }
 
@@ -76,6 +76,10 @@ public class KdbExample {
 
     private static CommandLine generateCommandLine(String[] cliArguments) throws ParseException {
         CommandLineParser cmdLineParser = new DefaultParser();
+        CommandLineParser helpLineParser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        Options helpOptions = new Options();
+        helpOptions.addOption("help", "Prints all commandline options for KDB Mojo Deployment Example");
         Options options = new Options();
         options.addRequiredOption("f", "mojofilepath", true, "location on local filesystem of pipline.mojo file");
         options.addRequiredOption("h", "kdbhost", true, "hostname or ip address of kdb server");
@@ -84,16 +88,18 @@ public class KdbExample {
         options.addRequiredOption("q", "qexpression", true, "q expression used to subscribe to KDB Tickerplant");
         options.addRequiredOption("t", "pubtable", true, "table in KDB server to publish results to");
         options.addOption("d", "dropcolumns", true, "comma separated list of columns to drop from KDB Tickerplant response");
-        options.addOption("help","Displays all command line options and descriptions");
         try {
-            CommandLine commandLine = cmdLineParser.parse(options, cliArguments);
-            if (commandLine.hasOption("help")) {
-                HelpFormatter formatter = new HelpFormatter();
-                formatter.printHelp("KDB Mojo Deployment Example CLI Help: ", options);
-                System.exit(0);
+            if(cliArguments.length <= 1) {
+                CommandLine commandHelpLine = helpLineParser.parse(helpOptions, cliArguments);
+                if (commandHelpLine.hasOption("help") || cliArguments.length == 0) {
+                    formatter.printHelp("KDB Mojo Deployment Example CLI Help: ", options);
+                    System.exit(1);
+                }
             }
         } catch (ParseException parseException) {
-            throw new ParseException(String.format("Unable to parse command-line arguments %s", Arrays.toString(cliArguments)));
+            log.error("There was an exception while parsing the commandline arguments. Printing commandline help for your convenience");
+            formatter.printHelp("KDB Mojo Deployment Example CLI Help:", options);
+            System.exit(1);
         }
         return cmdLineParser.parse(options, cliArguments);
     }
