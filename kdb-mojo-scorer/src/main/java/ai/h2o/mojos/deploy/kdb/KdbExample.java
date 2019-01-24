@@ -5,6 +5,7 @@ import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.deploy.kdb.KdbMojoInterface;
 import ai.h2o.mojos.deploy.common.kdb.KdbClientFactory;
 import ai.h2o.mojos.deploy.common.kdb.KdbCredentials;
+import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import kx.c;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ public class KdbExample {
             log.info("Beginning to load mojo pipeline");
             MojoPipeline model = MojoPipeline.loadFrom(mojoFilePath);
             log.info("Successfully Loaded Mojo Pipeline.");
+            MojoFrameMeta mojoMeta = model.getInputMeta();
             if (!kdbAuthFilePath.equals("")) {
                 kdbClient = KdbClientFactory.createKdbClient(kdbHost, kdbPort, kdbAuthFilePath);
             } else {
@@ -56,7 +58,7 @@ public class KdbExample {
                 if ((counter % 10) == 0) {
                     log.info("Processed {} responses from KDB", counter);
                 }
-                MojoFrame iframe = KdbMojoInterface.Parse(kdbResponse, model, dropColumns);
+                MojoFrame iframe = KdbMojoInterface.Parse(kdbResponse, mojoMeta, dropColumns);
                 MojoFrame oframe = model.transform(iframe);
                 KdbMojoInterface.Publish(kdbSubscribedClient, kdbResponse, qPubTable, oframe);
                 counter++;
