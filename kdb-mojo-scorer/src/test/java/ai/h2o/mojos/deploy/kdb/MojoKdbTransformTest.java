@@ -15,7 +15,6 @@ import java.io.IOException;
 
 class MojoKdbTransformTest {
 
-    private static MojoFrame iframe;
     private static c.Flip kdbFlipTable;
 
     @Test
@@ -23,7 +22,7 @@ class MojoKdbTransformTest {
         String dropCols = "";
         MojoFrameMeta mojoMetaInput = generateMojoFrameMetaInput();
         kdbFlipTable = generateDummyFlip();
-        iframe = MojoKdbTransform.createMojoFrameFromKdbFlip(mojoMetaInput, kdbFlipTable, dropCols);
+        MojoFrame iframe = MojoKdbTransform.createMojoFrameFromKdbFlip(mojoMetaInput, kdbFlipTable, dropCols);
         iframe.debug();
         assertThat(iframe.getNcols() == 23);
         assertThat(iframe.getNrows() == 2);
