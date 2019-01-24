@@ -3,12 +3,14 @@ buildscript {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
+        jcenter()
     }
     dependencies {
         classpath group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin',
                 version: springBootPluginVersion
         classpath group: 'gradle.plugin.org.hidetake', name: 'gradle-swagger-generator-plugin',
                 version: swaggerGradlePluginVersion
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
 }
 

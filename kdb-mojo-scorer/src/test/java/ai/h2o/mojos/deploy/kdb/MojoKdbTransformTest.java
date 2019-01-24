@@ -2,6 +2,8 @@ package ai.h2o.mojos.deploy.kdb;
 
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import ai.h2o.mojos.runtime.MojoPipeline;
@@ -15,25 +17,34 @@ import java.io.IOException;
 
 class MojoKdbTransformTest {
 
-    private static c.Flip kdbFlipTable;
-
     @Test
     void validateMojoTransform() throws IOException {
+        // Given
         String dropCols = "";
         MojoFrameMeta mojoMetaInput = generateMojoFrameMetaInput();
-        kdbFlipTable = generateDummyFlip();
+        c.Flip kdbFlipTable = generateDummyFlip();
+
+        // When
         MojoFrame iframe = MojoKdbTransform.createMojoFrameFromKdbFlip(mojoMetaInput, kdbFlipTable, dropCols);
         iframe.debug();
-        assertThat(iframe.getNcols() == 23);
-        assertThat(iframe.getNrows() == 2);
+
+        // Then
+        assertThat(iframe.getNcols()).isEqualTo(23);
+        assertThat(iframe.getNrows()).isEqualTo(2);
     }
 
     @Test
     void validateKdbPublishObjectGeneration() {
+        // Given
         String pubTable = "fooTable";
         MojoFrame oframe = generateDummyTransformedMojoFrame();
+        c.Flip kdbFlipTable = generateDummyFlip();
         oframe.debug();
+
+        // When
         Object[] kdbPublishObject = MojoKdbTransform.generateMojoPredictionPublishObject(pubTable, oframe, kdbFlipTable);
+
+        // Then
         assertThat(kdbPublishObject.length == 3);
         assertThat(kdbPublishObject[0].equals(".u.upd"));
         assertThat(kdbPublishObject[1].equals("fooTable"));

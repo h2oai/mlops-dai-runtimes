@@ -18,24 +18,28 @@ public class KdbExample {
     private static final Logger log = LoggerFactory.getLogger(KdbExample.class);
 
     public static void main(final String[] args) {
-        CommandLine commandLine = generateCommandLine(args);
-        log.info("Received commandline arguments:");
-        String mojoFilePath = commandLine.getOptionValue('f');
-        log.info("Path to Mojo File: {}", mojoFilePath);
-        String kdbHost = commandLine.getOptionValue("h");
-        log.info("KDB Server Hostname/IP Address: {}", kdbHost);
-        Integer kdbPort = Integer.parseInt(commandLine.getOptionValue("p"));
-        log.info("KDB Port Number: {}", kdbPort);
-        String kdbAuthFilePath = commandLine.getOptionValue("auth", "");
-        log.info("Path to KDB Credentials JSON File: {}", kdbAuthFilePath);
-        String qExpression = commandLine.getOptionValue("q");
-        log.info("KDB Q Subscription Expression: {}", qExpression);
-        String qPubTable = commandLine.getOptionValue("t");
-        log.info("KDB Table to publish to: {}", qPubTable);
-        String dropColumns = commandLine.getOptionValue("d", "");
-        log.info("Columns to Drop from KDB Tickerplant Response: {}", dropColumns);
+        try {
+            CommandLine commandLine = generateCommandLine(args);
+            log.info("Received commandline arguments:");
+            String mojoFilePath = commandLine.getOptionValue('f');
+            log.info("Path to Mojo File: {}", mojoFilePath);
+            String kdbHost = commandLine.getOptionValue("h");
+            log.info("KDB Server Hostname/IP Address: {}", kdbHost);
+            Integer kdbPort = Integer.parseInt(commandLine.getOptionValue("p"));
+            log.info("KDB Port Number: {}", kdbPort);
+            String kdbAuthFilePath = commandLine.getOptionValue("auth", "");
+            log.info("Path to KDB Credentials JSON File: {}", kdbAuthFilePath);
+            String qExpression = commandLine.getOptionValue("q");
+            log.info("KDB Q Subscription Expression: {}", qExpression);
+            String qPubTable = commandLine.getOptionValue("t");
+            log.info("KDB Table to publish to: {}", qPubTable);
+            String dropColumns = commandLine.getOptionValue("d", "");
+            log.info("Columns to Drop from KDB Tickerplant Response: {}", dropColumns);
 
-        runKdbMojoDeployment(mojoFilePath, kdbHost, kdbPort, kdbAuthFilePath, qExpression, qPubTable, dropColumns);
+            runKdbMojoDeployment(mojoFilePath, kdbHost, kdbPort, kdbAuthFilePath, qExpression, qPubTable, dropColumns);
+        } catch(ParseException e) {
+            log.error(e.getMessage());
+        }
     }
 
     private static void runKdbMojoDeployment(String mojoFilePath, String kdbHost, Integer kdbPort, String kdbAuthFilePath,
@@ -70,9 +74,8 @@ public class KdbExample {
         }
     }
 
-    private static CommandLine generateCommandLine(final String[] cliArguments) {
-        final CommandLineParser cmdLineParser = new DefaultParser();
-        CommandLine commandLine = null;
+    private static CommandLine generateCommandLine(String[] cliArguments) throws ParseException {
+        CommandLineParser cmdLineParser = new DefaultParser();
         Options options = new Options();
         options.addRequiredOption("f", "mojofilepath", true, "location on local filesystem of pipline.mojo file");
         options.addRequiredOption("h", "kdbhost", true, "hostname or ip address of kdb server");
@@ -81,11 +84,17 @@ public class KdbExample {
         options.addRequiredOption("q", "qexpression", true, "q expression used to subscribe to KDB Tickerplant");
         options.addRequiredOption("t", "pubtable", true, "table in KDB server to publish results to");
         options.addOption("d", "dropcolumns", true, "comma separated list of columns to drop from KDB Tickerplant response");
+        options.addOption("help","Displays all command line options and descriptions");
         try {
-            commandLine = cmdLineParser.parse(options, cliArguments);
+            CommandLine commandLine = cmdLineParser.parse(options, cliArguments);
+            if (commandLine.hasOption("help")) {
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp("KDB Mojo Deployment Example CLI Help: ", options);
+                System.exit(0);
+            }
         } catch (ParseException parseException) {
-            log.error("Unable to parse command-line arguments {} due to: {}", Arrays.toString(cliArguments), parseException);
+            throw new ParseException(String.format("Unable to parse command-line arguments %s", Arrays.toString(cliArguments)));
         }
-        return commandLine;
+        return cmdLineParser.parse(options, cliArguments);
     }
 }
