@@ -3,12 +3,14 @@ buildscript {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
+        jcenter()
     }
     dependencies {
         classpath group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin',
                 version: springBootPluginVersion
         classpath group: 'gradle.plugin.org.hidetake', name: 'gradle-swagger-generator-plugin',
                 version: swaggerGradlePluginVersion
+        classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: shadowJarVersion
     }
 }
 
@@ -47,8 +49,9 @@ subprojects {
             dependencySet(group: 'org.junit.jupiter', version: jupiterVersion) {
                 entry 'junit-jupiter-api'
                 entry 'junit-jupiter-engine'
-
             }
+            dependency group: 'commons-cli', name: 'commons-cli', version: apacheCommonsCliVersion
+            dependency group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
         }
     }
 }
