@@ -45,10 +45,10 @@ class MojoKdbTransformTest {
         Object[] kdbPublishObject = MojoKdbTransform.generateMojoPredictionPublishObject(pubTable, oframe, kdbFlipTable);
 
         // Then
-        assertThat(kdbPublishObject.length == 3);
+        assertThat(kdbPublishObject.length).isEqualTo(3);
         assertThat(kdbPublishObject[0].equals(".u.upd"));
         assertThat(kdbPublishObject[1].equals("fooTable"));
-        assertThat(kdbPublishObject[2] instanceof Object[]);
+        assertThat(kdbPublishObject[2]).isInstanceOf(Object[].class);
     }
 
     private c.Flip generateDummyFlip() {

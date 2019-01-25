@@ -38,7 +38,7 @@ public class KdbExample {
 
             runKdbMojoDeployment(mojoFilePath, kdbHost, kdbPort, kdbAuthFilePath, qExpression, qPubTable, dropColumns);
         } catch(ParseException e) {
-            log.error("Unable to parse command-line arguments %s, try passing flag -help (With no other flags) for cli help information", e);
+            log.error(String.format("Unable to parse command-line arguments %s, try passing flag -help (With no other flags) for cli help information", Arrays.toString(args)), e);
         }
     }
 
