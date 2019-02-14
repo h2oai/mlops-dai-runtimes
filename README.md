@@ -37,12 +37,12 @@ if the version is not changed back to contain `-SNAPSHOT` again.
 
 In addition to this, we maintain GitHub releases that mirror the released artifacts. For example
 an artifact versioned `0.0.5` is tagged as `v0.0.5` with the actual release called
-`Release v0.0.5`. This step is not automatized.
+`Release v0.0.5`. This step is not automated.
 
 
 ### Upgrading Mojo2 Runtime
 
-To increase the mojo2 runtime dependency version, just edit the corresponding line in the
+To upgrade the mojo2 runtime dependency version, just edit the corresponding line in the
 `gradle.properties` file a push a new version of the deployment templates out as described
 above.
 
