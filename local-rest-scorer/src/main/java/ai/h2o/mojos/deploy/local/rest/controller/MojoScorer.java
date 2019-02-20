@@ -50,7 +50,7 @@ class MojoScorer {
 
     ScoreResponse score(ScoreRequest request) {
         log.info("Got scoring request: {}", request);
-        MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputMeta());
+        MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
         MojoFrame responseFrame = doScore(requestFrame);
         ScoreResponse response = responseConverter.apply(responseFrame, request);
         response.id(pipeline.getUuid());
@@ -61,7 +61,7 @@ class MojoScorer {
         log.info("Got scoring request for CSV: {}", csvFilePath);
         MojoFrame requestFrame;
         try (InputStream csvStream = getInputStream(csvFilePath)) {
-            requestFrame = csvConverter.apply(csvStream, pipeline.getInputMeta());
+            requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
         }
         MojoFrame responseFrame = doScore(requestFrame);
         ScoreResponse response = responseConverter.apply(responseFrame, new ScoreRequest());

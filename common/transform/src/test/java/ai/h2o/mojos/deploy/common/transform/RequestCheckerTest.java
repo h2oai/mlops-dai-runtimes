@@ -31,7 +31,7 @@ class RequestCheckerTest {
     }
 
     @Test
-    void verifyNullRequest_throws() throws ScoreRequestFormatException {
+    void verifyNullRequest_throws() {
         // Given
         ScoreRequest request = null;
         MojoFrameMeta expectedMeta = MojoFrameMeta.getEmpty();
@@ -43,7 +43,7 @@ class RequestCheckerTest {
     }
 
     @Test
-    void verifyEmptyRequest_throws() throws ScoreRequestFormatException {
+    void verifyEmptyRequest_throws() {
         // Given
         ScoreRequest request = new ScoreRequest();
         MojoFrameMeta expectedMeta = MojoFrameMeta.getEmpty();
@@ -55,7 +55,7 @@ class RequestCheckerTest {
     }
 
     @Test
-    void verifyEmptyFieldsRequest_throws() throws ScoreRequestFormatException {
+    void verifyEmptyFieldsRequest_throws() {
         // Given
         ScoreRequest request = new ScoreRequest();
         request.addRowsItem(toRow("text"));
@@ -70,7 +70,7 @@ class RequestCheckerTest {
     }
 
     @Test
-    void verifyEmptyRowsRequest_throws() throws ScoreRequestFormatException {
+    void verifyEmptyRowsRequest_throws() {
         // Given
         ScoreRequest request = new ScoreRequest();
         request.addFieldsItem("field1");
@@ -85,7 +85,7 @@ class RequestCheckerTest {
     }
 
     @Test
-    void verifyMismatchedFieldsRequest_throws() throws ScoreRequestFormatException {
+    void verifyMismatchedFieldsRequest_throws() {
         // Given
         ScoreRequest request = new ScoreRequest();
         request.addFieldsItem("a_fields");
@@ -101,7 +101,7 @@ class RequestCheckerTest {
     }
 
     @Test
-    void verifyMismatchedRowsRequest_throws() throws ScoreRequestFormatException {
+    void verifyMismatchedRowsRequest_throws() {
         // Given
         ScoreRequest request = new ScoreRequest();
         request.addFieldsItem("field1");
