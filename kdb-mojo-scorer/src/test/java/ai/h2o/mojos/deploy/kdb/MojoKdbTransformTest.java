@@ -1,18 +1,17 @@
 package ai.h2o.mojos.deploy.kdb;
 
-import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
-import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.jupiter.api.Test;
-import static com.google.common.truth.Truth.assertThat;
-import ai.h2o.mojos.runtime.MojoPipeline;
-import ai.h2o.mojos.runtime.frame.MojoFrame;
-import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.frame.MojoColumn.Type;
-import ai.h2o.mojos.runtime.lic.LicenseException;
+import ai.h2o.mojos.runtime.frame.MojoFrame;
+import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
+import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
+import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
 import kx.c;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
+
+import static com.google.common.truth.Truth.assertThat;
+import static java.util.Collections.singletonList;
 
 
 class MojoKdbTransformTest {
@@ -21,11 +20,11 @@ class MojoKdbTransformTest {
     void validateMojoTransform() throws IOException {
         // Given
         String dropCols = "";
-        MojoFrameMeta mojoMetaInput = generateMojoFrameMetaInput();
+        MojoFrameBuilder frameBuilder = generateMojoFrameBuilder();
         c.Flip kdbFlipTable = generateDummyFlip();
 
         // When
-        MojoFrame iframe = MojoKdbTransform.createMojoFrameFromKdbFlip(mojoMetaInput, kdbFlipTable, dropCols);
+        MojoFrame iframe = MojoKdbTransform.createMojoFrameFromKdbFlip(frameBuilder, kdbFlipTable, dropCols);
         iframe.debug();
 
         // Then
@@ -52,7 +51,7 @@ class MojoKdbTransformTest {
     }
 
     private c.Flip generateDummyFlip() {
-        int[] limBal = {20000, 120000};
+        String[] limBal = {"20000", "NA"};
         int[] sex = {1, 2};
         int[] education = {5, 1};
         int[] marriage = {3,0};
@@ -84,14 +83,14 @@ class MojoKdbTransformTest {
         return new c.Flip(dict);
     }
 
-    private MojoFrameMeta generateMojoFrameMetaInput() {
+    private MojoFrameBuilder generateMojoFrameBuilder() {
         Type[] types = {Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64,
                 Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64,
                 Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64};
         String[] names = {"LIMIT_BAL", "SEX", "EDUCATION", "MARRIAGE", "AGE", "PAY_1",
                 "PAY_2", "PAY_3", "PAY_4", "PAY_5", "PAY_6", "BILL_AMT1", "BILL_AMT2", "BILL_AMT3", "BILL_AMT4",
                 "BILL_AMT5", "BILL_AMT6", "PAY_AMT1", "PAY_AMT2", "PAY_AMT3", "PAY_AMT4", "PAY_AMT5", "PAY_AMT6"};
-        return new MojoFrameMeta(names, types);
+        return new MojoFrameBuilder(new MojoFrameMeta(names, types), singletonList("NA"));
     }
 
     private MojoFrame generateDummyTransformedMojoFrame() {
