@@ -4,7 +4,6 @@ import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
-import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
 
 import java.util.List;
@@ -13,10 +12,9 @@ import java.util.function.BiFunction;
 /**
  * Converts the original API request object {@link ScoreRequest} into the input {@link MojoFrame}.
  */
-public class RequestToMojoFrameConverter implements BiFunction<ScoreRequest, MojoFrameMeta, MojoFrame> {
+public class RequestToMojoFrameConverter implements BiFunction<ScoreRequest, MojoFrameBuilder, MojoFrame> {
     @Override
-    public MojoFrame apply(ScoreRequest scoreRequest, MojoFrameMeta meta) {
-        MojoFrameBuilder frameBuilder = new MojoFrameBuilder(meta);
+    public MojoFrame apply(ScoreRequest scoreRequest, MojoFrameBuilder frameBuilder) {
         List<String> fields = scoreRequest.getFields();
 
         if (scoreRequest.getRows() != null) {

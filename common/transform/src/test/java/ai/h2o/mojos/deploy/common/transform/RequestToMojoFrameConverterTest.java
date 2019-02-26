@@ -4,8 +4,8 @@ import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.runtime.frame.MojoColumn.Type;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
+import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
-import com.google.common.truth.Truth;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -14,8 +14,10 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RequestToMojoFrameConverterTest {
+    private static final String[] SINGLE_NULL = {null};
     private final RequestToMojoFrameConverter converter = new RequestToMojoFrameConverter();
 
     @Test
@@ -24,7 +26,7 @@ class RequestToMojoFrameConverterTest {
         ScoreRequest request = new ScoreRequest();
 
         // When
-        MojoFrame result = converter.apply(request, MojoFrameMeta.getEmpty());
+        MojoFrame result = converter.apply(request, emptyFrameBuilder());
 
         // Then
         assertThat(result.getNcols()).isEqualTo(0);
@@ -40,7 +42,7 @@ class RequestToMojoFrameConverterTest {
 
         // When
         MojoFrame result = converter.apply(request,
-                new MojoFrameMeta(
+                frameBuilder(
                         new String[]{"field1"},
                         new Type[]{Type.Str}));
 
@@ -49,6 +51,64 @@ class RequestToMojoFrameConverterTest {
         assertThat(result.getNrows()).isEqualTo(1);
         assertThat(result.getColumnNames()).asList().containsExactly("field1");
         assertThat(result.getColumn(0).getDataAsStrings()).asList().containsExactly("value");
+    }
+
+    @Test
+    void convertNAFieldRequestWithoutMissingValues_fails() {
+        // Given
+        ScoreRequest request = new ScoreRequest();
+        request.addFieldsItem("field1");
+        request.addRowsItem(asRow("NA"));
+
+        // When & Then
+        NumberFormatException exception = assertThrows(NumberFormatException.class, () -> converter.apply(request,
+                frameBuilder(
+                        new String[]{"field1"},
+                        new Type[]{Type.Int32})));
+        assertThat(exception).hasMessageThat().contains("NA");
+    }
+
+    @Test
+    void convertNAFieldRequestWithMissingValues_succeeds() {
+        // Given
+        ScoreRequest request = new ScoreRequest();
+        request.addFieldsItem("field1");
+        request.addRowsItem(asRow("NA"));
+
+        // When
+        MojoFrame result = converter.apply(request,
+                frameBuilderWithMissingValues(
+                        new String[]{"field1"},
+                        new Type[]{Type.Int32},
+                        new String[]{"NA"})
+        );
+
+        // Then
+        assertThat(result.getNcols()).isEqualTo(1);
+        assertThat(result.getNrows()).isEqualTo(1);
+        assertThat(result.getColumnNames()).asList().containsExactly("field1");
+        assertThat(result.getColumn(0).getDataAsStrings()).asList().containsExactlyElementsIn(SINGLE_NULL);
+    }
+
+    @Test
+    void convertNullFieldRequestWithMissingValues_succeeds() {
+        // Given
+        ScoreRequest request = new ScoreRequest();
+        request.addFieldsItem("field1");
+        request.addRowsItem(asRow(SINGLE_NULL));
+
+        // When
+        MojoFrame result = converter.apply(request,
+                frameBuilder(
+                        new String[]{"field1"},
+                        new Type[]{Type.Int32})
+        );
+
+        // Then
+        assertThat(result.getNcols()).isEqualTo(1);
+        assertThat(result.getNrows()).isEqualTo(1);
+        assertThat(result.getColumnNames()).asList().containsExactly("field1");
+        assertThat(result.getColumn(0).getDataAsStrings()).asList().containsExactlyElementsIn(SINGLE_NULL);
     }
 
     @Test
@@ -62,7 +122,7 @@ class RequestToMojoFrameConverterTest {
 
         // When
         MojoFrame result = converter.apply(request,
-                new MojoFrameMeta(
+                frameBuilder(
                         new String[]{"field1"},
                         new Type[]{Type.Str}));
 
@@ -85,7 +145,7 @@ class RequestToMojoFrameConverterTest {
 
         // When
         MojoFrame result = converter.apply(request,
-                new MojoFrameMeta(fields.toArray(new String[0]), types));
+                frameBuilder(fields.toArray(new String[0]), types));
 
         // Then
         assertThat(result.getNcols()).isEqualTo(types.length);
@@ -94,6 +154,19 @@ class RequestToMojoFrameConverterTest {
         for (int col = 0; col < types.length; col++) {
             assertThat(result.getColumn(col).getDataAsStrings()[0]).isEqualTo(values[col]);
         }
+    }
+
+    private static MojoFrameBuilder emptyFrameBuilder() {
+        return new MojoFrameBuilder(MojoFrameMeta.getEmpty());
+    }
+
+    private static MojoFrameBuilder frameBuilder(String[] columns, Type[] types) {
+        return new MojoFrameBuilder(new MojoFrameMeta(columns, types));
+    }
+
+    private static MojoFrameBuilder frameBuilderWithMissingValues(String[] columns, Type[] types,
+                                                                  String[] missingValues) {
+        return new MojoFrameBuilder(new MojoFrameMeta(columns, types), asList(missingValues));
     }
 
     private static Row asRow(String... values) {

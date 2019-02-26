@@ -46,7 +46,7 @@ public final class MojoScorer {
         MojoPipeline mojoPipeline = getMojoPipeline(logger);
         requestChecker.verify(request, mojoPipeline.getInputMeta());
         logger.log("Scoring request verified");
-        MojoFrame requestFrame = requestConverter.apply(request, mojoPipeline.getInputMeta());
+        MojoFrame requestFrame = requestConverter.apply(request, mojoPipeline.getInputFrameBuilder());
         logger.log(String.format("Input has %d rows, %d columns: %s", requestFrame.getNrows(), requestFrame.getNcols(),
                 Arrays.toString(requestFrame.getColumnNames())));
         MojoFrame responseFrame = mojoPipeline.transform(requestFrame);
