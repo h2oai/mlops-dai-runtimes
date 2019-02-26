@@ -1,15 +1,13 @@
 package ai.h2o.mojos.deploy.kdb;
 
-import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
+import ai.h2o.mojos.runtime.frame.MojoFrame;
+import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import kx.c;
 import kx.c.Flip;
-import ai.h2o.mojos.deploy.kdb.MojoKdbTransform;
-import java.io.IOException;
-import ai.h2o.mojos.runtime.MojoPipeline;
-import ai.h2o.mojos.runtime.frame.MojoFrame;
-import ai.h2o.mojos.runtime.lic.LicenseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 
 public class KdbMojoInterface {
@@ -47,13 +45,13 @@ public class KdbMojoInterface {
      * Method to parse data obtained from KDB Tickerplant and convert to MojoFrame for inference
      *
      * @param kdbResponse Object[], response from KDB Tickerplant (new data) typically obtained from: Object kdbResponse = subscribedKdbClient.k();
-     * @param mojoMeta MojoFrameMeta, Metadata associated with the mojo artifact, defining the shape/columns/type of data in the MojoFrame
+     * @param frameBuilder Frame builder with metadata defining the shape/columns/type of data in the MojoFrame
      * @param dropCols String, comma separated list of columns that user wishes to drop prior to creating the MojoFrame. Ex. time,sym,optionalOtherDroppedColumn
      * @return MojoFrame, contains new data from KDB converted into MojoFrame for inference
      */
-    public static MojoFrame Parse(Object[] kdbResponse, MojoFrameMeta mojoMeta, String dropCols) throws IOException {
+    public static MojoFrame Parse(Object[] kdbResponse, MojoFrameBuilder frameBuilder, String dropCols) throws IOException {
         Flip kdbFlipTable = (c.Flip) kdbResponse[2];
-        return MojoKdbTransform.createMojoFrameFromKdbFlip(mojoMeta, kdbFlipTable, dropCols);
+        return MojoKdbTransform.createMojoFrameFromKdbFlip(frameBuilder, kdbFlipTable, dropCols);
     }
 
     /**

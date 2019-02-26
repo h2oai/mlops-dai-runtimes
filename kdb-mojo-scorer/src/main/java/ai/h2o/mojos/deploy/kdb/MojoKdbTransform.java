@@ -1,30 +1,29 @@
 package ai.h2o.mojos.deploy.kdb;
 
-import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
-import kx.c;
-import kx.c.Flip;
-import static kx.c.n;
-import ai.h2o.mojos.runtime.MojoPipeline;
+import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
-import ai.h2o.mojos.runtime.frame.MojoFrame;
-import java.io.UnsupportedEncodingException;
-import org.slf4j.LoggerFactory;
+import kx.c;
+import kx.c.Flip;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
+
+import static kx.c.n;
 
 
 class MojoKdbTransform {
 
     private static final Logger log = LoggerFactory.getLogger(MojoKdbTransform.class);
 
-    static MojoFrame createMojoFrameFromKdbFlip(MojoFrameMeta mojoMeta, Flip kdbFlipTable, String dropCols) throws UnsupportedEncodingException {
+    static MojoFrame createMojoFrameFromKdbFlip(MojoFrameBuilder frameBuilder, Flip kdbFlipTable, String dropCols) throws UnsupportedEncodingException {
         String[] colNames = kdbFlipTable.x;
         Object[] colData = kdbFlipTable.y;
         String[] colsToDrop = dropCols.split(",");
         List<String> dropColsList = Arrays.asList(colsToDrop);
-        MojoFrameBuilder frameBuilder = new MojoFrameBuilder(mojoMeta);
         for (int row = 0; row < n(colData[0]); row++) {
             MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
             for (int col = 0; col < colNames.length; col++) {
