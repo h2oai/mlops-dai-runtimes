@@ -36,6 +36,8 @@ provider "aws" {
 resource "aws_s3_bucket" "bucket" {
   bucket = "h2oai-${var.region}-lambda"
   acl = "private"
+  // Without the lock settings the terraform fails to adopt
+  // the existing bucket.
   object_lock_configuration = {
     object_lock_enabled = "Enabled"
   }
