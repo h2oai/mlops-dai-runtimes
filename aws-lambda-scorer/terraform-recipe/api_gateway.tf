@@ -47,11 +47,6 @@ resource "aws_api_gateway_usage_plan" "scorer_usage_plan" {
 
 resource "aws_api_gateway_api_key" "scorer_api_key" {
   name = "${local.escaped_id}"
-
-  stage_key {
-    rest_api_id = "${aws_api_gateway_rest_api.scorer_api.id}"
-    stage_name  = "${aws_api_gateway_deployment.scorer_api_deployment.stage_name}"
-  }
 }
 
 resource "aws_api_gateway_usage_plan_key" "scorer_usage_plan" {
