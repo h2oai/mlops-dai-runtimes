@@ -34,8 +34,11 @@ provider "aws" {
 
 // Mojo file in S3.
 resource "aws_s3_bucket" "bucket" {
-  bucket = "${replace(local.escaped_id, "_", "-")}"
+  bucket = "h2oai-${var.region}-lambda"
   acl = "private"
+  object_lock_configuration = {
+    object_lock_enabled = "Enabled"
+  }
 }
 
 resource "aws_s3_bucket_object" "mojo" {
