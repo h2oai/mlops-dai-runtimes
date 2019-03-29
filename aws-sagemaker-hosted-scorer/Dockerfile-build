@@ -1,0 +1,8 @@
+# This Dockerfile is for building the software that lives in the production image.
+# This is not the production image.
+
+FROM ubuntu:16.04
+
+RUN apt-get -y update
+RUN apt-get -y install default-jdk
+RUN apt-get -y install make wget unzip
