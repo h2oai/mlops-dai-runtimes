@@ -12,6 +12,32 @@ It's a REST API which accepts one data point at a time for prediction in real-ti
 
 ## Overview
 
+### Build process (tested on Linux x86_64 with Docker)
+
+Follow these steps to build.  The build is fully Dockerized, so you should not need to install anything locally except for Docker.
+
+```
+make clean
+make
+```
+
+The output is a docker container:
+
+`h2oai/dai-sagemaker-hosted-scorer:latest`
+
+After building, run to test the produced Docker container locally like this:
+
+Step 1:  Put a pipeline.mojo into this directory (aws-sagemaker-hosted-scorer).
+
+Step 2:  Start the docker instance.
+
+```
+DRIVERLESS_AI_LICENSE_KEY=<paste key here> make run
+```
+
+Step 3:  Use curl to send a JSON-formatted row to the scorer as shown in the details below.
+
+
 ### AWS Model Creation API
 
 https://docs.aws.amazon.com/sagemaker/latest/dg/API_CreateModel.html
@@ -43,7 +69,7 @@ docker run image serve
 Our container consists of the following entrypoint:
 
 ```
-ENTRYPOINT ["java", "-jar", "sagemakerserve.jar"]
+ENTRYPOINT ["java", "-jar", "serve.jar"]
 ```
 
 ```
