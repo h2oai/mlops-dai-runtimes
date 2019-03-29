@@ -37,7 +37,11 @@ run:
 	docker run \
 		--rm \
 		--init \
-		-ti h2oai/dai-sagemaker-hosted-scorer \
+		-ti \
+		-v `pwd`:/opt/ml/model \
+		-e "DRIVERLESS_AI_LICENSE_KEY=$(DRIVERLESS_AI_LICENSE_KEY)" \
+		-p 8080:8080 \
+		h2oai/dai-sagemaker-hosted-scorer \
 		serve
 
 .PHONY: clean build run
