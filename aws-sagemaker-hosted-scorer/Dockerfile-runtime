@@ -1,0 +1,9 @@
+FROM ubuntu:16.04
+
+RUN apt-get -y update
+RUN apt-get -y install default-jre
+COPY build/libs/serve.jar /
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "/serve.jar"]
