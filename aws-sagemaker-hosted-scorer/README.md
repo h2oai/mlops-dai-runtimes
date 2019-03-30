@@ -25,6 +25,8 @@ The output is a docker container:
 
 `h2oai/dai-sagemaker-hosted-scorer:latest`
 
+### Optional: Test the build
+
 After building, run to test the produced Docker container locally like this:
 
 Step 1:  Put a pipeline.mojo into this directory (aws-sagemaker-hosted-scorer).
@@ -37,6 +39,33 @@ DRIVERLESS_AI_LICENSE_KEY=<paste key here> make run
 
 Step 3:  Use curl to send a JSON-formatted row to the scorer as shown in the details below.
 
+
+### Deploy to SageMaker
+
+(Note:  These steps are still incomplete, other stuff was done in the UI first.  Needs some cleanup.)
+
+You need to `docker login` with the output from the command below:
+
+```
+aws ecr get-login --region us-west-2 --no-include-email
+```
+
+Then push the scorer service image to AWS ECR (Elastic Container Registry):
+
+```
+docker push your-url.amazonaws.com/h2oai/dai-sagemaker-hosted-scorer:latest
+```
+
+Then create a model package with the pipeline file and the license key, and copy it to S3:
+
+```
+tar cvf mojo.tar pipeline.mojo license.sig
+gzip mojo.tar
+s3cmd put pipeline.mojo.tar.gz s3://h2oai-tomk-us-west-2/sagemaker-test/pipeline.mojo.tar.gz
+```
+
+
+## Details
 
 ### AWS Model Creation API
 
@@ -64,13 +93,13 @@ Sagemaker starts the container with the following command:
 docker run image serve
 ```
 
-## Details
-
 Our container consists of the following entrypoint:
 
 ```
 ENTRYPOINT ["java", "-jar", "serve.jar"]
 ```
+
+You can test the container locally with the following curl command:
 
 ```
 curl -X POST -H 'Content-Type: application/octet-stream' --data-binary @test.json http://localhost:8080/invocations
