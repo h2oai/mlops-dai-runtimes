@@ -95,7 +95,7 @@ pipeline {
                         artifactId = 'dai-deployment-templates'
                         version = VERSION
                         keepPrivate = false
-                        isRelease = isRelease()
+                        isRelease = isReleaseVersion(version)
                         platform = "any"
                     }
                 }
@@ -115,17 +115,17 @@ def getVersion() {
     if (!version) {
         error "Version must be set"
     }
-    if (isMasterBranch() && !isSnapshotVersion(version)) {
+    if (isMasterBranch() && isReleaseVersion(version)) {
         error "Master contains a non-snapshot version"
     }
     return version
 }
 
 /**
- * @return True, if the given version string denotes a snapshot version.
+ * @return True, if the given version string denotes a release (not a snapshot) version.
  */
-def isSnapshotVersion(version) {
-    return version.endsWith("-SNAPSHOT")
+def isReleaseVersion(version) {
+    return !version.endsWith("-SNAPSHOT")
 }
 
 /**
