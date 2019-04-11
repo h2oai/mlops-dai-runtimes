@@ -37,10 +37,10 @@ The deployment templates zip archives are stored in S3 at:
 
 The push is handled by Jenkins from `master` and `release*` branches with versioning
 defined by a value in `gradle.properties`. The snapshots are versions with
-the `-SNAPSHOT` suffix in `gradle-properties`.
+the `-SNAPSHOT` suffix in `version` value defined in `gradle.properties`.
 
 The `master` branch is expected to be a snapshot (otherwise Jenkins pipeline fails).
-The `release*` branches may be both - snapshot and release versions.
+The `release*` branches may be both snapshot and release versions.
 Beware that Jenkins is happy to overwrite the release artifact, if there is a new commit
 with the same version.
 
