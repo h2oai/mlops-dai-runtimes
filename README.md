@@ -28,7 +28,7 @@ Please see and follow examples in the existing deployment templates.
 
 ## Release
 
-The deployment templates zip archives are stored in S3 here: 
+The deployment templates zip archives are stored in S3 at: 
 
  - *Snapshots*:
   https://s3.console.aws.amazon.com/s3/buckets/artifacts.h2o.ai/snapshots/ai/h2o/dai-deployment-templates/
@@ -36,11 +36,11 @@ The deployment templates zip archives are stored in S3 here:
   https://s3.console.aws.amazon.com/s3/buckets/artifacts.h2o.ai/releases/ai/h2o/dai-deployment-templates/
 
 The push is handled by Jenkins from `master` and `release*` branches with versioning
-defined by a value in `gradle.properties`. As usual, the snapshots are versions with
-the `-SNAPSHOT` suffix.
+defined by a value in `gradle.properties`. The snapshots are versions with
+the `-SNAPSHOT` suffix in `gradle-properties`.
 
-The `master` branch is expected to only contain snapshots (otherwise Jenkins pipeline fails).
-The `release*` branches may contain both snapshot and release versions.
+The `master` branch is expected to be a snapshot (otherwise Jenkins pipeline fails).
+The `release*` branches may be both - snapshot and release versions.
 Beware that Jenkins is happy to overwrite the release artifact, if there is a new commit
 with the same version.
 
