@@ -68,7 +68,7 @@ pipeline {
             steps {
                 script {
                     sh "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew distributionZip"
-                    if (isRelease(VERSION)) {
+                    if (isReleaseVersion(VERSION)) {
                         utilsLib.appendBuildDescription("Release ${VERSION}")
                     }
                 }
@@ -85,7 +85,7 @@ pipeline {
             agent { label NODE_LABEL }
             when {
                 expression {
-                    return doPublish()
+                    return isReleaseBranch() || isMasterBranch()
                 }
             }
             steps {
@@ -95,7 +95,7 @@ pipeline {
                         artifactId = 'dai-deployment-templates'
                         version = VERSION
                         keepPrivate = false
-                        isRelease = isRelease(VERSION)
+                        isRelease = isReleaseVersion(VERSION)
                         platform = "any"
                     }
                 }
@@ -105,16 +105,9 @@ pipeline {
 }
 
 /**
- * @param version version to test
- * @return true, if given version does not contain SNAPSHOT.
- */
-def isRelease(version) {
-    echo version
-    return !version.contains('SNAPSHOT')
-}
-
-/**
- * @return version specified in gradle.properties
+ * Returns version specified in gradle.properties.
+ *
+ * Fails if master contains a release version (to prevent pushing release version accidentally).
  */
 def getVersion() {
     def version = sh(
@@ -123,12 +116,29 @@ def getVersion() {
     if (!version) {
         error "Version must be set"
     }
+    if (isMasterBranch() && isReleaseVersion(version)) {
+        error "Master contains a non-snapshot version"
+    }
     return version
 }
 
 /**
- * @return true, if we are building master or rel-* branch
+ * Returns true, if the given version string denotes a release (not a snapshot) version.
  */
-def doPublish() {
-    return env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith("rel-")
+def isReleaseVersion(version) {
+    return !version.endsWith("-SNAPSHOT")
+}
+
+/**
+ * Returns true, if we are on the master branch.
+ */
+def isMasterBranch() {
+    return env.BRANCH_NAME == "master"
+}
+
+/**
+ * Returns true, if we are on a release branch.
+ */
+def isReleaseBranch() {
+    return env.BRANCH_NAME.startsWith("release")
 }
