@@ -85,7 +85,7 @@ pipeline {
             agent { label NODE_LABEL }
             when {
                 expression {
-                    return doPublish()
+                    return isRelease() || isMaster()
                 }
             }
             steps {
@@ -95,7 +95,7 @@ pipeline {
                         artifactId = 'dai-deployment-templates'
                         version = VERSION
                         keepPrivate = false
-                        isRelease = isRelease(VERSION)
+                        isRelease = isRelease()
                         platform = "any"
                     }
                 }
@@ -105,16 +105,8 @@ pipeline {
 }
 
 /**
- * @param version version to test
- * @return true, if given version does not contain SNAPSHOT.
- */
-def isRelease(version) {
-    echo version
-    return !version.contains('SNAPSHOT')
-}
-
-/**
- * @return version specified in gradle.properties
+ * @return Version specified in gradle.properties. Fails if master contains a release version (to prevent pushing
+ * release version accidentally).
  */
 def getVersion() {
     def version = sh(
@@ -123,12 +115,22 @@ def getVersion() {
     if (!version) {
         error "Version must be set"
     }
+    if (isMaster() && !version.endsWith("-SNAPSHOT")) {
+        error "Master contains a non-snapshot version"
+    }
     return version
 }
 
 /**
- * @return true, if we are building master or rel-* branch
+ * @return True, if we are on the master branch.
  */
-def doPublish() {
-    return env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith("rel-")
+def isMaster() {
+    return env.BRANCH_NAME == "master"
+}
+
+/**
+ * @return True, if we are on the release branch.
+ */
+def isRelease() {
+    return env.BRANCH_NAME.startsWith("release")
 }
