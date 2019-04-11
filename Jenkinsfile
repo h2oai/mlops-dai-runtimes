@@ -85,7 +85,7 @@ pipeline {
             agent { label NODE_LABEL }
             when {
                 expression {
-                    return isRelease() || isMaster()
+                    return isReleaseBranch() || isMasterBranch()
                 }
             }
             steps {
@@ -115,22 +115,29 @@ def getVersion() {
     if (!version) {
         error "Version must be set"
     }
-    if (isMaster() && !version.endsWith("-SNAPSHOT")) {
+    if (isMasterBranch() && !isSnapshotVersion(version)) {
         error "Master contains a non-snapshot version"
     }
     return version
 }
 
 /**
+ * @return True, if the given version string denotes a snapshot version.
+ */
+def isSnapshotVersion(version) {
+    return version.endsWith("-SNAPSHOT")
+}
+
+/**
  * @return True, if we are on the master branch.
  */
-def isMaster() {
+def isMasterBranch() {
     return env.BRANCH_NAME == "master"
 }
 
 /**
- * @return True, if we are on the release branch.
+ * @return True, if we are on a release branch.
  */
-def isRelease() {
+def isReleaseBranch() {
     return env.BRANCH_NAME.startsWith("release")
 }
