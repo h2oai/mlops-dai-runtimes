@@ -28,16 +28,25 @@ Please see and follow examples in the existing deployment templates.
 
 ## Release
 
-The built deployment templates zip archive is stored in S3 here: 
-https://s3.console.aws.amazon.com/s3/buckets/artifacts.h2o.ai/releases/ai/h2o/dai-deployment-templates.
+The deployment templates zip archives are stored in S3 at: 
 
-The push is handled by Jenkins from the `master` branch whenever the version in `gradle.properties`
-does not contain the `-SNAPSHOT` suffix. Beware that Jenkins is happy to overwrite the artifact
-if the version is not changed back to contain `-SNAPSHOT` again.
+ - *Snapshots*:
+  https://s3.console.aws.amazon.com/s3/buckets/artifacts.h2o.ai/snapshots/ai/h2o/dai-deployment-templates/
+ - *Releases*:
+  https://s3.console.aws.amazon.com/s3/buckets/artifacts.h2o.ai/releases/ai/h2o/dai-deployment-templates/
+
+The push is handled by Jenkins from `master` and `release*` branches with versioning
+defined by a value in `gradle.properties`. The snapshots are versions with
+the `-SNAPSHOT` suffix in `version` value defined in `gradle.properties`.
+
+The `master` branch is expected to be a snapshot (otherwise Jenkins pipeline fails).
+The `release*` branches may be both snapshot and release versions.
+Beware that Jenkins is happy to overwrite the release artifact, if there is a new commit
+with the same version.
 
 In addition to this, we maintain GitHub releases that mirror the released artifacts. For example
 an artifact versioned `0.0.5` is tagged as `v0.0.5` with the actual release called
-`Release v0.0.5`. This step is not automated.
+`Release v0.0.5`. This step is not automated yet.
 
 
 ### Upgrading Mojo2 Runtime
