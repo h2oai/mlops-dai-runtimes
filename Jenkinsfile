@@ -68,7 +68,7 @@ pipeline {
             steps {
                 script {
                     sh "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew distributionZip"
-                    if (isRelease(VERSION)) {
+                    if (isReleaseVersion(VERSION)) {
                         utilsLib.appendBuildDescription("Release ${VERSION}")
                     }
                 }
@@ -95,7 +95,7 @@ pipeline {
                         artifactId = 'dai-deployment-templates'
                         version = VERSION
                         keepPrivate = false
-                        isRelease = isReleaseVersion(version)
+                        isRelease = isReleaseVersion(VERSION)
                         platform = "any"
                     }
                 }
