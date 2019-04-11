@@ -105,8 +105,9 @@ pipeline {
 }
 
 /**
- * @return Version specified in gradle.properties. Fails if master contains a release version (to prevent pushing
- * release version accidentally).
+ * Returns version specified in gradle.properties.
+ *
+ * Fails if master contains a release version (to prevent pushing release version accidentally).
  */
 def getVersion() {
     def version = sh(
@@ -122,21 +123,21 @@ def getVersion() {
 }
 
 /**
- * @return True, if the given version string denotes a release (not a snapshot) version.
+ * Returns true, if the given version string denotes a release (not a snapshot) version.
  */
 def isReleaseVersion(version) {
     return !version.endsWith("-SNAPSHOT")
 }
 
 /**
- * @return True, if we are on the master branch.
+ * Returns true, if we are on the master branch.
  */
 def isMasterBranch() {
     return env.BRANCH_NAME == "master"
 }
 
 /**
- * @return True, if we are on a release branch.
+ * Returns true, if we are on a release branch.
  */
 def isReleaseBranch() {
     return env.BRANCH_NAME.startsWith("release")
