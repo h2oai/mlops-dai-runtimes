@@ -21,6 +21,12 @@ variable "license_key" {
 variable "mojo_path" {
   description = "Local path to the mojo file to be pushed to S3."
 }
+variable "bucket_name" {
+  description = "Name of S3 bucket."
+}
+variable "bucket_arn" {
+  description = "ARN of S3 bucket."
+}
 
 locals {
   escaped_id = "${replace("h2oai_${var.lambda_id}", "/[^-_a-zA-Z0-9]/", "")}"
@@ -32,19 +38,8 @@ provider "aws" {
   region = "${var.region}"
 }
 
-// Mojo file in S3.
-resource "aws_s3_bucket" "bucket" {
-  bucket = "h2oai-${var.region}-lambda"
-  acl = "private"
-  // Without the lock settings the terraform fails to adopt
-  // the existing bucket.
-  object_lock_configuration = {
-    object_lock_enabled = "Enabled"
-  }
-}
-
 resource "aws_s3_bucket_object" "mojo" {
-  bucket = "${aws_s3_bucket.bucket.id}"
+  bucket = "${var.bucket_name}"
   key = "${var.lambda_id}.mojo"
   source = "${var.mojo_path}"
   etag = "${md5(file(var.mojo_path))}"
@@ -66,7 +61,7 @@ resource "aws_lambda_function" "scorer" {
 
   environment {
     variables = {
-      DEPLOYMENT_S3_BUCKET_NAME = "${aws_s3_bucket.bucket.id}"
+      DEPLOYMENT_S3_BUCKET_NAME = "${var.bucket_name}"
       MOJO_S3_OBJECT_KEY = "${aws_s3_bucket_object.mojo.key}"
       DRIVERLESS_AI_LICENSE_KEY = "${var.license_key}"
       // This is not used yet by the scorer, but it is here to enforce code reload when only the mojo itself changes.
@@ -110,12 +105,12 @@ resource "aws_iam_policy" "s3_policy" {
     {
       "Effect": "Allow",
       "Action": ["s3:ListBucket"],
-      "Resource": ["${aws_s3_bucket.bucket.arn}"]
+      "Resource": ["${var.bucket_arn}"]
     },
     {
       "Effect": "Allow",
       "Action": ["s3:GetObject"],
-      "Resource": ["${aws_s3_bucket.bucket.arn}/${aws_s3_bucket_object.mojo.key}"]
+      "Resource": ["${var.bucket_arn}/${aws_s3_bucket_object.mojo.key}"]
     }
   ]
 }
