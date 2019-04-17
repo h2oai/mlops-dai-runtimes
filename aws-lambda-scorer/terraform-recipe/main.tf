@@ -24,12 +24,9 @@ variable "mojo_path" {
 variable "bucket_name" {
   description = "Name of S3 bucket."
 }
-variable "bucket_arn" {
-  description = "ARN of S3 bucket."
-}
-
 locals {
   escaped_id = "${replace("h2oai_${var.lambda_id}", "/[^-_a-zA-Z0-9]/", "")}"
+  bucket_arn = "arn:aws:s3:::${var.bucket_name}"
 }
 
 provider "aws" {
@@ -105,12 +102,12 @@ resource "aws_iam_policy" "s3_policy" {
     {
       "Effect": "Allow",
       "Action": ["s3:ListBucket"],
-      "Resource": ["${var.bucket_arn}"]
+      "Resource": ["${local.bucket_arn}"]
     },
     {
       "Effect": "Allow",
       "Action": ["s3:GetObject"],
-      "Resource": ["${var.bucket_arn}/${aws_s3_bucket_object.mojo.key}"]
+      "Resource": ["${local.bucket_arn}/${aws_s3_bucket_object.mojo.key}"]
     }
   ]
 }
