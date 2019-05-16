@@ -16,7 +16,7 @@ The resulting executable jar is located in the `build/libs` folder.
 To run the local scorer, you can either use `bootRun` gradle task or run directly the executable jar:
 
 ```bash
-$ java -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}.jar -Dmojo.pipeline={PATH_TO_MOJO_PIPELINE}
+$ java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}.jar
 ``` 
 
 
@@ -27,10 +27,19 @@ To test the endpoint, send a request to http://localhost:8080 as follows:
 ```bash
 $ curl \
     -X POST \
+    -H "Content-Type: application/json" \
     -d @test.json http://localhost:8080/models/{UUID_OF_YOUR_MOJO_PIPELINE}/score
 ```
 
-If you don't know the UUID of the mojo pipeline, see the scorer log and search for text like:
+You can get the UUID of the loaded pipeline by calling the following:
+
+```bash
+$ curl http://localhost:8080/models
+```
+
+Which should return a json list with the UUID.
+
+Alternatively, the scorer log contains the UUID as well in the form:
 `Mojo pipeline successfully loaded (a12e7390-b8ac-406a-ade9-0d5ea4b63ea9).`
 The hex string in parenthesis is the UUID of you mojo pipeline.
 
