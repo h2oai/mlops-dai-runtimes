@@ -1,8 +1,8 @@
-from pyspark.sql import SparkSession, Row
+from pyspark.sql import SparkSession
 import argparse
 
 from pyspark.sql.types import StringType,FloatType
-from pyspark.sql.functions import udf
+from pyspark.sql.functions import monotonically_increasing_id
 
 def main():
     spark = SparkSession.builder.appName('MOJO Pipeline Transformer').getOrCreate()
@@ -11,7 +11,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mojo", type=str, required=True, help="Location of .mojo file, e.g., 'file:///tmp/pipeline.mojo'")
     parser.add_argument("--input", type=str, required=True, help="Location of input file, e.g., 'file:///tmp/example.csv'")
-    parser.add_argument("--output", type=str, required=False, help="Location of output file, if not specified output is printed to console")
+    parser.add_argument("--output", type=str, required=False, help="Directory location of output files, if not specified output is printed to console")
     parser.add_argument("--format", type=str, required=False, default='csv', help="Format of output file, if not specified format is csv")
     parser.add_argument("--format_options", type=dict, required=False, default={'header': True}, help="Input options for the underlying data source")
     parser.add_argument("--nthreads", type=int, required=False, default=1, help="Number of threads to use, defaults to 1")
@@ -29,17 +29,16 @@ def main():
     print("=====================================")
 
     # Load data
-    example_df = spark.read.format(args.format).options(**args.format_options).load(args.input).repartition(args.nthreads)
+    example_df = spark.read.\
+            format(args.format).\
+            options(**args.format_options).\
+            load(args.input).\
+            repartition(args.nthreads).\
+            withColumn('', monotonically_increasing_id())
     prediction_df = mojo.transform(example_df)
+    output_df = prediction_df.select(['','prediction.*'])
 
-    # Flatenize prediction column to allow export to file/console
-    if args.format == 'parquet':
-        flat_fce = lambda x: str(x)
-    else:
-        flat_fce = lambda x: str(x) # TODO
-    flat_udf = udf(flat_fce, StringType())
-    output_df = prediction_df.withColumn('prediction', flat_udf(prediction_df.prediction))
-
+    # Write ouput
     if args.output:
         output_df.write.format(args.format).mode('overwrite').option("header", "true").save(args.output)
         print("Predictions written to: {}".format(args.output))
