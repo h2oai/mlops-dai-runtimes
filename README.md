@@ -49,6 +49,23 @@ an artifact versioned `0.0.5` is tagged as `v0.0.5` with the actual release call
 `Release v0.0.5`. This step is not automated yet.
 
 
+### Release Lines
+
+Currently, we have two lines of releases:
+
+ - *DriverlessAI 1.7.x, bleeding edge*:
+ These releases are meant for the latest version of DriverlessAI and contains
+ the most up to date version of the templates. 
+ Git branch: `master`, release versions: `0.2.x`, immutable release branch
+ names: `release-2.0.x`.
+ - *DriverlessAI 1.6.x, LTS*:
+ These releases are meant to support the LTS branch of DriverlessAI marked as
+ `1.6.x`. Changes in this branch **must not** break compatibility, so please
+ keep the Terraform version fixed.
+ Git branch `support-1.6`, release versions `0.0.x`, immutable release branch
+ names: `release-0.0.x`.
+
+
 ### Upgrading Mojo2 Runtime
 
 To upgrade the mojo2 runtime dependency version, just edit the corresponding line in the
