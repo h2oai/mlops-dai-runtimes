@@ -17,12 +17,6 @@ buildscript {
 subprojects {
     repositories {
         mavenCentral()
-
-        // Local H2O Nexus for fetching internal dependencies, e.g., mojo runtime.
-        def localNexusLocation = "http://nexus:8081/nexus/repository"
-        maven {
-            url "$localNexusLocation/releases/"
-        }
     }
 
     apply plugin: 'io.spring.dependency-management'
