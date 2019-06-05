@@ -73,11 +73,9 @@ To upgrade the mojo2 runtime dependency version, just edit the corresponding lin
 above.
 
 Note that in order to be able to build against the new mojo2 runtime, the mojo2 runtime
-implementation and the api jars have to be available in the H2O local Nexus:
-http://172.17.0.53:8081/nexus. The mojo2 api also goes to the public
-Maven repository: https://mvnrepository.com/artifact/ai.h2o/mojo2-runtime-api and it is
-always a good idea to make sure it gets there for consistency. If this step fails,
-it usually stops the whole release before fully pushing to the local Nexus.
+implementation and the api jars have to be available in the public
+Maven repository: https://mvnrepository.com/artifact/ai.h2o/mojo2-runtime-api and
+https://mvnrepository.com/artifact/ai.h2o/mojo2-runtime-impl.
 
 Both the steps are handled by the `DAI Build: mojo2` Jenkins pipeline:
 http://mr-0xc1:8080/view/H2OAI/job/mojo2/job/master/
