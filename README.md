@@ -72,8 +72,8 @@ To upgrade the mojo2 runtime dependency version, just edit the corresponding lin
 `gradle.properties` file a push a new version of the deployment templates out as described
 above.
 
-Note that in order to be able to build against the new mojo2 runtime, i.e., the mojo2 runtime
-implementation and the api jars, have to be available in the public
+Note that in order to be able to build against the new mojo2 runtime, the mojo2 runtime
+implementation and the api jars have to be available in the public
 Maven repository: https://mvnrepository.com/artifact/ai.h2o/mojo2-runtime-api and
 https://mvnrepository.com/artifact/ai.h2o/mojo2-runtime-impl.
 
