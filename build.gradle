@@ -10,7 +10,10 @@ buildscript {
                 version: springBootPluginVersion
         classpath group: 'gradle.plugin.org.hidetake', name: 'gradle-swagger-generator-plugin',
                 version: swaggerGradlePluginVersion
-        classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: shadowJarVersion
+        classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow',
+                version: shadowJarVersion
+        classpath group: 'gradle.plugin.com.hierynomus.gradle.plugins', name: 'license-gradle-plugin',
+                version: licenseGradlePluginVersion
     }
 }
 
@@ -20,6 +23,8 @@ subprojects {
     }
 
     apply plugin: 'io.spring.dependency-management'
+
+    apply plugin: 'com.github.hierynomus.license'
 
     dependencyManagement {
         dependencies {
