@@ -42,10 +42,10 @@ public class RequestChecker {
         if (rows == null || rows.isEmpty()) {
             return "List of input data rows cannot be empty";
         }
-        Set expFields = new HashSet<String>(asList(expectedMeta.getColumnNames()));
-        if (!expFields.equals(new HashSet<String>(fields))) {
-            return String.format("Input fields don't match the Mojo, expected %s actual %s",
-                    Arrays.toString(expectedMeta.getColumnNames()), fields.toString());
+        List<String> expectedFields = asList(expectedMeta.getColumnNames());
+        if (!fields.containsAll(expectedFields)) {
+            return String.format("Input fields don't contain all the Mojo fields, expected %s actual %s",
+                    expectedFields.toString(), fields.toString());
         }
         int i = 0;
         for (Row row : scoreRequest.getRows()) {
