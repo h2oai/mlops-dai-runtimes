@@ -5,10 +5,7 @@ import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.runtime.frame.MojoColumn;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static java.util.Arrays.asList;
 
