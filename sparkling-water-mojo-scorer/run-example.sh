@@ -45,5 +45,5 @@ Using:
 
 EOF
 
-$CMD example.py $@
+$CMD example.py "$@"
 
