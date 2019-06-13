@@ -97,7 +97,40 @@ class RequestCheckerTest {
         // When & then
         ScoreRequestFormatException exception =
                 assertThrows(ScoreRequestFormatException.class, () -> checker.verify(request, expectedMeta));
-        assertThat(exception.getMessage()).contains("fields don't match");
+        assertThat(exception.getMessage()).contains("fields don't contain all");
+    }
+
+    @Test
+    void verifyTooFewFieldsRequest_throws() {
+        // Given
+        ScoreRequest request = new ScoreRequest();
+        request.addFieldsItem("field1");
+        request.addRowsItem(toRow("text"));
+        MojoFrameMeta expectedMeta = new MojoFrameMeta(
+                new String[]{"field1", "field2"},
+                new MojoColumn.Type[]{MojoColumn.Type.Str, MojoColumn.Type.Str});
+
+        // When & then
+        ScoreRequestFormatException exception =
+                assertThrows(ScoreRequestFormatException.class, () -> checker.verify(request, expectedMeta));
+        assertThat(exception.getMessage()).contains("fields don't contain all");
+    }
+
+    @Test
+    void verifyExtraFieldsRequest_succeeds() throws ScoreRequestFormatException {
+        // Given
+        ScoreRequest request = new ScoreRequest();
+        request.addFieldsItem("field1");
+        request.addFieldsItem("field2");
+        request.addRowsItem(toRow("text1", "text2"));
+        MojoFrameMeta expectedMeta = new MojoFrameMeta(
+                new String[]{"field1"},
+                new MojoColumn.Type[]{MojoColumn.Type.Str});
+
+        // When
+        checker.verify(request, expectedMeta);
+
+        // Then all ok
     }
 
     @Test
