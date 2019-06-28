@@ -48,6 +48,27 @@ In addition to this, we maintain GitHub releases that mirror the released artifa
 an artifact versioned `0.0.5` is tagged as `v0.0.5` with the actual release called
 `Release v0.0.5`. This step is not automated yet.
 
+### Step-by-step
+
+1. Prepare PR with two commits:
+   - First, "Release X.Y.Z" that removes the `-SNAPSHOT` suffix in `gradle.properties` form `version`.
+     The diff will look like:
+     ```diff
+     - version = 1.2.3-SNAPSHOT
+     + version = 1.2.3
+     ```
+   - Second, "Dev X.Y.(Z+1)" that bumps the version and adds the `-SNAPSHOT` suffix back to `version`
+     in `gradle.properties`. The diff will look like:
+     ```diff
+     - version = 1.2.3
+     + version = 1.2.4-SNAPSHOT
+     ```
+   - Once approved, **rebase** the PR on top of `master`, so that both the commits exist in
+     the history as separate commits.
+   - Create a release branch pointing to the first commit of the two, the release one, called `release-X.Y.Z`.
+     Once in GitHub, Jenkins will automatically pick it up and push the corresponding release packages to S3.
+   - Create a GitHub release "Release vX.Y.Z" with meaningful description, tag `vX.Y.Z`, and branch
+     `release-X.Y.Z`.
 
 ### Release Lines
 
