@@ -20,33 +20,43 @@ docker images --format "{{.Repository}} \t {{.Tag}}" | grep "h2oai/rest-scorer"
 
 ### 1. Start the Docker container
 
-> Note: replace `<version>` with the version of the image you found from the previous step.
+> Note: Replace `<version>` with the version of the image you found from the previous step.
+
 
 ```bash
 docker run \
   --name rest-scorer \
-  --rm \
+  -v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo \
+  -v /path/to/local/license.sig:/secrets/license.sig \
   -p 8080:8080 \
   -t h2oai/rest-scorer:<version>
 ```
 
-### 2. Upload your DAI license
-
-The Docker image expects a H2O.ai DriverlessAI license to be located at `/root/license.sig`.
-
-```bash
-docker cp /path/to/license.sig rest-scorer:/root/license.sig
+Notice how the desired MOJO was mounted to the container:
+```
+-v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo
 ```
 
-### 3. Upload your MOJO
-
-The scoring application continuously looks for a DriverlessAI mojo to be uploaded to `/tmp/pipeline.mojo`
-
-```bash
-docker cp /path/to/pipeline.mojo rest-scorer:/tmp/pipeline.mojo
+Notice how your H2O.ai DriverlessAI license was mounted to the container:
+```
+-v /path/to/local/license.sig:/secrets/license.sig
 ```
 
-### 4. Score!
+
+Alternatively, you could pass in your license as an environment variable:
+
+> Note: However, this approach is not recommended as your license may be written to system logs.
+
+```bash
+docker run \
+  --name rest-scorer \
+  -v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo \
+  -e DRIVERLESS_AI_LICENSE_KEY=12345abcde \
+  -p 8080:8080 \
+  -t h2oai/rest-scorer:<version>
+```
+
+### 2. Score!
 
 A mojo scorer is now running on http://localhost:8080.
 

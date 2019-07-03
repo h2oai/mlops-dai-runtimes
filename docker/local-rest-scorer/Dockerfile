@@ -1,6 +1,6 @@
 FROM openjdk:8-jre-alpine
 
-ENV DRIVERLESS_AI_LICENSE_FILE /root/license.sig
+ENV DRIVERLESS_AI_LICENSE_FILE /secrets/license.sig
 
 COPY build/local-rest-scorer.jar /opt/h2oai/rest-scorer/
 
