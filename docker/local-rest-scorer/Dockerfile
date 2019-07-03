@@ -1,9 +1,4 @@
-FROM ubuntu:18.04
-
-RUN apt-get update \
-  && apt-get install -y openjdk-8-jdk \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/
+FROM openjdk:8-jre-alpine
 
 ENV DRIVERLESS_AI_LICENSE_FILE /root/license.sig
 
