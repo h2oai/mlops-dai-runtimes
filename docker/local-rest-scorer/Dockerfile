@@ -7,11 +7,8 @@ RUN apt-get update \
 
 ENV DRIVERLESS_AI_LICENSE_FILE /root/license.sig
 
-COPY assets/local-rest-scorer.jar \
-     assets/start-mojo-scorer.sh /opt/h2oai/mojo-scorer/
-
-RUN chmod +x /opt/h2oai/mojo-scorer/start-mojo-scorer.sh
+COPY assets/local-rest-scorer.jar /opt/h2oai/rest-scorer/
 
 EXPOSE 8080
 
-ENTRYPOINT ["/opt/h2oai/mojo-scorer/start-mojo-scorer.sh"]
+ENTRYPOINT ["java", "-Dmojo.path=/mojos/pipeline.mojo", "-jar", "/opt/h2oai/rest-scorer/local-rest-scorer.jar"]
