@@ -4,7 +4,7 @@ import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
 task copyJarToDockerAssets(type: Copy) {
     from tasks.getByPath(':local-rest-scorer:bootJar')
-    into "assets"
+    into "build"
 
     rename { String filename -> return "local-rest-scorer.jar" }
 }

@@ -7,7 +7,7 @@ RUN apt-get update \
 
 ENV DRIVERLESS_AI_LICENSE_FILE /root/license.sig
 
-COPY assets/local-rest-scorer.jar /opt/h2oai/rest-scorer/
+COPY build/local-rest-scorer.jar /opt/h2oai/rest-scorer/
 
 EXPOSE 8080
 
