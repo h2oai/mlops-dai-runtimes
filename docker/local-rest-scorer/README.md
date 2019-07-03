@@ -26,34 +26,42 @@ docker images --format "{{.Repository}} \t {{.Tag}}" | grep "h2oai/rest-scorer"
 ```bash
 docker run \
   --name rest-scorer \
-  -v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo \
-  -v /path/to/local/license.sig:/secrets/license.sig \
+  -v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo:ro \
+  -v /path/to/local/license.sig:/secrets/license.sig:ro \
   -p 8080:8080 \
-  -t h2oai/rest-scorer:<version>
+  h2oai/rest-scorer:<version>
 ```
 
 Notice how the desired MOJO was mounted to the container:
 ```
--v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo
+-v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo:ro
 ```
 
 Notice how your H2O.ai DriverlessAI license was mounted to the container:
 ```
--v /path/to/local/license.sig:/secrets/license.sig
+-v /path/to/local/license.sig:/secrets/license.sig:ro
 ```
 
 
 Alternatively, you could pass in your license as an environment variable:
 
-> Note: However, this approach is not recommended as your license may be written to system logs.
+First, `export` your license key.
+```bash
+read -s DRIVERLESS_AI_LICENSE_KEY < /path/to/local/license.sig
+export DRIVERLESS_AI_LICENSE_KEY
+```
+
+> Note: Option `-s`, above, hides the echoing of your license so that its content is not written to logs.
+
+Now start a container.
 
 ```bash
 docker run \
   --name rest-scorer \
-  -v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo \
-  -e DRIVERLESS_AI_LICENSE_KEY=12345abcde \
+  -v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo:ro \
+  -e DRIVERLESS_AI_LICENSE_KEY \
   -p 8080:8080 \
-  -t h2oai/rest-scorer:<version>
+  h2oai/rest-scorer:<version>
 ```
 
 ### 2. Score!
