@@ -1,0 +1,19 @@
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+task copyJarToDockerAssets(type: Copy) {
+    from tasks.getByPath(':local-rest-scorer:bootJar')
+    into "build"
+
+    rename { String filename -> return "local-rest-scorer.jar" }
+}
+
+task buildDockerImage(type: DockerBuildImage) {
+  dependsOn copyJarToDockerAssets
+    inputDir = file('.')
+    tags.add('h2oai/rest-scorer:' + version)
+}
+
+// Plug into the gradle build process
+task build dependsOn buildDockerImage
