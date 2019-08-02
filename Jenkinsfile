@@ -100,6 +100,14 @@ pipeline {
                     }
                 }
             }
+            post {
+                success {
+                    script {
+                        echo "Keep this build.."
+                        currentBuild.setKeepLog(true)
+                    }
+                }
+            }
         }
     }
 }
