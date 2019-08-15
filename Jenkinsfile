@@ -4,9 +4,8 @@
 
 import ai.h2o.ci.Utils
 
-JAVA_IMAGE = 'nimmis/java-centos:openjdk-8-jdk'
-DOCKER_JAVA_HOME = '/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.161-0.b14.el7_4.x86_64'
-NODE_LABEL = 'master'
+JAVA_IMAGE = 'openjdk:8u222-jdk-slim'
+NODE_LABEL = 'docker'
 
 def VERSION = null
 def utilsLib = new Utils()
@@ -47,7 +46,7 @@ pipeline {
                 script {
                     VERSION = getVersion()
                     echo "Version: ${VERSION}"
-                    sh "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew check"
+                    sh "./gradlew check"
                 }
             }
             post {
@@ -67,7 +66,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew distributionZip"
+                    sh "./gradlew distributionZip"
                     if (isReleaseVersion(VERSION)) {
                         utilsLib.appendBuildDescription("Release ${VERSION}")
                     }
@@ -119,7 +118,7 @@ pipeline {
  */
 def getVersion() {
     def version = sh(
-            script: "JAVA_HOME=${DOCKER_JAVA_HOME} ./gradlew -q -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false printVersion",
+            script: "./gradlew -q -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false printVersion",
             returnStdout: true).trim()
     if (!version) {
         error "Version must be set"
