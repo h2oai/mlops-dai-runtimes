@@ -53,7 +53,9 @@ public final class MojoScorer {
         logger.log(String.format("Response has %d rows, %d columns: %s", responseFrame.getNrows(),
                 responseFrame.getNcols(), Arrays.toString(responseFrame.getColumnNames())));
 
-        return responseConverter.apply(responseFrame, request);
+        ScoreResponse response = responseConverter.apply(responseFrame, request);
+        response.id(mojoPipeline.getUuid());
+        return response;
     }
 
     private static MojoPipeline getMojoPipeline(LambdaLogger logger) throws IOException, LicenseException {
