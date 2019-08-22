@@ -19,6 +19,12 @@ buildscript {
     }
 }
 
+allprojects {
+    ext {
+        version = "${swaggerApiVersion}.${patchVersion}"
+    }
+}
+
 subprojects {
     repositories {
         mavenCentral()
