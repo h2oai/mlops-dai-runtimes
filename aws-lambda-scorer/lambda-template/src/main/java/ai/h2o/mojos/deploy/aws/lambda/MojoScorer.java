@@ -3,10 +3,7 @@ package ai.h2o.mojos.deploy.aws.lambda;
 
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
-import ai.h2o.mojos.deploy.common.transform.MojoFrameToResponseConverter;
-import ai.h2o.mojos.deploy.common.transform.RequestChecker;
-import ai.h2o.mojos.deploy.common.transform.RequestToMojoFrameConverter;
-import ai.h2o.mojos.deploy.common.transform.ScoreRequestFormatException;
+import ai.h2o.mojos.deploy.common.transform.*;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;
@@ -37,7 +34,7 @@ public final class MojoScorer {
 
     private final RequestToMojoFrameConverter requestConverter = new RequestToMojoFrameConverter();
     private final MojoFrameToResponseConverter responseConverter = new MojoFrameToResponseConverter();
-    private final RequestChecker requestChecker = new RequestChecker();
+    private final RequestChecker requestChecker = new RequestChecker(new SampleRequestBuilder());
 
     public ScoreResponse score(ScoreRequest request, Context context) throws IOException, LicenseException,
             ScoreRequestFormatException {
