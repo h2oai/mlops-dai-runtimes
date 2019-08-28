@@ -58,6 +58,28 @@ paths:
             $ref: '#/definitions/Model'
         '404':
           description: 'Model not found, please verify model id'
+  '/models/{id}/sample_request':
+    get:
+      tags:
+        - models
+      summary: sample scoring request
+      description: builds a sample scoring request that would pass all validations
+      operationId: getSampleRequest
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: unique model indetifier
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ScoreRequest'
+        '404':
+          description: 'Model not found, please verify model id'
   '/models/{id}/score':
     post:
       tags:
