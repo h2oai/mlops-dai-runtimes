@@ -2,7 +2,6 @@ package ai.h2o.mojos.deploy.common.transform;
 
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
-import ai.h2o.mojos.runtime.frame.MojoColumn;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 
 import java.util.List;
@@ -13,6 +12,11 @@ import static java.util.Arrays.asList;
  * Checks that the request is of the correct form matching the corresponding mojo pipeline.
  */
 public class RequestChecker {
+    private final SampleRequestBuilder sampleRequestBuilder;
+
+    public RequestChecker(SampleRequestBuilder sampleRequestBuilder) {
+        this.sampleRequestBuilder = sampleRequestBuilder;
+    }
 
     /**
      * Verify that the request is valid and matches the expected {@link MojoFrameMeta}.
@@ -24,7 +28,7 @@ public class RequestChecker {
         if (message == null) {
             return;
         }
-        throw new ScoreRequestFormatException(message, getExampleRequest(expectedMeta));
+        throw new ScoreRequestFormatException(message, sampleRequestBuilder.build(expectedMeta));
     }
 
     private String getProblemMessageOrNull(ScoreRequest scoreRequest, MojoFrameMeta expectedMeta) {
@@ -52,34 +56,5 @@ public class RequestChecker {
             i++;
         }
         return null;
-    }
-
-    private static ScoreRequest getExampleRequest(MojoFrameMeta expectedMeta) {
-        ScoreRequest request = new ScoreRequest();
-        request.setFields(asList(expectedMeta.getColumnNames()));
-        Row row = new Row();
-        for (MojoColumn.Type type : expectedMeta.getColumnTypes()) {
-            row.add(getExampleValue(type));
-        }
-        request.addRowsItem(row);
-        return request;
-    }
-
-    private static String getExampleValue(MojoColumn.Type type) {
-        switch (type) {
-            case Bool:
-                return "true";
-            case Int32:
-            case Int64:
-            case Float32:
-            case Float64:
-                return "0";
-            case Str:
-                return "text";
-            case Time64:
-                return "2018-01-01";
-            default:
-                return "";
-        }
     }
 }
