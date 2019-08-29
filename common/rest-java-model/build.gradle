@@ -1,8 +1,4 @@
-apply plugin: 'java'
 apply plugin: 'org.hidetake.swagger.generator'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 dependencies {
     compile group: 'com.google.code.gson', name: 'gson'

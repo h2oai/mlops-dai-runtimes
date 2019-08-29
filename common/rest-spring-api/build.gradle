@@ -1,9 +1,5 @@
-apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'org.hidetake.swagger.generator'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 dependencies {
     compile group: 'io.swagger', name: 'swagger-annotations'
