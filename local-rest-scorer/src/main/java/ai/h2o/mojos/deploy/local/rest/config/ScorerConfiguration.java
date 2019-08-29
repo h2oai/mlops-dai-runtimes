@@ -10,28 +10,28 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 class ScorerConfiguration {
-    @Bean
-    public MojoFrameToResponseConverter responseConverter() {
-        return new MojoFrameToResponseConverter();
-    }
+  @Bean
+  public MojoFrameToResponseConverter responseConverter() {
+    return new MojoFrameToResponseConverter();
+  }
 
-    @Bean
-    public RequestToMojoFrameConverter requestConverter() {
-        return new RequestToMojoFrameConverter();
-    }
+  @Bean
+  public RequestToMojoFrameConverter requestConverter() {
+    return new RequestToMojoFrameConverter();
+  }
 
-    @Bean
-    public MojoPipelineToModelInfoConverter modelConverter() {
-        return new MojoPipelineToModelInfoConverter();
-    }
+  @Bean
+  public MojoPipelineToModelInfoConverter modelConverter() {
+    return new MojoPipelineToModelInfoConverter();
+  }
 
-    @Bean
-    public CsvToMojoFrameConverter csvConverter() {
-        return new CsvToMojoFrameConverter();
-    }
+  @Bean
+  public CsvToMojoFrameConverter csvConverter() {
+    return new CsvToMojoFrameConverter();
+  }
 
-    @Bean
-    public SampleRequestBuilder sampleRequestBuilder() {
-        return new SampleRequestBuilder();
-    }
+  @Bean
+  public SampleRequestBuilder sampleRequestBuilder() {
+    return new SampleRequestBuilder();
+  }
 }

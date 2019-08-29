@@ -7,7 +7,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableSwagger2
 public class ScorerApplication {
-    public static void main(String[] args) {
-        new SpringApplication(ScorerApplication.class).run(args);
-    }
+  public static void main(String[] args) {
+    new SpringApplication(ScorerApplication.class).run(args);
+  }
 }
