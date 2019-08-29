@@ -4,9 +4,11 @@ import ai.h2o.mojos.deploy.common.rest.api.ModelsApi;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -21,10 +23,12 @@ public class ModelsApiController implements ModelsApi {
     private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
     private final MojoScorer scorer;
+    private final SampleRequestBuilder sampleRequestBuilder;
 
-    @org.springframework.beans.factory.annotation.Autowired
-    public ModelsApiController(MojoScorer scorer) {
+    @Autowired
+    public ModelsApiController(MojoScorer scorer, SampleRequestBuilder sampleRequestBuilder) {
         this.scorer = scorer;
+        this.sampleRequestBuilder = sampleRequestBuilder;
     }
 
     public ResponseEntity<Model> getModelInfo(String id) {
@@ -85,5 +89,14 @@ public class ModelsApiController implements ModelsApi {
             log.debug(" - failure cause: ", e);
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @Override
+    public ResponseEntity<ScoreRequest> getSampleRequest(String id) {
+        if (!id.equals(scorer.getModelId())) {
+            log.info("Model {} not found", id);
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(sampleRequestBuilder.build(scorer.getPipeline().getInputMeta()));
     }
 }

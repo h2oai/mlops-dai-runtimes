@@ -16,7 +16,7 @@ The resulting executable jar is located in the `build/libs` folder.
 To run the local scorer, you can either use `bootRun` gradle task or run directly the executable jar:
 
 ```bash
-$ java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}.jar
+java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}.jar
 ``` 
 
 
@@ -25,7 +25,7 @@ $ java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YO
 To test the endpoint, send a request to http://localhost:8080 as follows:
 
 ```bash
-$ curl \
+curl \
     -X POST \
     -H "Content-Type: application/json" \
     -d @test.json http://localhost:8080/models/{UUID_OF_YOUR_MOJO_PIPELINE}/score
@@ -102,7 +102,7 @@ The expected response should follow this structure, but the actual values may di
 Alternatively, you can score an existing file on the local filesystem using `GET` request to the same endpoint:
 
 ```bash
-$ curl \
+curl \
     -X GET \
     http://localhost:8080/models/{UUID_OF_YOUR_MOJO_PIPELINE}/score/?file=/tmp/test.csv
 ```
@@ -111,10 +111,23 @@ This expects a CSV file `/tmp/test.csv` to exist on the machine where the scorer
 over HTTP).
 
 
+### Get Example Request
+
+The scorer can also provide an example request that would pass all validations.
+This way, users can quickly get an example scoring request to send to the scorer to test it.
+This request can be further filled with meaningful input values.
+
+```bash
+curl \
+    -X GET \
+    http://localhost:8080/models/{UUID_OF_YOUR_MOJO_PIPELINE}/sample_request
+```
+
+The resulting JSON is a valid input for the POST `/score` request.
+
 ### API Inspection
 
 You can use SpringFox endpoints that allow both programmatic and manual inspection of the API:
 
 * Swagger JSON representation for programmatic access: http://localhost:8080/v2/api-docs.
 * The UI for manual API inspection: http://localhost:8080/swagger-ui.html.
-

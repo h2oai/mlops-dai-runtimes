@@ -90,6 +90,10 @@ class MojoScorer {
         return pipeline.getUuid();
     }
 
+    MojoPipeline getPipeline() {
+        return pipeline;
+    }
+
     Model getModelInfo() {
         return modelInfoConverter.apply(pipeline);
     }
