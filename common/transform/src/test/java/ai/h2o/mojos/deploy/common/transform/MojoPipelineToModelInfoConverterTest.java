@@ -1,5 +1,7 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import ai.h2o.mojos.deploy.common.rest.model.DataField;
 import ai.h2o.mojos.deploy.common.rest.model.DataField.DataTypeEnum;
 import ai.h2o.mojos.deploy.common.rest.model.Model;

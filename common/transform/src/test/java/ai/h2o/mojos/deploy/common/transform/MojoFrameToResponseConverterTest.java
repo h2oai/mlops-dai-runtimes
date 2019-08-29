@@ -1,5 +1,6 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Arrays.asList;
 
 import ai.h2o.mojos.deploy.common.rest.model.Row;
