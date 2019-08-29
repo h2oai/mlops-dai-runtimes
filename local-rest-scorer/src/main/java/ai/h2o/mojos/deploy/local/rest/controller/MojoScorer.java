@@ -49,7 +49,7 @@ class MojoScorer {
     }
 
     ScoreResponse score(ScoreRequest request) {
-        log.info("Got scoring request: {}", request);
+        log.info("Got scoring request");
         MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
         MojoFrame responseFrame = doScore(requestFrame);
         ScoreResponse response = responseConverter.apply(responseFrame, request);
@@ -58,7 +58,7 @@ class MojoScorer {
     }
 
     ScoreResponse scoreCsv(String csvFilePath) throws IOException {
-        log.info("Got scoring request for CSV: {}", csvFilePath);
+        log.info("Got scoring request for CSV");
         MojoFrame requestFrame;
         try (InputStream csvStream = getInputStream(csvFilePath)) {
             requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
@@ -78,10 +78,10 @@ class MojoScorer {
     }
 
     private static MojoFrame doScore(MojoFrame requestFrame) {
-        log.info("Input has {} rows, {} columns: {}", requestFrame.getNrows(), requestFrame.getNcols(),
+        log.debug("Input has {} rows, {} columns: {}", requestFrame.getNrows(), requestFrame.getNcols(),
                 Arrays.toString(requestFrame.getColumnNames()));
         MojoFrame responseFrame = pipeline.transform(requestFrame);
-        log.info("Response has {} rows, {} columns: {}", responseFrame.getNrows(),
+        log.debug("Response has {} rows, {} columns: {}", responseFrame.getNrows(),
                 responseFrame.getNcols(), Arrays.toString(responseFrame.getColumnNames()));
         return responseFrame;
     }

@@ -43,7 +43,7 @@ public final class MojoScorer {
     public ScoreResponse score(ScoreRequest request, Context context) throws IOException, LicenseException,
             ScoreRequestFormatException {
         LambdaLogger logger = context.getLogger();
-        logger.log(String.format("Got scoring request: %s", request));
+        logger.log("Got scoring request");
         MojoPipeline mojoPipeline = getMojoPipeline(logger);
         requestChecker.verify(request, mojoPipeline.getInputMeta());
         logger.log("Scoring request verified");
@@ -77,7 +77,7 @@ public final class MojoScorer {
                     MOJO_S3_OBJECT_KEY));
             MojoReaderBackend mojoReaderBackend = MojoPipelineReaderBackendFactory.createReaderBackend(mojoInput);
             MojoPipeline mojoPipeline = MojoPipeline.loadFrom(mojoReaderBackend);
-            logger.log(String.format("Mojo pipeline successfully loaded (%s).", mojoPipeline));
+            logger.log(String.format("Mojo pipeline successfully loaded (%s).", mojoPipeline.getUuid()));
             return mojoPipeline;
         }
     }
