@@ -71,7 +71,7 @@ class CsvToMojoFrameConverterTest {
   }
 
   @Test
-  void convertNAWithoutMissingValues_fails() {
+  void convertNaWithoutMissingValues_fails() {
     // Given
     String[] names = {"Field1"};
     Type[] types = {Type.Int32};
@@ -85,7 +85,7 @@ class CsvToMojoFrameConverterTest {
   }
 
   @Test
-  void convertNAWithMissingValues_succeeds() throws IOException {
+  void convertNaWithMissingValues_succeeds() throws IOException {
     // Given
     String[] names = {"Field1"};
     Type[] types = {Type.Int32};

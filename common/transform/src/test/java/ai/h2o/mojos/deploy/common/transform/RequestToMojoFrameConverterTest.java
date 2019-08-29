@@ -51,7 +51,7 @@ class RequestToMojoFrameConverterTest {
   }
 
   @Test
-  void convertNAFieldRequestWithoutMissingValues_fails() {
+  void convertNaFieldRequestWithoutMissingValues_fails() {
     // Given
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
@@ -68,7 +68,7 @@ class RequestToMojoFrameConverterTest {
   }
 
   @Test
-  void convertNAFieldRequestWithMissingValues_succeeds() {
+  void convertNaFieldRequestWithMissingValues_succeeds() {
     // Given
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
