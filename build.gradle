@@ -63,7 +63,10 @@ subprojects {
         java {
             target project.fileTree(project.rootDir) {
                 include '**/*.java'
+                // Exclude generated and hidden folders.
+                exclude '**/.*/**'
                 exclude '**/build/**'
+                // Exclude KDB related code.
                 exclude '**/kdb-java/**'
                 exclude '**/kdb-mojo-scorer/**'
             }
