@@ -87,6 +87,8 @@ paths:
       summary: score a model
       description: score a model
       operationId: getScore
+      consumes:
+        - application/json
       produces:
         - application/json
       parameters:
