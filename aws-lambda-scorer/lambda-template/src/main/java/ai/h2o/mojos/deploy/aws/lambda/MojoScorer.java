@@ -39,7 +39,7 @@ public final class MojoScorer {
   private final MojoFrameToResponseConverter responseConverter = new MojoFrameToResponseConverter();
   private final RequestChecker requestChecker = new RequestChecker(new SampleRequestBuilder());
 
-  /** Process a single {@link ScoreRequest} in the given AWS Lambda {@link Context}. */
+  /** Processes a single {@link ScoreRequest} in the given AWS Lambda {@link Context}. */
   public ScoreResponse score(ScoreRequest request, Context context)
       throws IOException, LicenseException, ScoreRequestFormatException {
     LambdaLogger logger = context.getLogger();
