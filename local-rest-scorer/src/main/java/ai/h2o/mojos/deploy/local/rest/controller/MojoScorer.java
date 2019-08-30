@@ -12,11 +12,6 @@ import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,6 +19,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /*
  * H2O DAI mojo scorer.
@@ -33,101 +32,112 @@ import java.util.Arrays;
  */
 @Component
 class MojoScorer {
-    private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
-    private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
-    private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
-    private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
+  private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
+  private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
+  private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
+  private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
 
-    private final RequestToMojoFrameConverter requestConverter;
-    private final MojoFrameToResponseConverter responseConverter;
-    private final MojoPipelineToModelInfoConverter modelInfoConverter;
-    private final CsvToMojoFrameConverter csvConverter;
+  private final RequestToMojoFrameConverter requestConverter;
+  private final MojoFrameToResponseConverter responseConverter;
+  private final MojoPipelineToModelInfoConverter modelInfoConverter;
+  private final CsvToMojoFrameConverter csvConverter;
 
-    @Autowired
-    public MojoScorer(RequestToMojoFrameConverter requestConverter, MojoFrameToResponseConverter responseConverter,
-                      MojoPipelineToModelInfoConverter modelInfoConverter, CsvToMojoFrameConverter csvConverter) {
-        this.requestConverter = requestConverter;
-        this.responseConverter = responseConverter;
-        this.modelInfoConverter = modelInfoConverter;
-        this.csvConverter = csvConverter;
+  @Autowired
+  public MojoScorer(
+      RequestToMojoFrameConverter requestConverter,
+      MojoFrameToResponseConverter responseConverter,
+      MojoPipelineToModelInfoConverter modelInfoConverter,
+      CsvToMojoFrameConverter csvConverter) {
+    this.requestConverter = requestConverter;
+    this.responseConverter = responseConverter;
+    this.modelInfoConverter = modelInfoConverter;
+    this.csvConverter = csvConverter;
+  }
+
+  ScoreResponse score(ScoreRequest request) {
+    log.info("Got scoring request");
+    MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
+    MojoFrame responseFrame = doScore(requestFrame);
+    ScoreResponse response = responseConverter.apply(responseFrame, request);
+    response.id(pipeline.getUuid());
+    return response;
+  }
+
+  ScoreResponse scoreCsv(String csvFilePath) throws IOException {
+    log.info("Got scoring request for CSV");
+    MojoFrame requestFrame;
+    try (InputStream csvStream = getInputStream(csvFilePath)) {
+      requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
     }
+    MojoFrame responseFrame = doScore(requestFrame);
+    ScoreResponse response = responseConverter.apply(responseFrame, new ScoreRequest());
+    response.id(pipeline.getUuid());
+    return response;
+  }
 
-    ScoreResponse score(ScoreRequest request) {
-        log.info("Got scoring request");
-        MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
-        MojoFrame responseFrame = doScore(requestFrame);
-        ScoreResponse response = responseConverter.apply(responseFrame, request);
-        response.id(pipeline.getUuid());
-        return response;
+  private static InputStream getInputStream(String filePath) throws IOException {
+    File csvFile = new File(filePath);
+    if (!csvFile.isFile()) {
+      throw new FileNotFoundException(
+          String.format("Could not find the input CSV file: %s", filePath));
     }
+    return new FileInputStream(filePath);
+  }
 
-    ScoreResponse scoreCsv(String csvFilePath) throws IOException {
-        log.info("Got scoring request for CSV");
-        MojoFrame requestFrame;
-        try (InputStream csvStream = getInputStream(csvFilePath)) {
-            requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
-        }
-        MojoFrame responseFrame = doScore(requestFrame);
-        ScoreResponse response = responseConverter.apply(responseFrame, new ScoreRequest());
-        response.id(pipeline.getUuid());
-        return response;
-    }
+  private static MojoFrame doScore(MojoFrame requestFrame) {
+    log.debug(
+        "Input has {} rows, {} columns: {}",
+        requestFrame.getNrows(),
+        requestFrame.getNcols(),
+        Arrays.toString(requestFrame.getColumnNames()));
+    MojoFrame responseFrame = pipeline.transform(requestFrame);
+    log.debug(
+        "Response has {} rows, {} columns: {}",
+        responseFrame.getNrows(),
+        responseFrame.getNcols(),
+        Arrays.toString(responseFrame.getColumnNames()));
+    return responseFrame;
+  }
 
-    private static InputStream getInputStream(String filePath) throws IOException {
-        File csvFile = new File(filePath);
-        if (!csvFile.isFile()) {
-            throw new FileNotFoundException(String.format("Could not find the input CSV file: %s", filePath));
-        }
-        return new FileInputStream(filePath);
-    }
+  String getModelId() {
+    return pipeline.getUuid();
+  }
 
-    private static MojoFrame doScore(MojoFrame requestFrame) {
-        log.debug("Input has {} rows, {} columns: {}", requestFrame.getNrows(), requestFrame.getNcols(),
-                Arrays.toString(requestFrame.getColumnNames()));
-        MojoFrame responseFrame = pipeline.transform(requestFrame);
-        log.debug("Response has {} rows, {} columns: {}", responseFrame.getNrows(),
-                responseFrame.getNcols(), Arrays.toString(responseFrame.getColumnNames()));
-        return responseFrame;
-    }
+  MojoPipeline getPipeline() {
+    return pipeline;
+  }
 
-    String getModelId() {
-        return pipeline.getUuid();
-    }
+  Model getModelInfo() {
+    return modelInfoConverter.apply(pipeline);
+  }
 
-    MojoPipeline getPipeline() {
-        return pipeline;
+  private static MojoPipeline loadMojoPipelineFromFile() {
+    Preconditions.checkArgument(
+        !Strings.isNullOrEmpty(MOJO_PIPELINE_PATH),
+        "Path to mojo pipeline not specified, set the %s property.",
+        MOJO_PIPELINE_PATH_PROPERTY);
+    log.info("Loading Mojo pipeline from path {}", MOJO_PIPELINE_PATH);
+    File mojoFile = new File(MOJO_PIPELINE_PATH);
+    if (!mojoFile.isFile()) {
+      ClassLoader classLoader = MojoScorer.class.getClassLoader();
+      URL resourcePath = classLoader.getResource(MOJO_PIPELINE_PATH);
+      if (resourcePath != null) {
+        mojoFile = new File(resourcePath.getFile());
+      }
     }
-
-    Model getModelInfo() {
-        return modelInfoConverter.apply(pipeline);
+    if (!mojoFile.isFile()) {
+      throw new RuntimeException("Could not load mojo");
     }
-
-    private static MojoPipeline loadMojoPipelineFromFile() {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(MOJO_PIPELINE_PATH),
-                "Path to mojo pipeline not specified, set the %s property.",
-                MOJO_PIPELINE_PATH_PROPERTY);
-        log.info("Loading Mojo pipeline from path {}", MOJO_PIPELINE_PATH);
-        File mojoFile = new File(MOJO_PIPELINE_PATH);
-        if (!mojoFile.isFile()) {
-            ClassLoader classLoader = MojoScorer.class.getClassLoader();
-            URL resourcePath = classLoader.getResource(MOJO_PIPELINE_PATH);
-            if (resourcePath != null) {
-                mojoFile = new File(resourcePath.getFile());
-            }
-        }
-        if (!mojoFile.isFile()) {
-            throw new RuntimeException("Could not load mojo");
-        }
-        try {
-            MojoPipeline mojoPipeline = MojoPipeline.loadFrom(mojoFile.getPath());
-            log.info("Mojo pipeline successfully loaded ({}).", mojoPipeline.getUuid());
-            return mojoPipeline;
-        } catch (IOException e) {
-            log.error("Could not load mojo", e);
-            throw new RuntimeException("Unable to load mojo", e);
-        } catch (LicenseException e) {
-            log.error("No License File", e);
-            throw new RuntimeException("License file not found", e);
-        }
+    try {
+      MojoPipeline mojoPipeline = MojoPipeline.loadFrom(mojoFile.getPath());
+      log.info("Mojo pipeline successfully loaded ({}).", mojoPipeline.getUuid());
+      return mojoPipeline;
+    } catch (IOException e) {
+      log.error("Could not load mojo", e);
+      throw new RuntimeException("Unable to load mojo", e);
+    } catch (LicenseException e) {
+      log.error("No License File", e);
+      throw new RuntimeException("License file not found", e);
     }
+  }
 }
