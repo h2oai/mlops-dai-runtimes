@@ -30,6 +30,7 @@ public class ModelsApiController implements ModelsApi {
     this.sampleRequestBuilder = sampleRequestBuilder;
   }
 
+  @Override
   public ResponseEntity<Model> getModelInfo(String id) {
     if (Strings.isNullOrEmpty(id)) {
       log.info("Request is missing a valid id");
@@ -42,10 +43,12 @@ public class ModelsApiController implements ModelsApi {
     return ResponseEntity.ok(scorer.getModelInfo());
   }
 
+  @Override
   public ResponseEntity<List<String>> getModels() {
     return ResponseEntity.ok(singletonList(scorer.getModelId()));
   }
 
+  @Override
   public ResponseEntity<ScoreResponse> getScore(ScoreRequest request, String id) {
     if (Strings.isNullOrEmpty(id)) {
       log.info("Request is missing a valid id");
@@ -64,6 +67,7 @@ public class ModelsApiController implements ModelsApi {
     }
   }
 
+  @Override
   public ResponseEntity<ScoreResponse> getScoreByFile(String id, String file) {
     if (Strings.isNullOrEmpty(id)) {
       log.info("Request is missing a valid id");

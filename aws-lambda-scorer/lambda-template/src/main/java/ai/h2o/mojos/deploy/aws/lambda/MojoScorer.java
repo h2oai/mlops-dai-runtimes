@@ -24,8 +24,8 @@ import java.util.Arrays;
 /*
  * AWS lambda request handler that implements scoring using a H2O DAI mojo.
  *
- * <p>The scorer code is shared for all mojo deployments and is only parameterized by environment variables that define,
- * e.g., the location of the mojo file in AWS S3.
+ * <p>The scorer code is shared for all mojo deployments and is only parameterized by environment
+ * variables that define, e.g., the location of the mojo file in AWS S3.
  */
 public final class MojoScorer {
   private static final String DEPLOYMENT_S3_BUCKET_NAME =
@@ -39,6 +39,7 @@ public final class MojoScorer {
   private final MojoFrameToResponseConverter responseConverter = new MojoFrameToResponseConverter();
   private final RequestChecker requestChecker = new RequestChecker(new SampleRequestBuilder());
 
+  /** Processes a single {@link ScoreRequest} in the given AWS Lambda {@link Context}. */
   public ScoreResponse score(ScoreRequest request, Context context)
       throws IOException, LicenseException, ScoreRequestFormatException {
     LambdaLogger logger = context.getLogger();

@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component;
 /*
  * H2O DAI mojo scorer.
  *
- * <p>The scorer code is shared for all mojo deployments and is only parameterized by the {@code mojo.path}
- * property to define the mojo to use.
+ * <p>The scorer code is shared for all mojo deployments and is only parameterized by the
+ * {@code mojo.path} property to define the mojo to use.
  */
 @Component
 class MojoScorer {

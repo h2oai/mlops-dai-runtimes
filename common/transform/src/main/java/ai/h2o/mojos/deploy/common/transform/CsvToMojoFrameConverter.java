@@ -9,6 +9,7 @@ import java.io.InputStream;
 
 /** Converts the CSV from {@link InputStream} to the {@link MojoFrame} for scoring. */
 public class CsvToMojoFrameConverter {
+  /** Converts the CSV data from the given {@link InputStream} to a {@link MojoFrame}. */
   public MojoFrame apply(InputStream inputStream, MojoFrameBuilder frameBuilder)
       throws IOException {
     MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
