@@ -12,6 +12,7 @@ buildscript {
                 version: swaggerGradlePluginVersion
         classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: shadowJarVersion
         classpath group: 'com.bmuschko', name: 'gradle-docker-plugin', version: dockerPluginVersion
+        classpath group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: spotlessPluginVersion
     }
 }
 
@@ -20,8 +21,11 @@ subprojects {
         mavenCentral()
     }
 
-    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
+    apply plugin: 'io.spring.dependency-management'
     dependencyManagement {
         dependencies {
             dependencySet(group: 'ai.h2o', version: mojoRuntimeVersion) {
@@ -53,9 +57,32 @@ subprojects {
             dependency group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
         }
     }
+
+    apply plugin: 'com.diffplug.gradle.spotless'
+    spotless {
+        java {
+            target project.fileTree(project.rootDir) {
+                include '**/*.java'
+                // Exclude generated and hidden folders.
+                exclude '**/.*/**'
+                exclude '**/build/**'
+                // Exclude KDB related code.
+                exclude '**/kdb-java/**'
+                exclude '**/kdb-mojo-scorer/**'
+            }
+            googleJavaFormat('1.7')
+        }
+    }
+
+    apply plugin: 'checkstyle'
+    checkstyle {
+        toolVersion '8.21'
+        configFile = project(":").file("config/checkstyle/google_style.xml")
+        configProperties = ["suppressionFile": project(":").file("config/checkstyle/suppressions.xml")]
+    }
 }
 
-// Collect artifacts from all the deployment templates into a signle ZIP to be released.
+// Collect artifacts from all the deployment templates into a single ZIP to be released.
 //
 // This task is to be injected content from the individual deployment templates (in their child build.gradle files)
 // as follows:
