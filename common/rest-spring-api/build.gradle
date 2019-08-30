@@ -1,9 +1,12 @@
-apply plugin: 'org.springframework.boot'
-apply plugin: 'org.hidetake.swagger.generator'
+plugins {
+    id 'org.springframework.boot'
+    id 'org.hidetake.swagger.generator'
+}
+apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
-    compile group: 'io.swagger', name: 'swagger-annotations'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'io.swagger', name: 'swagger-annotations'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
 }
 

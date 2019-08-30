@@ -6,7 +6,4 @@
 
 <suppressions>
     <suppress files="[/\\]build[/\\]" checks=".*"/>
-    <!-- Suppress style violation in KDB code -->
-    <suppress files="[/\\]kdb-mojo-scorer[/\\]" checks=".*"/>
-    <suppress files="[/\\]kdb-java[/\\]" checks=".*"/>
 </suppressions>

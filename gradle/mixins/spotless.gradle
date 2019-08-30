@@ -1,0 +1,12 @@
+// Defines shared Gradle project Spotless formatter configuration.
+
+apply plugin: 'com.diffplug.gradle.spotless'
+
+spotless {
+    java {
+        target fileTree('src') {
+            include '**/*.java'
+        }
+        googleJavaFormat('1.7')
+    }
+}

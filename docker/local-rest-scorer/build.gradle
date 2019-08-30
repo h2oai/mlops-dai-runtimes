@@ -1,4 +1,6 @@
-apply plugin: 'com.bmuschko.docker-remote-api'
+plugins {
+    id 'com.bmuschko.docker-remote-api'
+}
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
@@ -14,4 +16,6 @@ task buildDockerImage(type: DockerBuildImage) {
     inputDir = file('.')
     tags.add('h2oai/rest-scorer:' + version)
 }
-build.dependsOn buildDockerImage
+
+// Plug into the gradle build process
+task build dependsOn buildDockerImage
