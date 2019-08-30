@@ -67,7 +67,7 @@ class SampleRequestBuilderTest {
     // Then
     ScoreRequest expected = new ScoreRequest();
     expected.fields(asList(columns));
-    expected.addRowsItem((asRow("text", "0", "0", "true", "0", "0", "2018-01-01")));
+    expected.addRowsItem(asRow("text", "0", "0", "true", "0", "0", "2018-01-01"));
     assertThat(result).isEqualTo(expected);
   }
 
