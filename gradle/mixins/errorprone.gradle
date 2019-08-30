@@ -1,0 +1,12 @@
+// Defines shared Gradle project Errorprone analyzer configuration.
+
+apply plugin: 'net.ltgt.errorprone'
+
+dependencies {
+    errorprone("com.google.errorprone:error_prone_core:$errorproneVersion")
+    errorproneJavac("com.google.errorprone:javac:$errorproneJavacVersion")
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.errorprone.disableWarningsInGeneratedCode = true
+}

@@ -13,6 +13,7 @@ buildscript {
         classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: shadowJarVersion
         classpath group: 'com.bmuschko', name: 'gradle-docker-plugin', version: dockerPluginVersion
         classpath group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: spotlessPluginVersion
+        classpath group: 'net.ltgt.gradle', name: 'gradle-errorprone-plugin', version: errorpronePluginVersion
     }
 }
 
