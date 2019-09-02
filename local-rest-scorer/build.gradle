@@ -1,4 +1,5 @@
 plugins {
+    id 'com.google.cloud.tools.jib'
     id 'org.springframework.boot'
 }
 apply from: project(":").file('gradle/java.gradle')
@@ -32,3 +33,31 @@ rootProject.distributionZip {
         from bootJar.archivePath
     }
 }
+
+// Docker image configuration.
+jib {
+    from {
+        image = 'openjdk:8-jre-alpine'
+    }
+    to {
+        image = 'harbor.h2o.ai/h2oai/rest-scorer'
+        tags = [version]
+    }
+    container {
+        jvmFlags = ['-Dmojo.path=/mojos/pipeline.mojo']
+        ports = ['8080']
+        volumes = [
+                // For storing the mojo2 file with the model to be used for scoring.
+                '/mojos',
+                // For the DAI license file.
+                '/secrets',
+        ]
+        environment = [
+                // The expected path to the DAI license file.
+                DRIVERLESS_AI_LICENSE_FILE: '/secrets/license.sig',
+        ]
+    }
+}
+
+// Make docker build part of the build task. No pushing to harbor though.
+tasks.build.dependsOn tasks.jibDockerBuild

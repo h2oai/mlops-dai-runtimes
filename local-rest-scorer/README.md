@@ -1,7 +1,7 @@
 # DAI Deployment Template for Local SpringBoot Scorer
 
-This package contains sources of a generic Java scorer implementation based on SpringBoot.
-
+This package contains sources of a generic Java scorer implementation based on SpringBoot
+and its Docker image.
 
 ## Building
 
@@ -10,7 +10,6 @@ The code of the local SpringBoot scorer is a gradle project build as usual by
 
 The resulting executable jar is located in the `build/libs` folder.
 
-
 ## Running
 
 To run the local scorer, you can either use `bootRun` gradle task or run directly the executable jar:
@@ -18,7 +17,6 @@ To run the local scorer, you can either use `bootRun` gradle task or run directl
 ```bash
 java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}.jar
 ``` 
-
 
 ### Score JSON Request
 
@@ -96,7 +94,6 @@ The expected response should follow this structure, but the actual values may di
 }
 ```
 
-
 ### Score CSV File
 
 Alternatively, you can score an existing file on the local filesystem using `GET` request to the same endpoint:
@@ -109,7 +106,6 @@ curl \
 
 This expects a CSV file `/tmp/test.csv` to exist on the machine where the scorer runs (i.e., it is not send to it
 over HTTP).
-
 
 ### Get Example Request
 
@@ -131,3 +127,68 @@ You can use SpringFox endpoints that allow both programmatic and manual inspecti
 
 * Swagger JSON representation for programmatic access: http://localhost:8080/v2/api-docs.
 * The UI for manual API inspection: http://localhost:8080/swagger-ui.html.
+
+## Docker Image
+
+Docker image for this REST scorer is built using
+[Jib](https://github.com/GoogleContainerTools/jib).
+
+### Build Image
+
+Generation of this Docker image is plugged into the build process of this project.
+Run the following command in the root project directory to run the `build` process.
+
+```bash
+./gradlew :local-rest-scorer:jibDockerBuild
+```
+
+Verify that the Docker image was created, and take note of the version created.
+```bash
+docker images --format "{{.Repository}} \t {{.Tag}}" | grep "h2oai/rest-scorer"
+```
+
+### Run Container
+
+> Note: Replace `<version>` with the version of the image you found from the previous step.
+
+```bash
+docker run \
+  --name rest-scorer \
+  -v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo:ro \
+  -v /path/to/local/license.sig:/secrets/license.sig:ro \
+  -p 8080:8080 \
+  h2oai/rest-scorer:<version>
+```
+
+Notice how the desired MOJO was mounted to the container:
+```
+-v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo:ro
+```
+
+Notice how your H2O.ai DriverlessAI license was mounted to the container:
+```
+-v /path/to/local/license.sig:/secrets/license.sig:ro
+```
+
+Alternatively, you could pass in your license as an environment variable:
+
+First, `export` your license key.
+```bash
+read -s DRIVERLESS_AI_LICENSE_KEY < /path/to/local/license.sig
+export DRIVERLESS_AI_LICENSE_KEY
+```
+
+> Note: Option `-s`, above, hides the echoing of your license so that its content is not written to logs.
+
+Now start a container.
+
+```bash
+docker run \
+  --name rest-scorer \
+  -v /path/to/local/pipeline.mojo:/mojos/pipeline.mojo:ro \
+  -e DRIVERLESS_AI_LICENSE_KEY \
+  -p 8080:8080 \
+  h2oai/rest-scorer:<version>
+```
+
+See section [Running](#running) above for information on how to score requests.

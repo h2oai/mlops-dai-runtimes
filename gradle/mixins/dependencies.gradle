@@ -12,6 +12,7 @@ dependencyManagement {
         dependency group: 'com.amazonaws', name: 'aws-lambda-java-events', version: awsLambdaEventsVersion
         dependency group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsSdkS3Version
         dependency group: 'com.google.code.gson', name: 'gson', version: gsonVersion
+        dependency group: 'com.google.guava', name: 'guava', version: guavaVersion
         dependency group: 'com.google.truth.extensions', name: 'truth-java8-extension', version: truthVersion
         dependencySet(group: 'io.springfox', version: springFoxVersion) {
             entry 'springfox-swagger2'
