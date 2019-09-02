@@ -1,0 +1,35 @@
+// Defines shared aspects of Spring dependency management.
+
+apply plugin: 'io.spring.dependency-management'
+
+dependencyManagement {
+    dependencies {
+        dependencySet(group: 'ai.h2o', version: mojoRuntimeVersion) {
+            entry 'mojo2-runtime-api'
+            entry 'mojo2-runtime-impl'
+        }
+        dependency group: 'com.amazonaws', name: 'aws-lambda-java-core', version: awsLambdaCoreVersion
+        dependency group: 'com.amazonaws', name: 'aws-lambda-java-events', version: awsLambdaEventsVersion
+        dependency group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsSdkS3Version
+        dependency group: 'com.google.code.gson', name: 'gson', version: gsonVersion
+        dependency group: 'com.google.truth.extensions', name: 'truth-java8-extension', version: truthVersion
+        dependencySet(group: 'io.springfox', version: springFoxVersion) {
+            entry 'springfox-swagger2'
+            entry 'springfox-swagger-ui'
+        }
+        dependency group: 'io.swagger', name: 'swagger-annotations', version: swaggerCoreSpringVersion
+        dependency group: 'io.swagger.core.v3', name: 'swagger-annotations', version: swaggerCoreVersion
+        dependency group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
+        dependency group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
+        dependencySet(group: 'org.junit.jupiter', version: jupiterVersion) {
+            entry 'junit-jupiter-api'
+            entry 'junit-jupiter-engine'
+        }
+        dependencySet(group: 'org.mockito', version: mockitoVersion) {
+            entry 'mockito-core'
+            entry 'mockito-junit-jupiter'
+        }
+        dependency group: 'commons-cli', name: 'commons-cli', version: apacheCommonsCliVersion
+        dependency group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+    }
+}

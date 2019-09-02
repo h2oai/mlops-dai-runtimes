@@ -1,13 +1,17 @@
-apply plugin: 'com.github.johnrengelman.shadow'
+plugins {
+    id 'com.github.johnrengelman.shadow'
+}
+apply from: project(":").file('gradle/java_no_style.gradle')
 
 dependencies {
-    compile project(':common:kdb-java')
-    compile group: 'ai.h2o', name: 'mojo2-runtime-api'
-    compile group: 'ai.h2o', name: 'mojo2-runtime-impl'
-    compile group: 'commons-cli', name: 'commons-cli'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12'
-    testCompile group: 'com.google.truth.extensions', name: 'truth-java8-extension'
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api'
+    implementation project(':common:kdb-java')
+    implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
+    implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
+    implementation group: 'commons-cli', name: 'commons-cli'
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12'
+
+    testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
     testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
 }
 

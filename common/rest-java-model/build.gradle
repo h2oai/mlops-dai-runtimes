@@ -1,9 +1,12 @@
-apply plugin: 'org.hidetake.swagger.generator'
+plugins {
+    id 'org.hidetake.swagger.generator'
+}
+apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
-    compile group: 'com.google.code.gson', name: 'gson'
-    compile group: 'javax.annotation', name: 'javax.annotation-api'
-    compile group: 'io.swagger.core.v3', name: 'swagger-annotations'
+    implementation group: 'com.google.code.gson', name: 'gson'
+    implementation group: 'javax.annotation', name: 'javax.annotation-api'
+    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations'
     swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
 }
 
