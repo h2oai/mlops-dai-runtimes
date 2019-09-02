@@ -48,7 +48,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: unique model indetifier
+          description: unique model identifier
           required: true
           type: string
       responses:
@@ -70,7 +70,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: unique model indetifier
+          description: unique model identifier
           required: true
           type: string
       responses:
