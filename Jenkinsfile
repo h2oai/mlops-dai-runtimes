@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-@Library('test-shared-library@1.17') _
+@Library('test-shared-library@1.19') _
 
 import ai.h2o.ci.Utils
 
