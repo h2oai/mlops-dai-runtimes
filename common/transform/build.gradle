@@ -2,7 +2,6 @@ apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
     implementation project(':common:rest-java-model')
-
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
 
