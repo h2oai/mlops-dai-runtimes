@@ -1,6 +1,7 @@
 package ai.h2o.mojos.deploy.common.transform;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -156,6 +157,6 @@ class CsvToMojoFrameConverterTest {
   }
 
   private static InputStream toCsvStream(String... rows) {
-    return new ByteArrayInputStream(String.join("\n", rows).getBytes());
+    return new ByteArrayInputStream(String.join("\n", rows).getBytes(UTF_8));
   }
 }
