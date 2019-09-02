@@ -7,6 +7,6 @@ spotless {
         target fileTree('src') {
             include '**/*.java'
         }
-        googleJavaFormat('1.7')
+        googleJavaFormat(googleJavaFormatVersion)
     }
 }

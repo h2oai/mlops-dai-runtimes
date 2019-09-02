@@ -3,7 +3,7 @@
 apply plugin: 'checkstyle'
 
 checkstyle {
-    toolVersion '8.21'
+    toolVersion checkStyleVersion
     configFile = project(":").file("config/checkstyle/google_style.xml")
     configProperties = ["suppressionFile": project(":").file("config/checkstyle/suppressions.xml")]
 }
