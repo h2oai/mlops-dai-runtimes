@@ -8,5 +8,7 @@ dependencies {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.errorprone.disableWarningsInGeneratedCode = true
+    options.errorprone {
+        disableWarningsInGeneratedCode = true
+    }
 }
