@@ -59,5 +59,7 @@ jib {
     }
 }
 
-// Make docker build part of the build task. No pushing to harbor though.
-tasks.build.dependsOn tasks.jibDockerBuild
+// Make docker TAR build part of the build task to ensure the image can be built.
+// No pushing anywhere (not even to local docker). To push to local docker run task `jibDockerBuild` instead.
+// To push to harbor use task `jib`, credentials will be needed though.
+tasks.build.dependsOn tasks.jibBuildTar
