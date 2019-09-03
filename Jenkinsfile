@@ -22,9 +22,17 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
+    parameters {
+        booleanParam(
+            name: 'PUSH_DOCKER_IMAGES',
+            defaultValue: false,
+            description: 'Whether to also push Docker images to Harbor.',
+        )
+    }
+
     stages {
 
-        stage('Init') {
+        stage('1. Init') {
             agent { label NODE_LABEL }
             steps {
                 script {
@@ -34,7 +42,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('2. Test') {
             // Run inside JAVA_IMAGE container on NODE_LABEL host.
             agent {
                 docker {
@@ -56,7 +64,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('3. Build') {
             // Run inside JAVA_IMAGE container on NODE_LABEL host.
             agent {
                 docker {
@@ -79,7 +87,7 @@ pipeline {
             }
         }
 
-        stage('Publish to S3') {
+        stage('4. Publish to S3') {
             // Run on NODE_LABEL host.
             agent { label NODE_LABEL }
             when {
@@ -104,6 +112,39 @@ pipeline {
                     script {
                         echo "Keep this build.."
                         currentBuild.setKeepLog(true)
+                    }
+                }
+            }
+        }
+
+        stage('5. Push Docker Images') {
+            when {
+                expression {
+                    return isReleaseBranch() || isMasterBranch() || params.PUSH_DOCKER_IMAGES
+                }
+            }
+            agent {
+                docker {
+                    image JAVA_IMAGE
+                    label NODE_LABEL
+                }
+            }
+            steps {
+                script {
+                    def harborCredentials = usernamePassword(
+                        credentialsId: "harbor.h2o.ai",
+                        passwordVariable: "HARBOR_PASSWORD",
+                        usernameVariable: "HARBOR_USERNAME",
+                    )
+                    def gitCommitHash = env.GIT_COMMIT
+                    def imageTags = "${VERSION},${gitCommitHash}"
+                    withCredentials([harborCredentials]) {
+                        sh "./gradlew jib \
+                            -Djib.to.auth.username=${HARBOR_USERNAME} \
+                            -Djib.to.auth.password=${HARBOR_PASSWORD} \
+                            -Djib.to.tags=${imageTags} \
+                            -Djib.allowInsecureRegistries=true \
+                            -DsendCredentialsOverHttp=true"
                     }
                 }
             }
