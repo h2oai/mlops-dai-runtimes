@@ -22,6 +22,19 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
+    parameters {
+        booleanParam(
+            name: 'PUSH_DOCKER_IMAGES',
+            defaultValue: false,
+            description: 'Whether to also push Docker images to Harbor.',
+        )
+        booleanParam(
+            name: 'PUSH_DISTRIBUTION_ZIP',
+            defaultValue: false,
+            description: 'Whether to also push distribution ZIP archive to S3.',
+        )
+    }
+
     stages {
 
         stage('Init') {
@@ -75,6 +88,7 @@ pipeline {
             post {
                 success {
                     arch "build/dai-deployment-templates-${VERSION}.zip"
+                    stash name: "distribution-zip", includes: "build/dai-deployment-templates-${VERSION}.zip"
                 }
             }
         }
@@ -84,11 +98,12 @@ pipeline {
             agent { label NODE_LABEL }
             when {
                 expression {
-                    return isReleaseBranch() || isMasterBranch()
+                    return isReleaseBranch() || isMasterBranch() || PUSH_DISTRIBUTION_ZIP
                 }
             }
             steps {
                 script {
+                    unstash name: "distribution-zip"
                     s3upDocker {
                         localArtifact = "build/dai-deployment-templates-${VERSION}.zip"
                         artifactId = 'dai-deployment-templates'
