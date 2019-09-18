@@ -8,7 +8,7 @@ help:
 	@echo
 	@echo "  help           display this help"
 	@echo "  clean          clean existing artifacts"
-	@echo "  package        create a lambda deployment package named my_function.zip"
+	@echo "  package        create a lambda deployment package named lambda_function.zip"
 	@echo
 
 clean:
