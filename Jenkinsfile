@@ -98,7 +98,7 @@ pipeline {
             agent { label NODE_LABEL }
             when {
                 expression {
-                    return isReleaseBranch() || isMasterBranch() || PUSH_DISTRIBUTION_ZIP
+                    return isReleaseBranch() || isMasterBranch() || params.PUSH_DISTRIBUTION_ZIP
                 }
             }
             steps {
