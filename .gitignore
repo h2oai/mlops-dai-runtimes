@@ -22,3 +22,6 @@ build/
 .gradle/
 .terraform/
 terraform.tfstate*
+
+# doc build files
+docs/_build/
