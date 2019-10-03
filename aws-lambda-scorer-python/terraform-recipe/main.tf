@@ -13,7 +13,7 @@ variable "lambda_id" {
 }
 variable "lambda_zip_path" {
   description = "Local path to the actual lambda scorer distribution."
-  default = "../lambda-template/lambda-function.zip"
+  default = "../lambda-template/lambda_function.zip"
 }
 variable "license_key" {
   description = "Driverless AI license key."

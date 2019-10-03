@@ -16,10 +16,10 @@ clean:
 	rm -rf pip_package
 
 package: clean
-	rm -f my_function.zip
+	rm -f lambda_function.zip
 	virtualenv -p python3.6 --system-site-packages aws_lambda_env
 	aws_lambda_env/bin/python -m pip install --target ./pip_package $(MOJO_WHL)
 	aws_lambda_env/bin/python -m pip install --target ./pip_package -r requirements.txt
 	cd pip_package && rm -r daimojo/tf_* && zip -r9 -q ../lambda_function.zip .
-	zip -g lambda_function.zip my_scorer.py
+	zip -g lambda_function.zip py_scorer.py
 	make clean
