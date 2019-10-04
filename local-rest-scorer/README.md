@@ -26,20 +26,8 @@ To test the endpoint, send a request to http://localhost:8080 as follows:
 curl \
     -X POST \
     -H "Content-Type: application/json" \
-    -d @test.json http://localhost:8080/models/{UUID_OF_YOUR_MOJO_PIPELINE}/score
+    -d @test.json http://localhost:8080/model/score
 ```
-
-You can get the UUID of the loaded pipeline by calling the following:
-
-```bash
-$ curl http://localhost:8080/models
-```
-
-Which should return a json list with the UUID.
-
-Alternatively, the scorer log contains the UUID as well in the form:
-`Mojo pipeline successfully loaded (a12e7390-b8ac-406a-ade9-0d5ea4b63ea9).`
-The hex string in parenthesis is the UUID of you mojo pipeline.
 
 This expects a file `test.json` with the actual scoring request payload.
 If you are using the mojo trained in `test/data/iris.csv` as suggested above,
@@ -99,13 +87,25 @@ The expected response should follow this structure, but the actual values may di
 Alternatively, you can score an existing file on the local filesystem using `GET` request to the same endpoint:
 
 ```bash
-curl \
-    -X GET \
-    http://localhost:8080/models/{UUID_OF_YOUR_MOJO_PIPELINE}/score/?file=/tmp/test.csv
+curl -X GET http://localhost:8080/model/score/?file=/tmp/test.csv
 ```
 
 This expects a CSV file `/tmp/test.csv` to exist on the machine where the scorer runs (i.e., it is not send to it
 over HTTP).
+
+### Model ID
+
+You can get the UUID of the loaded pipeline by calling the following:
+
+```bash
+$ curl http://localhost:8080/model/id
+```
+
+Which should return the UUID of the loaded mojo model.
+
+Alternatively, the scorer log contains the UUID as well in the form:
+`Mojo pipeline successfully loaded (a12e7390-b8ac-406a-ade9-0d5ea4b63ea9).`
+The hex string in parenthesis is the UUID of you mojo pipeline.
 
 ### Get Example Request
 
@@ -114,12 +114,10 @@ This way, users can quickly get an example scoring request to send to the scorer
 This request can be further filled with meaningful input values.
 
 ```bash
-curl \
-    -X GET \
-    http://localhost:8080/models/{UUID_OF_YOUR_MOJO_PIPELINE}/sample_request
+curl -X GET http://localhost:8080/model/sample_request
 ```
 
-The resulting JSON is a valid input for the POST `/score` request.
+The resulting JSON is a valid input for the POST `/model/score` request.
 
 ### API Inspection
 
