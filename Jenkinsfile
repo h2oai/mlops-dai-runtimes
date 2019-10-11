@@ -176,14 +176,14 @@ pipeline {
             }
             steps {
                 script {
-                    def harborCredentials = usernamePassword(
+                    def dockerhubCredentials = usernamePassword(
                             credentialsId: "dockerhub",
                             passwordVariable: "DOCKERHUB_PASSWORD",
                             usernameVariable: "DOCKERHUB_USERNAME",
                     )
                     def gitCommitHash = env.GIT_COMMIT
                     def imageTags = "${VERSION},${gitCommitHash}"
-                    withCredentials([harborCredentials]) {
+                    withCredentials([dockerhubCredentials]) {
                         sh "./gradlew jib \
                             -Djib.to.auth.username=${DOCKERHUB_USERNAME} \
                             -Djib.to.auth.password=${DOCKERHUB_PASSWORD} \
