@@ -24,9 +24,14 @@ pipeline {
 
     parameters {
         booleanParam(
-            name: 'PUSH_DOCKER_IMAGES',
+            name: 'PUSH_DOCKER_IMAGES_TO_HARBOR',
             defaultValue: false,
             description: 'Whether to also push Docker images to Harbor.',
+        )
+        booleanParam(
+            name: 'PUSH_DOCKER_IMAGES_TO_DOCKERHUB',
+            defaultValue: false,
+            description: 'Whether to also push Docker images to DockerHub.',
         )
         booleanParam(
             name: 'PUSH_DISTRIBUTION_ZIP',
@@ -124,10 +129,10 @@ pipeline {
             }
         }
 
-        stage('5. Push Docker Images') {
+        stage('5. Push Docker Images To Harbor') {
             when {
                 expression {
-                    return isReleaseBranch() || isMasterBranch() || params.PUSH_DOCKER_IMAGES
+                    return isReleaseBranch() || isMasterBranch() || params.PUSH_DOCKER_IMAGES_TO_HARBOR
                 }
             }
             agent {
@@ -152,6 +157,38 @@ pipeline {
                             -Djib.to.tags=${imageTags} \
                             -Djib.allowInsecureRegistries=true \
                             -DsendCredentialsOverHttp=true"
+                    }
+                }
+            }
+        }
+
+        stage('6. Push Docker Images To DockerHub') {
+            when {
+                expression {
+                    return isReleaseBranch() || params.PUSH_DOCKER_IMAGES_TO_DOCKERHUB
+                }
+            }
+            agent {
+                docker {
+                    image JAVA_IMAGE
+                    label NODE_LABEL
+                }
+            }
+            steps {
+                script {
+                    def harborCredentials = usernamePassword(
+                            credentialsId: "dockerhub",
+                            passwordVariable: "DOCKERHUB_PASSWORD",
+                            usernameVariable: "DOCKERHUB_USERNAME",
+                    )
+                    def gitCommitHash = env.GIT_COMMIT
+                    def imageTags = "${VERSION},${gitCommitHash}"
+                    withCredentials([harborCredentials]) {
+                        sh "./gradlew jib \
+                            -Djib.to.auth.username=${DOCKERHUB_USERNAME} \
+                            -Djib.to.auth.password=${DOCKERHUB_PASSWORD} \
+                            -Djib.to.tags=${imageTags} \
+                            -PdockerRepositoryPrefix=h2oai/"
                     }
                 }
             }
