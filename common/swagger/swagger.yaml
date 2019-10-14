@@ -25,7 +25,7 @@ paths:
       description: Returns unique id of the model loaded in the server and used for scoring
       operationId: getModelId
       produces:
-        - application/json
+        - text/plain
       parameters: []
       responses:
         '200':
