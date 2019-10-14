@@ -53,8 +53,8 @@ paths:
     get:
       tags:
         - metadata
-      summary: sample scoring request
-      description: builds a sample scoring request that would pass all validations
+      summary: Sample scoring request
+      description: Builds a sample scoring request that would pass all validations
       operationId: getSampleRequest
       produces:
         - application/json
