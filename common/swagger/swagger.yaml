@@ -17,86 +17,65 @@ schemes:
   - https
   - http
 paths:
-  /models:
+  /model/id:
     get:
       tags:
-        - models
-      summary: Returns a list of models loaded in the server
-      description: Returns a list of models loaded in the server
-      operationId: getModels
+        - metadata
+      summary: Returns model id
+      description: Returns unique id of the model loaded in the server and used for scoring
+      operationId: getModelId
+      produces:
+        - text/plain
+      parameters: []
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: string
+      security:
+        - api_key: []
+  '/model/schema':
+    get:
+      tags:
+        - metadata
+      summary: Describe a model
+      description: Returns information about the model used for scoring, e.g., input schema.
+      operationId: getModelInfo
       produces:
         - application/json
       parameters: []
       responses:
         '200':
-          description: list of model ids that are available to score
-          schema:
-            type: array
-            items:
-              type: string
-      security:
-        - api_key: []
-  '/models/{id}':
-    get:
-      tags:
-        - models
-      summary: describe a model
-      description: describe a model
-      operationId: getModelInfo
-      produces:
-        - application/json
-      parameters:
-        - name: id
-          in: path
-          description: unique model identifier
-          required: true
-          type: string
-      responses:
-        '200':
-          description: successful operation
+          description: Successful operation
           schema:
             $ref: '#/definitions/Model'
-        '404':
-          description: 'Model not found, please verify model id'
-  '/models/{id}/sample_request':
+  '/model/sample_request':
     get:
       tags:
-        - models
-      summary: sample scoring request
-      description: builds a sample scoring request that would pass all validations
+        - metadata
+      summary: Sample scoring request
+      description: Builds a sample scoring request that would pass all validations
       operationId: getSampleRequest
       produces:
         - application/json
-      parameters:
-        - name: id
-          in: path
-          description: unique model identifier
-          required: true
-          type: string
+      parameters: []
       responses:
         '200':
-          description: successful operation
+          description: Successful operation
           schema:
             $ref: '#/definitions/ScoreRequest'
-        '404':
-          description: 'Model not found, please verify model id'
-  '/models/{id}/score':
+  '/model/score':
     post:
       tags:
-        - models
-      summary: score a model
-      description: score a model
+        - scoring
+      summary: Score on given rows
+      description: Computes score of the rows sent in the body of the post request
       operationId: getScore
       consumes:
         - application/json
       produces:
         - application/json
       parameters:
-        - name: id
-          in: path
-          description: ID of model to be scored
-          required: true
-          type: string
         - name: payload
           in: body
           required: true
@@ -104,39 +83,30 @@ paths:
             $ref: '#/definitions/ScoreRequest'
       responses:
         '200':
-          description: successful operation
+          description: Successful operation
           schema:
             $ref: '#/definitions/ScoreResponse'
         '400':
           description: Invalid payload
-        '404':
-          description: Model not found
     get:
       tags:
-        - models
-      summary: score a model
-      description: score a model
+        - scoring
+      summary: Score on given file
+      description: Computes score of the rows in the file specified by the path in the query parameter
       operationId: getScoreByFile
       produces:
         - application/json
       parameters:
-        - in: path
-          name: id
-          description: ID of model to be scored
-          required: true
-          type: string
         - in: query
           name: file
           type: string
       responses:
         '200':
-          description: successful operation
+          description: Successful operation
           schema:
             $ref: '#/definitions/ScoreResponse'
         '400':
           description: Invalid payload
-        '404':
-          description: Model not found
 securityDefinitions:
   api_key:
     type: apiKey
@@ -174,8 +144,6 @@ definitions:
   ScoreRequest:
     type: object
     properties:
-      id:
-        type: string
       includeFieldsInOutput:
         type: array
         items:

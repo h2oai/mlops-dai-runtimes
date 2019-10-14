@@ -19,6 +19,7 @@ hs_err_pid*
 
 # Intermediate build files and folders.
 build/
+out/
 .gradle/
 .terraform/
 terraform.tfstate*
