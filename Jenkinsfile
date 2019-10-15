@@ -24,12 +24,12 @@ pipeline {
 
     parameters {
         booleanParam(
-            name: 'PUSH_DOCKER_IMAGES_TO_HARBOR',
+            name: 'PUSH_TO_HARBOR',
             defaultValue: false,
             description: 'Whether to also push Docker images to Harbor.',
         )
         booleanParam(
-            name: 'PUSH_DOCKER_IMAGES_TO_DOCKERHUB',
+            name: 'PUSH_TO_DOCKERHUB',
             defaultValue: false,
             description: 'Whether to also push Docker images to DockerHub.',
         )
@@ -132,7 +132,7 @@ pipeline {
         stage('5. Push Docker Images To Harbor') {
             when {
                 expression {
-                    return isReleaseBranch() || isMasterBranch() || params.PUSH_DOCKER_IMAGES_TO_HARBOR
+                    return isReleaseBranch() || isMasterBranch() || params.PUSH_TO_HARBOR
                 }
             }
             agent {
@@ -143,17 +143,12 @@ pipeline {
             }
             steps {
                 script {
-                    def harborCredentials = usernamePassword(
-                        credentialsId: "harbor.h2o.ai",
-                        passwordVariable: "HARBOR_PASSWORD",
-                        usernameVariable: "HARBOR_USERNAME",
-                    )
                     def gitCommitHash = env.GIT_COMMIT
                     def imageTags = "${VERSION},${gitCommitHash}"
-                    withCredentials([harborCredentials]) {
+                    withDockerCredentials("harbor.h2o.ai") {
                         sh "./gradlew jib \
-                            -Djib.to.auth.username=${HARBOR_USERNAME} \
-                            -Djib.to.auth.password=${HARBOR_PASSWORD} \
+                            -Djib.to.auth.username=${DOCKER_USERNAME} \
+                            -Djib.to.auth.password=${DOCKER_PASSWORD} \
                             -Djib.to.tags=${imageTags} \
                             -Djib.allowInsecureRegistries=true \
                             -DsendCredentialsOverHttp=true"
@@ -165,7 +160,7 @@ pipeline {
         stage('6. Push Docker Images To DockerHub') {
             when {
                 expression {
-                    return isReleaseBranch() || params.PUSH_DOCKER_IMAGES_TO_DOCKERHUB
+                    return isReleaseBranch() || params.PUSH_TO_DOCKERHUB
                 }
             }
             agent {
@@ -176,17 +171,12 @@ pipeline {
             }
             steps {
                 script {
-                    def dockerhubCredentials = usernamePassword(
-                            credentialsId: "dockerhub",
-                            passwordVariable: "DOCKERHUB_PASSWORD",
-                            usernameVariable: "DOCKERHUB_USERNAME",
-                    )
                     def gitCommitHash = env.GIT_COMMIT
                     def imageTags = "${VERSION},${gitCommitHash}"
-                    withCredentials([dockerhubCredentials]) {
+                    withDockerCredentials("dockerhub") {
                         sh "./gradlew jib \
-                            -Djib.to.auth.username=${DOCKERHUB_USERNAME} \
-                            -Djib.to.auth.password=${DOCKERHUB_PASSWORD} \
+                            -Djib.to.auth.username=${DOCKER_USERNAME} \
+                            -Djib.to.auth.password=${DOCKER_PASSWORD} \
                             -Djib.to.tags=${imageTags} \
                             -PdockerRepositoryPrefix=h2oai/"
                     }
@@ -233,4 +223,16 @@ def isMasterBranch() {
  */
 def isReleaseBranch() {
     return env.BRANCH_NAME.startsWith("release")
+}
+
+/** Context manager that runs content with set up credentials for a Docker repository. */
+def withDockerCredentials(String credentialsId, Closure body) {
+    def dockerCredentials = usernamePassword(
+            credentialsId: credentialsId,
+            passwordVariable: "DOCKER_PASSWORD",
+            usernameVariable: "DOCKER_USERNAME"
+    )
+    withCredentials([dockerCredentials]) {
+        body()
+    }
 }
