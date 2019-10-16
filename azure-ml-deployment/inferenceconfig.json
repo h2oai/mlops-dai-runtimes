@@ -1,0 +1,10 @@
+{
+    "entryScript": "score.py",
+    "runtime": "python",
+    "condaFile": "dai_deploy.yml",
+    "extraDockerfileSteps": null,
+    "sourceDirectory": "./scoring-pipeline",
+    "enableGpu": false,
+    "baseImage": null,
+    "baseImageRegistry": null
+}
