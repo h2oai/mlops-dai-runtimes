@@ -7,7 +7,7 @@ import ai.h2o.ci.Utils
 JAVA_IMAGE = 'openjdk:8u222-jdk-slim'
 NODE_LABEL = 'docker'
 
-def VERSION = null
+def version = null
 def utilsLib = new Utils()
 
 pipeline {
@@ -62,8 +62,8 @@ pipeline {
             }
             steps {
                 script {
-                    VERSION = getVersion()
-                    echo "Version: ${VERSION}"
+                    version = getVersion()
+                    echo "Version: ${version}"
                     sh "./gradlew check"
                 }
             }
@@ -85,15 +85,15 @@ pipeline {
             steps {
                 script {
                     sh "./gradlew distributionZip"
-                    if (isReleaseVersion(VERSION)) {
-                        utilsLib.appendBuildDescription("Release ${VERSION}")
+                    if (isReleaseVersion(version)) {
+                        utilsLib.appendBuildDescription("Release ${version}")
                     }
                 }
             }
             post {
                 success {
-                    arch "build/dai-deployment-templates-${VERSION}.zip"
-                    stash name: "distribution-zip", includes: "build/dai-deployment-templates-${VERSION}.zip"
+                    arch "build/dai-deployment-templates-${version}.zip"
+                    stash name: "distribution-zip", includes: "build/dai-deployment-templates-${version}.zip"
                 }
             }
         }
@@ -110,11 +110,11 @@ pipeline {
                 script {
                     unstash name: "distribution-zip"
                     s3upDocker {
-                        localArtifact = "build/dai-deployment-templates-${VERSION}.zip"
+                        localArtifact = "build/dai-deployment-templates-${version}.zip"
                         artifactId = 'dai-deployment-templates'
-                        version = VERSION
+                        version = version
                         keepPrivate = false
-                        isRelease = isReleaseVersion(VERSION)
+                        isRelease = isReleaseVersion(version)
                         platform = "any"
                     }
                 }
@@ -144,7 +144,7 @@ pipeline {
             steps {
                 script {
                     def gitCommitHash = env.GIT_COMMIT
-                    def imageTags = "${VERSION},${gitCommitHash}"
+                    def imageTags = "${version},${gitCommitHash}"
                     withDockerCredentials("harbor.h2o.ai") {
                         sh "./gradlew jib \
                             -Djib.to.auth.username=${DOCKER_USERNAME} \
@@ -172,7 +172,7 @@ pipeline {
             steps {
                 script {
                     def gitCommitHash = env.GIT_COMMIT
-                    def imageTags = "${VERSION},${gitCommitHash}"
+                    def imageTags = "${version},${gitCommitHash}"
                     withDockerCredentials("dockerhub") {
                         sh "./gradlew jib \
                             -Djib.to.auth.username=${DOCKER_USERNAME} \
