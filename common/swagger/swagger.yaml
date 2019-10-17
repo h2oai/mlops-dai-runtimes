@@ -185,7 +185,9 @@ definitions:
         description: >
           An array of rows consisting the actual scoring output. The order of rows corresponds to the order of the input
           request rows. Each row contains any copied input fields first (in the order of appearance in the input row).
-          If the `idField` was specified and also listed in the  but not provided it follows after the
+          If the `idField` was specified and also listed in the `includeFieldsInOutput` but not provided in `fields`,
+          a unique id will be generated and positioned right after all the other fields copied from the input.
+          The scoring output follows.
         type: array
         items:
           $ref: '#/definitions/Row'
