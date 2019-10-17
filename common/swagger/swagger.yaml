@@ -145,14 +145,32 @@ definitions:
     type: object
     properties:
       includeFieldsInOutput:
+        description: >
+          An array holding the list of field names to be copied from the input request row to the corresponding scoring
+          output. It is an error to specify a field name not present in the `fields` property, except when it is equal
+          to the `idField` property. In the latter case, the row id would be generated and returned in the response.
+          Note that the order of items in `includeFieldsInOutput` is ignored and the specified fields are returned in
+          the order of appearance in the input request row.
         type: array
         items:
           type: string
+      idField:
+        description: >
+          Name of the field that holds a row id, e.g., a value that uniquely identifies each row of the request.
+          The caller may specify a name of the field that is not present in fields. In which case, the scorer is allowed
+          to generate a UUID to identify each row (e.g., for logging and monitoring purposes). To retrieve such a
+          generated id as a part of the response, simply name it in the `includeFieldsInOutput`.
+        type: string
       fields:
+        description: >
+          An array holding the names of fields in the order of appearance in the `rows` property. The length of `fields`
+          has to match length of each row in `rows`. No duplicates are allowed.
         type: array
         items:
           type: string
       rows:
+        description: >
+          An array of rows consisting the actual input data for scoring, one scoring request per row.
         type: array
         items:
           $ref: '#/definitions/Row'
@@ -160,8 +178,16 @@ definitions:
     type: object
     properties:
       id:
+        description: >
+          A unique id of the model used for scoring.
         type: string
       score:
+        description: >
+          An array of rows consisting the actual scoring output. The order of rows corresponds to the order of the input
+          request rows. Each row contains any copied input fields first (in the order of appearance in the input row).
+          If the `idField` was specified and also listed in the `includeFieldsInOutput` but not provided in `fields`,
+          a unique id will be generated and positioned right after all the other fields copied from the input.
+          The scoring output follows.
         type: array
         items:
           $ref: '#/definitions/Row'

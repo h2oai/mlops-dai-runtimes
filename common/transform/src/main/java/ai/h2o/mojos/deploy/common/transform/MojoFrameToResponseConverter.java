@@ -6,10 +6,12 @@ import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
+import com.google.common.base.Strings;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,6 +42,7 @@ public class MojoFrameToResponseConverter
     if (includedFields.isEmpty()) {
       return;
     }
+    boolean generateRowIds = shouldGenerateRowIds(scoreRequest);
     List<Row> inputRows = scoreRequest.getRows();
     for (int row = 0; row < outputRows.size(); row++) {
       Row inputRow = inputRows.get(row);
@@ -50,7 +53,17 @@ public class MojoFrameToResponseConverter
           outputRow.add(inputRow.get(col));
         }
       }
+      if (generateRowIds) {
+        outputRow.add(UUID.randomUUID().toString());
+      }
     }
+  }
+
+  private static boolean shouldGenerateRowIds(ScoreRequest scoreRequest) {
+    String idField = scoreRequest.getIdField();
+    return !Strings.isNullOrEmpty(idField)
+        && scoreRequest.getIncludeFieldsInOutput().contains(idField)
+        && !scoreRequest.getFields().contains(idField);
   }
 
   private static void copyResultFields(MojoFrame mojoFrame, List<Row> outputRows) {

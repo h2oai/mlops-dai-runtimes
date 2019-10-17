@@ -83,6 +83,50 @@ class MojoFrameToResponseConverterTest {
   }
 
   @Test
+  void convertIncludePresentIdField_succeeds() {
+    // Given
+    String[] fields = {"outputField"};
+    Type[] types = {Type.Str};
+    String[][] values = {{"outputValue"}};
+    ScoreRequest scoreRequest = new ScoreRequest();
+    scoreRequest.setFields(asList("inputField", "omittedField", "id"));
+    scoreRequest.setIncludeFieldsInOutput(asList("inputField", "id"));
+    scoreRequest.addRowsItem(asRow("inputValue", "omittedValue", "testId"));
+    scoreRequest.setIdField("id");
+
+    // When
+    ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
+
+    // Then
+    assertThat(result.getScore()).containsExactly(asRow("inputValue", "testId", "outputValue"));
+  }
+
+  @Test
+  void convertIncludeMissingIdField_generateUuid() {
+    // Given
+    String[] fields = {"outputField"};
+    Type[] types = {Type.Str};
+    String[][] values = {{"outputValue"}};
+    ScoreRequest scoreRequest = new ScoreRequest();
+    scoreRequest.setFields(asList("inputField", "omittedField"));
+    scoreRequest.setIncludeFieldsInOutput(asList("inputField", "id"));
+    scoreRequest.addRowsItem(asRow("inputValue", "omittedValue", "testId"));
+    scoreRequest.setIdField("id");
+
+    // When
+    ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
+
+    // Then
+    assertThat(result.getScore()).hasSize(1);
+    assertThat(result.getScore().get(0)).hasSize(3);
+    assertThat(result.getScore().get(0).get(0)).isEqualTo("inputValue");
+    assertThat(result.getScore().get(0).get(1))
+        .matches(
+            "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}");
+    assertThat(result.getScore().get(0).get(2)).isEqualTo("outputValue");
+  }
+
+  @Test
   void convertMoreRowsResponse_succeeds() {
     // Given
     String[] fields = {"field"};
