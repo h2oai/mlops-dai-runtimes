@@ -2,8 +2,8 @@ import requests
 import json
 import pandas as pd 
 
-service_uri = "http://eab43710-5b28-4228-ae7b-df236b23e6b2.eastus.azurecontainer.io/score"
-service_key = "27gZi21I5em5T5sJ4qwpcaTgwIYnhqYq"
+service_uri = "<scoring_uri>"
+service_key = "<service_key>"
 
 headers = {'Content-Type': 'application/json'}
 
