@@ -1,0 +1,9 @@
+name: dai_deploy
+dependencies:
+  - python=3.6.2
+  - pip:
+    - azureml-defaults
+    - numpy
+    - pandas
+    - @@DAI MOJO URL@@
+    - @@DATA TABLE URLL@@
