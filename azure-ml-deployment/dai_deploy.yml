@@ -1,9 +1,0 @@
-name: dai_deploy
-dependencies:
-  - python=3.6.2
-  - pip:
-    - azureml-defaults
-    - numpy
-    - pandas
-    - https://h2ostore12792.blob.core.windows.net/mojodependencies/daimojo-2.0.1%2Bmaster.478-cp36-cp36m-linux_x86_64.whl
-    - https://h2ostore12792.blob.core.windows.net/mojodependencies/datatable-0.8.0-cp36-cp36m-linux_x86_64.whl
