@@ -1,7 +1,4 @@
-# Sagemaker Hosted Scorer
-
-
-## Summary
+# DAI Deployment Template for Sagemaker Hosted Scorer
 
 The code and documentation in this directory plugs in to the AWS SageMaker workflow documented here:
 
@@ -12,29 +9,38 @@ It's a REST API which accepts one data point at a time for prediction in real-ti
 
 ## Overview
 
-### Build process (tested on Linux x86_64 with Docker)
+### Build Image
 
-Follow these steps to build.  The build is fully Dockerized, so you should not need to install anything locally except for Docker.
+Generation of the Docker image is plugged into the build process of this project.
+Run the following command in the root project directory to run the `build` process.
 
+```bash
+./gradlew :aws-sagemaker-hosted-scorer:jibDockerBuild
 ```
-make clean
-make
+
+Verify that the Docker image was created, and take note of the version created.
+
+```bash
+docker images --format "{{.Repository}} \t {{.Tag}}" | grep "h2oai/rest-scorer"
 ```
-
-The output is a docker container:
-
-`h2oai/dai-sagemaker-hosted-scorer:latest`
 
 ### Optional: Test the build
 
 After building, run to test the produced Docker container locally like this:
 
-Step 1:  Put a pipeline.mojo into this directory (aws-sagemaker-hosted-scorer).
+Step 1:  Put a pipeline.mojo and valid license.sig into this directory (aws-sagemaker-hosted-scorer).
 
 Step 2:  Start the docker instance.
 
 ```
-DRIVERLESS_AI_LICENSE_KEY=<paste key here> make run
+docker run \
+    --rm \
+    --init \
+    -ti \
+    -v `pwd`:/opt/ml/model \
+    -p 8080:8080 \
+    h2oai/dai-sagemaker-hosted-scorer \
+    serve
 ```
 
 Step 3:  Use curl to send a JSON-formatted row to the scorer as shown in the details below.
@@ -42,18 +48,24 @@ Step 3:  Use curl to send a JSON-formatted row to the scorer as shown in the det
 
 ### Deploy to SageMaker
 
-(Note:  These steps are still incomplete, other stuff was done in the UI first.  Needs some cleanup.)
+Create `h2oai/sagemaker-hosted-scorer` repository in Sagemaker for the scorer service image.
 
-You need to `docker login` with the output from the command below:
+Use the output of the command below to `docker login`:
 
 ```
-aws ecr get-login --region us-west-2 --no-include-email
+aws ecr get-login --region <region> --no-include-email
+```
+
+Tag the scorer service image for loading into the `h2oai/sagemaker-hosted-scorer` repository.
+
+```
+docker tag <IMAGE ID> <aws_account_id>.dkr.ecr.<region>.amazonaws.com/h2oai/sagemaker-hosted-server
 ```
 
 Then push the scorer service image to AWS ECR (Elastic Container Registry):
 
 ```
-docker push your-url.amazonaws.com/h2oai/dai-sagemaker-hosted-scorer:latest
+docker push your-url.amazonaws.com/h2oai/sagemaker-hosted-scorer
 ```
 
 Then create a model package with the pipeline file and the license key, and copy it to S3:
@@ -61,8 +73,12 @@ Then create a model package with the pipeline file and the license key, and copy
 ```
 tar cvf mojo.tar pipeline.mojo license.sig
 gzip mojo.tar
-s3cmd put pipeline.mojo.tar.gz s3://h2oai-tomk-us-west-2/sagemaker-test/pipeline.mojo.tar.gz
+aws s3 cp mojo.tar.gz s3://your-bucket/
 ```
+
+Next create the appropriate endpoint on Sagemaker.
+Check that the endpoint is available with `aws sagemaker list-endpoints`.
+See `example_request.py` for example of end point query.
 
 
 ## Details
@@ -77,7 +93,7 @@ https://docs.aws.amazon.com/sagemaker/latest/dg/API_CreateModel.html
 	* ModelDataURL=s3://blah/blah/model.tar.gz
 
 
-* `DRIVERLESS_AI_LICENSE_KEY` environment variable must contain the base64-encoded key
+* `DRIVERLESS_AI_LICENSE_KEY` environment variable must contain the base64-encoded key (optional if a license.sig isns't included in mojo.tar.gz)
 * `ModelDataURL` must point to an S3 URL with a .tar.gz file of the MOJO artifact
 
 

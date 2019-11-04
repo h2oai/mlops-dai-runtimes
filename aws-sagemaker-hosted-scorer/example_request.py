@@ -2,7 +2,7 @@ import boto3
 
 client = boto3.client('sagemaker-runtime')
 
-endpoint_name = "tomk-dai-mojo-test-2"
+endpoint_name = "endpoint-name"
 content_type = "application/octet-stream"
 payload = """
 {
