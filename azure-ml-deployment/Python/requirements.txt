@@ -1,0 +1,3 @@
+azure-storage-blob==0.37.1
+azure
+azureml-sdk

@@ -32,7 +32,7 @@ dai_mojo_url=$(az storage blob url --container-name "mojodependencies" --name $d
 az storage blob upload --container-name "mojodependencies" --name $datatable_blob --file $datatable_path
 datatable_url=$(az storage blob url --container-name "mojodependencies" --name $datatable_blob | tr -d '"')
 
-cp dai_deploy_template.yml dai_deploy.yml
+cp ../scoring-pipeline/dai_deploy_template.yml ../scoring-pipeline/dai_deploy.yml
 sed -i -E "s,@@DAI MOJO URL@@,${dai_mojo_url}," dai_deploy.yml
 sed -i -E "s,@@DATA TABLE URLL@@,${datatable_url}," dai_deploy.yml
 
