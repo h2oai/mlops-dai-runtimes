@@ -18,7 +18,7 @@ import com.google.gson.JsonParser;
 @CrossOrigin
 public class ServeController {
     @Autowired
-    private Serve sv = null;
+    private Serve serve = null;
 
     /**
      * Performs an inference.
@@ -71,7 +71,7 @@ public class ServeController {
         }
 
         try {
-            return sv.invocations(inputs);
+            return serve.invocations(inputs);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -91,7 +91,7 @@ public class ServeController {
     @SuppressWarnings("unused")
     @RequestMapping("/ping")
     public void ping(HttpServletResponse response) {
-        if (sv.isReady()) {
+        if (serve.isReady()) {
             response.setStatus(HttpServletResponse.SC_OK);
         }
         else {

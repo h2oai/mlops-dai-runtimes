@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Application implements CommandLineRunner {
     @Autowired
-    private Serve sv = null;
+    private Serve serve = null;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -17,8 +17,8 @@ public class Application implements CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
-            sv.init();
-            sv.server();
+            serve.init();
+            serve.server();
         }
         catch (Exception e) {
             e.printStackTrace();
