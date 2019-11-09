@@ -21,7 +21,7 @@ Run the following command in the root project directory to run the `build` proce
 Verify that the Docker image was created, and take note of the version created.
 
 ```bash
-docker images --format "{{.Repository}} \t {{.Tag}}" | grep "h2oai/rest-scorer"
+docker images --format "{{.Repository}} \t {{.Tag}}" | grep "h2oai/sagemaker-hosted-scorer"
 ```
 
 ### Optional: Test the build
@@ -39,7 +39,7 @@ docker run \
     -ti \
     -v `pwd`:/opt/ml/model \
     -p 8080:8080 \
-    h2oai/dai-sagemaker-hosted-scorer \
+    harbor.h2o.ai/opsh2oai/h2oai/sagemaker-hosted-scorer \
     serve
 ```
 
@@ -59,13 +59,13 @@ aws ecr get-login --region <region> --no-include-email
 Tag the scorer service image for loading into the `h2oai/sagemaker-hosted-scorer` repository.
 
 ```
-docker tag <IMAGE ID> <aws_account_id>.dkr.ecr.<region>.amazonaws.com/h2oai/sagemaker-hosted-server
+docker tag <IMAGE ID> <aws_account_id>.dkr.ecr.<region>.amazonaws.com/h2oai/sagemaker-hosted-scorer
 ```
 
 Then push the scorer service image to AWS ECR (Elastic Container Registry):
 
 ```
-docker push your-url.amazonaws.com/h2oai/sagemaker-hosted-scorer
+docker push <aws_account_id>.dkr.ecr.<region>.amazonaws.com/h2oai/sagemaker-hosted-scorer
 ```
 
 Then create a model package with the pipeline file and the license key, and copy it to S3:
@@ -73,10 +73,10 @@ Then create a model package with the pipeline file and the license key, and copy
 ```
 tar cvf mojo.tar pipeline.mojo license.sig
 gzip mojo.tar
-aws s3 cp mojo.tar.gz s3://your-bucket/
+aws s3 cp mojo.tar.gz s3://<your-bucket>/
 ```
 
-Next create the appropriate endpoint on Sagemaker.
+Next create the appropriate model and endpoint on Sagemaker.
 Check that the endpoint is available with `aws sagemaker list-endpoints`.
 See `example_request.py` for example of end point query.
 
@@ -118,14 +118,29 @@ ENTRYPOINT ["java", "-jar", "serve.jar"]
 You can test the container locally with the following curl command:
 
 ```
-curl -X POST -H 'Content-Type: application/octet-stream' --data-binary @test.json http://localhost:8080/invocations
+curl \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d @test.json http://localhost:8080/invocations
 ```
 
 test.json:
 
 ```
 {
-    "field1" : "value1",
-    "field2" : "value2"
+  "fields": [
+    "field1", "field2"
+  ],
+  "includeFieldsInOutput": [
+    "field2"
+  ],
+  "rows": [
+    [
+      "value1", "value2"
+    ],
+    [
+      "value1", "value2"
+    ]
+  ]
 }
 ```
