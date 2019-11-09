@@ -1,20 +1,17 @@
 plugins {
-    id 'java'
-    id 'idea'
     id 'org.springframework.boot'
-    id 'io.spring.dependency-management'
     id 'com.google.cloud.tools.jib'
 }
 apply from: project(":").file('gradle/java_no_style.gradle')
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
 dependencies {
+    implementation project(':common:rest-spring-api')
+    implementation project(':common:transform')
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
+    implementation group: 'io.springfox', name: 'springfox-swagger2'
+    implementation group: 'io.springfox', name: 'springfox-swagger-ui'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    implementation group: 'com.google.code.gson', name: 'gson'
 }
 
 test {
@@ -26,7 +23,7 @@ bootRun {
 }
 
 bootJar {
-    baseName = 'serve'
+    archivesBaseName = 'serve'
 }
 
 rootProject.distributionZip {
@@ -46,6 +43,7 @@ jib {
         tags = [version]
     }
     container {
+        jvmFlags = ['-Dmojo.path=/opt/ml/model/pipeline.mojo']
         ports = ['8080']
         volumes = [
                 // mojo pipeline and license file will live here

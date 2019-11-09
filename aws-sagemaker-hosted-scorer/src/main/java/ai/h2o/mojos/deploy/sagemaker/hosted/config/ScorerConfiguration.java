@@ -1,4 +1,4 @@
-package ai.h2o.mojos.deploy.local.rest.config;
+package ai.h2o.mojos.deploy.sagemaker.hosted.config;
 
 import ai.h2o.mojos.deploy.common.transform.CsvToMojoFrameConverter;
 import ai.h2o.mojos.deploy.common.transform.MojoFrameToResponseConverter;
