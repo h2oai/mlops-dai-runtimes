@@ -13,8 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class ModelsApiController implements ModelApi {
@@ -29,6 +28,16 @@ public class ModelsApiController implements ModelApi {
         return this.isReady;
     }
 
+    /**
+     * Simple Api controller. Inherits from {@link ModelApi}, which controls global,
+     * expected request mappings for the rest service.
+     *
+     * Sagemaker Specific: override `getScore` method to point to requestMapping `/invocations`
+     *                     add `ping` method that points to `/ping` for Sagemaker health checks
+     * See Sagemaker Docs here: https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms-inference-code.html
+     * @param scorer {@link MojoScorer} initialized class that contains loaded mojo, and mojo interaction methods
+     * @param sampleRequestBuilder {@link SampleRequestBuilder} Simple class for generating sample request.
+     */
     @Autowired
     public ModelsApiController(MojoScorer scorer, SampleRequestBuilder sampleRequestBuilder) {
         this.scorer = scorer;
