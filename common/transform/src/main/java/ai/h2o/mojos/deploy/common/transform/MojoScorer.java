@@ -92,7 +92,7 @@ public class MojoScorer {
         !Strings.isNullOrEmpty(MOJO_PIPELINE_PATH),
         "Path to mojo pipeline not specified, set the %s property.",
         MOJO_PIPELINE_PATH_PROPERTY);
-//    log.info("Loading Mojo pipeline from path {}", MOJO_PIPELINE_PATH);
+    //    log.info("Loading Mojo pipeline from path {}", MOJO_PIPELINE_PATH);
     File mojoFile = new File(MOJO_PIPELINE_PATH);
     if (!mojoFile.isFile()) {
       ClassLoader classLoader = MojoScorer.class.getClassLoader();
