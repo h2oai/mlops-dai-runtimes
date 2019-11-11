@@ -26,6 +26,18 @@ Note that each of the templates is expected to inject its files in this archive 
 Please see and follow examples in the existing deployment templates.
 
 
+## Test Build
+
+The ci process for building the above artifacts also performs linting and styling checks, and will fail if there
+are any issues found. In order test this before pushing to the remote, these checks can be performed locally.
+
+To test builds locally, with respect to linting and styling use the following steps: 
+1. run `./gradlew applySpotless`
+  - this will help clean the code base with proper linting/styling
+2. run `./gradlew check`
+  - this will run the same check as in Jenkins, to check for styling/linting errors.
+  - will identify issues such as missing javadoc strings etc. 
+
 ## Release
 
 The deployment templates zip archives are stored in S3 at: 
