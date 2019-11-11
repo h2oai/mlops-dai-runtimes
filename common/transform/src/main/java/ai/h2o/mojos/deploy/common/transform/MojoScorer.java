@@ -31,6 +31,14 @@ public class MojoScorer {
   private final MojoPipelineToModelInfoConverter modelInfoConverter;
   private final CsvToMojoFrameConverter csvConverter;
 
+  /**
+   * MojoScorer class initializer, requires below parameters.
+   *
+   * @param requestConverter {@link RequestToMojoFrameConverter}
+   * @param responseConverter {@link MojoFrameToResponseConverter}
+   * @param modelInfoConverter {@link MojoPipelineToModelInfoConverter}
+   * @param csvConverter {@link CsvToMojoFrameConverter}
+   */
   public MojoScorer(
       RequestToMojoFrameConverter requestConverter,
       MojoFrameToResponseConverter responseConverter,
@@ -42,6 +50,12 @@ public class MojoScorer {
     this.csvConverter = csvConverter;
   }
 
+  /**
+   * Method to score an incoming request of type {@link ScoreRequest}.
+   *
+   * @param request {@link ScoreRequest}
+   * @return response {@link ScoreResponse}
+   */
   public ScoreResponse score(ScoreRequest request) {
     MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
     MojoFrame responseFrame = doScore(requestFrame);
@@ -50,6 +64,13 @@ public class MojoScorer {
     return response;
   }
 
+  /**
+   * Method to score a csv file on path provided as part of request {@link ScoreRequest} payload.
+   *
+   * @param csvFilePath {@link String} path to csv to score. MUST exist locally.
+   * @return response {@link ScoreResponse}
+   * @throws IOException if csv file does not exist on local path, IOException will be thrown
+   */
   public ScoreResponse scoreCsv(String csvFilePath) throws IOException {
     MojoFrame requestFrame;
     try (InputStream csvStream = getInputStream(csvFilePath)) {
