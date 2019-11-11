@@ -34,9 +34,12 @@ public class ModelsApiController implements ModelApi {
      *
      * Sagemaker Specific: override `getScore` method to point to requestMapping `/invocations`
      *                     add `ping` method that points to `/ping` for Sagemaker health checks
-     * See Sagemaker Docs here: https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms-inference-code.html
-     * @param scorer {@link MojoScorer} initialized class that contains loaded mojo, and mojo interaction methods
-     * @param sampleRequestBuilder {@link SampleRequestBuilder} Simple class for generating sample request.
+     * See Sagemaker Docs here:
+     * https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms-inference-code.html
+     * @param scorer
+     * {@link MojoScorer} initialized class containing loaded mojo, and mojo interaction methods
+     * @param sampleRequestBuilder
+     * {@link SampleRequestBuilder} Simple class for generating sample request.
      */
     @Autowired
     public ModelsApiController(MojoScorer scorer, SampleRequestBuilder sampleRequestBuilder) {

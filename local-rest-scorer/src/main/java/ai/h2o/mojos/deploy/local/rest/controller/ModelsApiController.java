@@ -27,8 +27,10 @@ public class ModelsApiController implements ModelApi {
    * Simple Api controller. Inherits from {@link ModelApi}, which controls global,
    * expected request mappings for the rest service.
    *
-   * @param scorer {@link MojoScorer} initialized class that contains loaded mojo, and mojo interaction methods
-   * @param sampleRequestBuilder {@link SampleRequestBuilder} Simple class for generating sample request.
+   * @param scorer
+   * {@link MojoScorer} initialized class containing loaded mojo, and mojo interaction methods
+   * @param sampleRequestBuilder
+   * {@link SampleRequestBuilder} initialized class, for generating sample request.
    */
   @Autowired
   public ModelsApiController(MojoScorer scorer, SampleRequestBuilder sampleRequestBuilder) {
