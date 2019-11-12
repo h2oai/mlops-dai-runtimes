@@ -78,8 +78,15 @@ aws s3 cp mojo.tar.gz s3://<your-bucket>/
 
 Next create the appropriate model and endpoint on Sagemaker.
 Check that the endpoint is available with `aws sagemaker list-endpoints`.
-See `example_request.py` for example of end point query.
 
+
+### Examples
+
+There is the [examples](examples) directory, which houses a sample python notebook, which 
+utilizes the AWS Sagemaker SDK to deploy a Sagemaker model pythonically. See the notebook 
+[here](examples/Sagemaker-DriverlessAI-MOJO.ipynb)
+
+For an example of an endpoint query being made via Python go [here](examples/example_request.py)
 
 ## Details
 

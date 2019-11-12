@@ -2,7 +2,7 @@ plugins {
     id 'org.springframework.boot'
     id 'com.google.cloud.tools.jib'
 }
-apply from: project(":").file('gradle/java_no_style.gradle')
+apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
     implementation project(':common:rest-spring-api')

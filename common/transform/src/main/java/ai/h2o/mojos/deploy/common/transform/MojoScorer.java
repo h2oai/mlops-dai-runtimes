@@ -8,12 +8,15 @@ import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 
 /*
  * H2O DAI mojo scorer.
@@ -22,6 +25,9 @@ import java.net.URL;
  * {@code mojo.path} property to define the mojo to use.
  */
 public class MojoScorer {
+
+  private static final Logger log = LoggerFactory.getLogger(MojoScorer.class);
+
   private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
   private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
   private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
@@ -92,7 +98,17 @@ public class MojoScorer {
   }
 
   private static MojoFrame doScore(MojoFrame requestFrame) {
+    log.debug(
+        "Input has {} rows, {} columns: {}",
+        requestFrame.getNrows(),
+        requestFrame.getNcols(),
+        Arrays.toString(requestFrame.getColumnNames()));
     MojoFrame responseFrame = pipeline.transform(requestFrame);
+    log.debug(
+        "Response has {} rows, {} columns: {}",
+        responseFrame.getNrows(),
+        responseFrame.getNcols(),
+        Arrays.toString(responseFrame.getColumnNames()));
     return responseFrame;
   }
 
@@ -113,7 +129,7 @@ public class MojoScorer {
         !Strings.isNullOrEmpty(MOJO_PIPELINE_PATH),
         "Path to mojo pipeline not specified, set the %s property.",
         MOJO_PIPELINE_PATH_PROPERTY);
-    //    log.info("Loading Mojo pipeline from path {}", MOJO_PIPELINE_PATH);
+        log.info("Loading Mojo pipeline from path {}", MOJO_PIPELINE_PATH);
     File mojoFile = new File(MOJO_PIPELINE_PATH);
     if (!mojoFile.isFile()) {
       ClassLoader classLoader = MojoScorer.class.getClassLoader();

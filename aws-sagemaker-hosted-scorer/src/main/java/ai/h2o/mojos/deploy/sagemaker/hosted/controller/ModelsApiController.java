@@ -22,11 +22,6 @@ public class ModelsApiController implements ModelApi {
 
     private final MojoScorer scorer;
     private final SampleRequestBuilder sampleRequestBuilder;
-    private Boolean isReady;
-
-    private Boolean getReady() {
-        return this.isReady;
-    }
 
     /**
      * Simple Api controller. Inherits from {@link ModelApi}, which controls global,
@@ -46,7 +41,6 @@ public class ModelsApiController implements ModelApi {
         this.scorer = scorer;
         log.info("Mojo pipeline successfully loaded ({}).", scorer.getModelId());
         this.sampleRequestBuilder = sampleRequestBuilder;
-        this.isReady = true;
     }
 
     @Override
@@ -99,10 +93,6 @@ public class ModelsApiController implements ModelApi {
 
     @RequestMapping("/ping")
     public ResponseEntity<String> ping() {
-        if(getReady()) {
-            return ResponseEntity.ok(scorer.getModelId());
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok("Success");
     }
 }
