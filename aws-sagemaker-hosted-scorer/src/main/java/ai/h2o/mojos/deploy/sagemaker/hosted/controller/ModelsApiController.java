@@ -7,9 +7,7 @@ import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import com.google.common.base.Strings;
-
 import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +24,16 @@ public class ModelsApiController implements ModelApi {
   private final SampleRequestBuilder sampleRequestBuilder;
 
   /**
-   * Simple Api controller. Inherits from {@link ModelApi}, which controls global,
-   * expected request mappings for the rest service.
-   * <p>
-   * Sagemaker Specific: override `getScore` method to point to requestMapping `/invocations`
-   * add `ping` method that points to `/ping` for Sagemaker health checks
-   * See Sagemaker Docs here:
+   * Simple Api controller. Inherits from {@link ModelApi}, which controls global, expected request
+   * mappings for the rest service. Sagemaker Specific: override `getScore` method to point to
+   * requestMapping `/invocations` add `ping` method that points to `/ping` for Sagemaker health
+   * checks See Sagemaker Docs here:
    * https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms-inference-code.html
    *
-   * @param scorer               {@link MojoScorer} initialized class containing loaded mojo, and mojo interaction methods
-   * @param sampleRequestBuilder {@link SampleRequestBuilder} Simple class for generating sample request.
+   * @param scorer {@link MojoScorer} initialized class containing loaded mojo, and mojo interaction
+   *     methods
+   * @param sampleRequestBuilder {@link SampleRequestBuilder} Simple class for generating sample
+   *     request.
    */
   @Autowired
   public ModelsApiController(MojoScorer scorer, SampleRequestBuilder sampleRequestBuilder) {
