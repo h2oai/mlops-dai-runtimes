@@ -5,6 +5,7 @@ dependencies {
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
     implementation group: 'com.google.guava', name: 'guava'
+    implementation group: 'org.slf4j', name: 'slf4j-api'
 
     testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'
     testImplementation group: 'org.mockito', name: 'mockito-core'

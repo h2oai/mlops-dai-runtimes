@@ -1,0 +1,59 @@
+plugins {
+    id 'org.springframework.boot'
+    id 'com.google.cloud.tools.jib'
+}
+apply from: project(":").file('gradle/java.gradle')
+
+dependencies {
+    implementation project(':common:rest-spring-api')
+    implementation project(':common:transform')
+    implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
+    implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
+    implementation group: 'io.springfox', name: 'springfox-swagger2'
+    implementation group: 'io.springfox', name: 'springfox-swagger-ui'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+bootRun {
+    systemProperties System.properties
+}
+
+bootJar {
+    archivesBaseName = 'serve'
+}
+
+rootProject.distributionZip {
+    dependsOn bootJar
+    into(this.project.path.replace(":", "/")) {
+        from bootJar.archivePath
+    }
+}
+
+// Docker image configuration
+jib {
+    from {
+        image = 'openjdk:8-jre-alpine'
+    }
+    to {
+        image = dockerRepositoryPrefix + 'sagemaker-hosted-scorer'
+        tags = [version]
+    }
+    container {
+        jvmFlags = ['-Dmojo.path=/opt/ml/model/pipeline.mojo']
+        ports = ['8080']
+        volumes = [
+                // mojo pipeline and license file will live here
+                '/opt/ml/model'
+        ]
+        environment = [
+                // location of driverless ai license file
+                DRIVERLESS_AI_LICENSE_FILE: '/opt/ml/model/license.sig'
+        ]
+    }
+}
+
+tasks.build.dependsOn tasks.jibBuildTar

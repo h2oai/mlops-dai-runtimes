@@ -1,4 +1,4 @@
-package ai.h2o.mojos.deploy.local.rest.controller;
+package ai.h2o.mojos.deploy.sagemaker.hosted.controller;
 
 import ai.h2o.mojos.deploy.common.rest.api.ModelApi;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class ModelsApiController implements ModelApi {
@@ -24,12 +25,15 @@ public class ModelsApiController implements ModelApi {
 
   /**
    * Simple Api controller. Inherits from {@link ModelApi}, which controls global, expected request
-   * mappings for the rest service.
+   * mappings for the rest service. Sagemaker Specific: override `getScore` method to point to
+   * requestMapping `/invocations` add `ping` method that points to `/ping` for Sagemaker health
+   * checks See Sagemaker Docs here:
+   * https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms-inference-code.html
    *
    * @param scorer {@link MojoScorer} initialized class containing loaded mojo, and mojo interaction
    *     methods
-   * @param sampleRequestBuilder {@link SampleRequestBuilder} initialized class, for generating
-   *     sample request.
+   * @param sampleRequestBuilder {@link SampleRequestBuilder} Simple class for generating sample
+   *     request.
    */
   @Autowired
   public ModelsApiController(MojoScorer scorer, SampleRequestBuilder sampleRequestBuilder) {
@@ -48,6 +52,7 @@ public class ModelsApiController implements ModelApi {
   }
 
   @Override
+  @RequestMapping("/invocations")
   public ResponseEntity<ScoreResponse> getScore(ScoreRequest request) {
     try {
       log.info("Got scoring request");
@@ -82,5 +87,10 @@ public class ModelsApiController implements ModelApi {
   @Override
   public ResponseEntity<ScoreRequest> getSampleRequest() {
     return ResponseEntity.ok(sampleRequestBuilder.build(scorer.getPipeline().getInputMeta()));
+  }
+
+  @RequestMapping("/ping")
+  public ResponseEntity<String> ping() {
+    return ResponseEntity.ok("Success");
   }
 }

@@ -1,12 +1,8 @@
-package ai.h2o.mojos.deploy.local.rest.controller;
+package ai.h2o.mojos.deploy.common.transform;
 
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
-import ai.h2o.mojos.deploy.common.transform.CsvToMojoFrameConverter;
-import ai.h2o.mojos.deploy.common.transform.MojoFrameToResponseConverter;
-import ai.h2o.mojos.deploy.common.transform.MojoPipelineToModelInfoConverter;
-import ai.h2o.mojos.deploy.common.transform.RequestToMojoFrameConverter;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;
@@ -21,8 +17,6 @@ import java.net.URL;
 import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /*
  * H2O DAI mojo scorer.
@@ -30,9 +24,10 @@ import org.springframework.stereotype.Component;
  * <p>The scorer code is shared for all mojo deployments and is only parameterized by the
  * {@code mojo.path} property to define the mojo to use.
  */
-@Component
-class MojoScorer {
-  private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
+public class MojoScorer {
+
+  private static final Logger log = LoggerFactory.getLogger(MojoScorer.class);
+
   private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
   private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
   private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
@@ -42,7 +37,14 @@ class MojoScorer {
   private final MojoPipelineToModelInfoConverter modelInfoConverter;
   private final CsvToMojoFrameConverter csvConverter;
 
-  @Autowired
+  /**
+   * MojoScorer class initializer, requires below parameters.
+   *
+   * @param requestConverter {@link RequestToMojoFrameConverter}
+   * @param responseConverter {@link MojoFrameToResponseConverter}
+   * @param modelInfoConverter {@link MojoPipelineToModelInfoConverter}
+   * @param csvConverter {@link CsvToMojoFrameConverter}
+   */
   public MojoScorer(
       RequestToMojoFrameConverter requestConverter,
       MojoFrameToResponseConverter responseConverter,
@@ -54,8 +56,13 @@ class MojoScorer {
     this.csvConverter = csvConverter;
   }
 
-  ScoreResponse score(ScoreRequest request) {
-    log.info("Got scoring request");
+  /**
+   * Method to score an incoming request of type {@link ScoreRequest}.
+   *
+   * @param request {@link ScoreRequest}
+   * @return response {@link ScoreResponse}
+   */
+  public ScoreResponse score(ScoreRequest request) {
     MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
     MojoFrame responseFrame = doScore(requestFrame);
     ScoreResponse response = responseConverter.apply(responseFrame, request);
@@ -63,8 +70,14 @@ class MojoScorer {
     return response;
   }
 
-  ScoreResponse scoreCsv(String csvFilePath) throws IOException {
-    log.info("Got scoring request for CSV");
+  /**
+   * Method to score a csv file on path provided as part of request {@link ScoreRequest} payload.
+   *
+   * @param csvFilePath {@link String} path to csv to score. MUST exist locally.
+   * @return response {@link ScoreResponse}
+   * @throws IOException if csv file does not exist on local path, IOException will be thrown
+   */
+  public ScoreResponse scoreCsv(String csvFilePath) throws IOException {
     MojoFrame requestFrame;
     try (InputStream csvStream = getInputStream(csvFilePath)) {
       requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
@@ -99,15 +112,15 @@ class MojoScorer {
     return responseFrame;
   }
 
-  String getModelId() {
+  public String getModelId() {
     return pipeline.getUuid();
   }
 
-  MojoPipeline getPipeline() {
+  public MojoPipeline getPipeline() {
     return pipeline;
   }
 
-  Model getModelInfo() {
+  public Model getModelInfo() {
     return modelInfoConverter.apply(pipeline);
   }
 
@@ -133,10 +146,8 @@ class MojoScorer {
       log.info("Mojo pipeline successfully loaded ({}).", mojoPipeline.getUuid());
       return mojoPipeline;
     } catch (IOException e) {
-      log.error("Could not load mojo", e);
       throw new RuntimeException("Unable to load mojo", e);
     } catch (LicenseException e) {
-      log.error("No License File", e);
       throw new RuntimeException("License file not found", e);
     }
   }
