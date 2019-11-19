@@ -34,7 +34,6 @@ public class ModelsApiController implements ModelApi {
   @Autowired
   public ModelsApiController(MojoScorer scorer, SampleRequestBuilder sampleRequestBuilder) {
     this.scorer = scorer;
-    log.info("Mojo pipeline successfully loaded ({}).", scorer.getModelId());
     this.sampleRequestBuilder = sampleRequestBuilder;
   }
 
