@@ -112,7 +112,7 @@ pipeline {
                     s3upDocker {
                         localArtifact = "build/dai-deployment-templates-${version}.zip"
                         artifactId = 'dai-deployment-templates'
-                        version = version
+                        version = "${version}"
                         keepPrivate = false
                         isRelease = isReleaseVersion(version)
                         platform = "any"
