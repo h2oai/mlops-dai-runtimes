@@ -101,11 +101,11 @@ pipeline {
         stage('4. Publish to S3') {
             // Run on NODE_LABEL host.
             agent { label NODE_LABEL }
-            // when {
-            //     expression {
-            //         return isReleaseBranch() || isMasterBranch() || params.PUSH_DISTRIBUTION_ZIP
-            //     }
-            // }
+            when {
+                expression {
+                    return isReleaseBranch() || isMasterBranch() || params.PUSH_DISTRIBUTION_ZIP
+                }
+            }
             steps {
                 script {
                     unstash name: "distribution-zip"
