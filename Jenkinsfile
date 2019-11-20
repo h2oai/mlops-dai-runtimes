@@ -7,7 +7,7 @@ import ai.h2o.ci.Utils
 JAVA_IMAGE = 'openjdk:8u222-jdk-slim'
 NODE_LABEL = 'docker'
 
-def version = null
+def versionText = null
 def utilsLib = new Utils()
 
 pipeline {
@@ -62,8 +62,8 @@ pipeline {
             }
             steps {
                 script {
-                    version = getVersion()
-                    echo "Version: ${version}"
+                    versionText = getVersion()
+                    echo "Version: ${versionText}"
                     sh "./gradlew check"
                 }
             }
@@ -85,15 +85,15 @@ pipeline {
             steps {
                 script {
                     sh "./gradlew distributionZip"
-                    if (isReleaseVersion(version)) {
-                        utilsLib.appendBuildDescription("Release ${version}")
+                    if (isReleaseVersion(versionText)) {
+                        utilsLib.appendBuildDescription("Release ${versionText}")
                     }
                 }
             }
             post {
                 success {
-                    arch "build/dai-deployment-templates-${version}.zip"
-                    stash name: "distribution-zip", includes: "build/dai-deployment-templates-${version}.zip"
+                    arch "build/dai-deployment-templates-${versionText}.zip"
+                    stash name: "distribution-zip", includes: "build/dai-deployment-templates-${versionText}.zip"
                 }
             }
         }
@@ -101,20 +101,20 @@ pipeline {
         stage('4. Publish to S3') {
             // Run on NODE_LABEL host.
             agent { label NODE_LABEL }
-            when {
-                expression {
-                    return isReleaseBranch() || isMasterBranch() || params.PUSH_DISTRIBUTION_ZIP
-                }
-            }
+            // when {
+            //     expression {
+            //         return isReleaseBranch() || isMasterBranch() || params.PUSH_DISTRIBUTION_ZIP
+            //     }
+            // }
             steps {
                 script {
                     unstash name: "distribution-zip"
                     s3upDocker {
-                        localArtifact = "build/dai-deployment-templates-${version}.zip"
+                        localArtifact = "build/dai-deployment-templates-${versionText}.zip"
                         artifactId = 'dai-deployment-templates'
-                        version = "${version}"
+                        version = "${versionText}"
                         keepPrivate = false
-                        isRelease = isReleaseVersion(version)
+                        isRelease = isReleaseVersion(versionText)
                         platform = "any"
                     }
                 }
@@ -144,7 +144,7 @@ pipeline {
             steps {
                 script {
                     def gitCommitHash = env.GIT_COMMIT
-                    def imageTags = "${version},${gitCommitHash}"
+                    def imageTags = "${versionText},${gitCommitHash}"
                     withDockerCredentials("harbor.h2o.ai") {
                         sh "./gradlew jib \
                             -Djib.to.auth.username=${DOCKER_USERNAME} \
@@ -172,7 +172,7 @@ pipeline {
             steps {
                 script {
                     def gitCommitHash = env.GIT_COMMIT
-                    def imageTags = "${version},${gitCommitHash}"
+                    def imageTags = "${versionText},${gitCommitHash}"
                     withDockerCredentials("dockerhub") {
                         sh "./gradlew jib \
                             -Djib.to.auth.username=${DOCKER_USERNAME} \
