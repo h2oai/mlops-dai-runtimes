@@ -27,7 +27,8 @@ e.g., for testing purposes.
 
 ### One-off Setup
 
-Install terraform following steps in: https://www.terraform.io/downloads.html.
+Install terraform `0.11.10` following steps in:
+https://www.terraform.io/downloads.html.
 
 Initialize terraform by running `terraform init` in the `terraform-recipe`
 folder.
@@ -50,6 +51,9 @@ environmental variables (using the prefix `TF_VAR_`):
   e.g., by running Driverless AI on `test/data/iris.csv` and asking it to
   create and download the Mojo scoring pipeline in the UI.
 * `license_key`: Driverless AI license key.
+* `bucket_name`: Name of AWS S3 bucket to store the mojo to so that the lambda
+  can access and load it. Note that the bucket has to already exist and
+  the effective AWS account has to have write access to it.
 
 Once all the non-optional variables are set, the following command will push
 the lambda (or update any changes thereof): `terraform apply`.
