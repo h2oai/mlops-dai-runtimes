@@ -18,7 +18,7 @@ from azureml.core.webservice import AciWebservice, AksWebservice, Webservice
 from azureml.core.compute import AksCompute, ComputeTarget
 from azureml.core.webservice import LocalWebservice
 #Azure Blob
-from azure.storage.blob import BlockBlobService, PublicAccess
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 #Azure Mgmt
 from azure.mgmt.resource import ResourceManagementClient
 from azure.common.credentials import ServicePrincipalCredentials
@@ -37,7 +37,7 @@ with open('./config.txt', 'r') as f:
         args = f.read().split("\n")         
         for arg in args:  
             if arg:
-                val = arg.split('=') 
+                val = arg.split('=',1) 
                 config[val[0]] = val[1].replace('"','')
                 print(val)
             
@@ -76,27 +76,26 @@ storage_account = storage_async_operation.result()
 storage_keys = storage_client.storage_accounts.list_keys(config['resource_group_name'], config['storage_name'])
 storage_keys = {v.key_name: v.value for v in storage_keys.keys}
 
+url = "https://{}.blob.core.windows.net".format(config['storage_name'])
+blob_service_client = BlobServiceClient(account_url=url, credential=storage_keys['key1'])
 
-block_blob_service = BlockBlobService(
-    account_name=config['storage_name'], account_key=storage_keys['key1'])
 
 container_name = 'mojodependencies'
-block_blob_service.create_container(container_name)
-
-# Set the permission so the blobs are public.
-block_blob_service.set_container_acl(
-    container_name, public_access=PublicAccess.Container)
+container_client = blob_service_client.create_container(container_name,public_access="blob" )
 
 # Upload packages and modify dai_deploy.yml    
 
-block_blob_service.create_blob_from_path(
-    container_name, os.path.basename(config['daimojo_path']), config['daimojo_path'])
-daimojo_url=block_blob_service.make_blob_url(container_name,os.path.basename(config['daimojo_path']))
+blob_client = blob_service_client.get_blob_client(container=container_name, blob=os.path.basename(config['daimojo_path']))
+with open(config['daimojo_path'], "rb") as data:
+    blob_client.upload_blob(data)
+    
+daimojo_url=blob_client.url
 
-block_blob_service.create_blob_from_path(
-    container_name, os.path.basename(config['datatable_path']), config['datatable_path'])
-datatable_url=block_blob_service.make_blob_url(container_name,os.path.basename(config['datatable_path']))
-
+blob_client = blob_service_client.get_blob_client(container=container_name, blob=os.path.basename(config['datatable_path']))
+with open(config['datatable_path'], "rb") as data:
+    blob_client.upload_blob(data)
+    
+datatable_url=blob_client.url
 
 shutil.copy('../scoring-pipeline/dai_deploy_template.yml', '../scoring-pipeline/dai_deploy.yml')
 
@@ -182,7 +181,7 @@ def deploy_to_local():
 
 if config['deployment_type'] == 'ACI':
     deploy_to_aci()
-elif config['deployment_type'] == 'ACI':
+elif config['deployment_type'] == 'AKS':
     deploy_to_aks()
 else:
     deploy_to_local()
