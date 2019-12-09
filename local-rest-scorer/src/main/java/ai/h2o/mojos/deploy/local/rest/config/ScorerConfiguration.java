@@ -6,8 +6,6 @@ import ai.h2o.mojos.deploy.common.transform.MojoPipelineToModelInfoConverter;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.RequestToMojoFrameConverter;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
