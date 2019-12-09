@@ -54,7 +54,7 @@ class MojoFrameToResponseConverterTest {
     Type[] types = {Type.Str};
     String[][] values = {{"value"}};
     ScoreRequest scoreRequest = new ScoreRequest();
-    scoreRequest.setIncludeFields(true);
+    scoreRequest.setIncludeFieldNames(true);
 
     // When
     ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
@@ -74,7 +74,7 @@ class MojoFrameToResponseConverterTest {
     scoreRequest.addFieldsItem("inputField");
     scoreRequest.addIncludeFieldsInOutputItem("inputField");
     scoreRequest.addRowsItem(asRow("inputValue"));
-    scoreRequest.setIncludeFields(true);
+    scoreRequest.setIncludeFieldNames(true);
 
     // When
     ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
@@ -94,7 +94,7 @@ class MojoFrameToResponseConverterTest {
     scoreRequest.setFields(asList("inputField1", "inputField2", "inputField3"));
     scoreRequest.setIncludeFieldsInOutput(asList("inputField1", "inputField3"));
     scoreRequest.addRowsItem(asRow("inputValue1", "omittedValue", "inputValue3"));
-    scoreRequest.setIncludeFields(true);
+    scoreRequest.setIncludeFieldNames(true);
 
     // When
     ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
@@ -118,7 +118,7 @@ class MojoFrameToResponseConverterTest {
     scoreRequest.setIncludeFieldsInOutput(asList("inputField", "id"));
     scoreRequest.addRowsItem(asRow("inputValue", "omittedValue", "testId"));
     scoreRequest.setIdField("id");
-    scoreRequest.setIncludeFields(true);
+    scoreRequest.setIncludeFieldNames(true);
 
     // When
     ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
@@ -139,7 +139,7 @@ class MojoFrameToResponseConverterTest {
     scoreRequest.setIncludeFieldsInOutput(asList("inputField", "id"));
     scoreRequest.addRowsItem(asRow("inputValue", "omittedValue", "testId"));
     scoreRequest.setIdField("id");
-    scoreRequest.setIncludeFields(true);
+    scoreRequest.setIncludeFieldNames(true);
 
     // When
     ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
@@ -162,7 +162,7 @@ class MojoFrameToResponseConverterTest {
     Type[] types = {Type.Str};
     String[][] values = {{"value1"}, {"value2"}, {"value3"}};
     ScoreRequest scoreRequest = new ScoreRequest();
-    scoreRequest.setIncludeFields(true);
+    scoreRequest.setIncludeFieldNames(true);
 
     // When
     ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
@@ -180,7 +180,7 @@ class MojoFrameToResponseConverterTest {
     Type[] types = {Type.Str, Type.Float32, Type.Float64, Type.Bool, Type.Int32, Type.Int64};
     String[][] values = {{"str", "1.1", "2.2", "1", "123", "123456789"}};
     ScoreRequest scoreRequest = new ScoreRequest();
-    scoreRequest.setIncludeFields(true);
+    scoreRequest.setIncludeFieldNames(true);
 
     // When
     ScoreResponse result =

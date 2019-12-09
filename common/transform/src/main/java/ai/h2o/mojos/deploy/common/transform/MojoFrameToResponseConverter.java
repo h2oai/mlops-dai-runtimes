@@ -37,7 +37,7 @@ public class MojoFrameToResponseConverter
     ScoreResponse response = new ScoreResponse();
     response.setScore(outputRows);
 
-    if (Optional.ofNullable(scoreRequest.isIncludeFields()).orElse(Boolean.FALSE)) {
+    if (Optional.ofNullable(scoreRequest.isIncludeFieldNames()).orElse(Boolean.FALSE)) {
       List<String> outputFieldNames = getFilteredInputFieldNames(scoreRequest, includedFields);
       outputFieldNames.addAll(asList(mojoFrame.getColumnNames()));
       response.setFields(outputFieldNames);
