@@ -1,12 +1,15 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import com.google.common.base.Strings;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -25,24 +28,30 @@ public class MojoFrameToResponseConverter
 
   @Override
   public ScoreResponse apply(MojoFrame mojoFrame, ScoreRequest scoreRequest) {
+    Set<String> includedFields = getSetOfIncludedFields(scoreRequest);
     List<Row> outputRows =
         Stream.generate(Row::new).limit(mojoFrame.getNrows()).collect(Collectors.toList());
-    copyFilteredInputFields(scoreRequest, outputRows);
+    copyFilteredInputFields(scoreRequest, includedFields, outputRows);
     copyResultFields(mojoFrame, outputRows);
 
     ScoreResponse response = new ScoreResponse();
     response.setScore(outputRows);
+
+    if (Optional.ofNullable(scoreRequest.isIncludeFields()).orElse(Boolean.FALSE)) {
+      List<String> outputFieldNames = getFilteredInputFieldNames(scoreRequest, includedFields);
+      outputFieldNames.addAll(asList(mojoFrame.getColumnNames()));
+      response.setFields(outputFieldNames);
+    }
+
     return response;
   }
 
-  private static void copyFilteredInputFields(ScoreRequest scoreRequest, List<Row> outputRows) {
-    Set<String> includedFields =
-        new HashSet<>(
-            Optional.ofNullable(scoreRequest.getIncludeFieldsInOutput()).orElse(emptyList()));
+  private static void copyFilteredInputFields(
+      ScoreRequest scoreRequest, Set<String> includedFields, List<Row> outputRows) {
     if (includedFields.isEmpty()) {
       return;
     }
-    boolean generateRowIds = shouldGenerateRowIds(scoreRequest);
+    boolean generateRowIds = shouldGenerateRowIds(scoreRequest, includedFields);
     List<Row> inputRows = scoreRequest.getRows();
     for (int row = 0; row < outputRows.size(); row++) {
       Row inputRow = inputRows.get(row);
@@ -59,11 +68,38 @@ public class MojoFrameToResponseConverter
     }
   }
 
-  private static boolean shouldGenerateRowIds(ScoreRequest scoreRequest) {
+  private static Set<String> getSetOfIncludedFields(ScoreRequest scoreRequest) {
+    List<String> includedFields =
+        Optional.ofNullable(scoreRequest.getIncludeFieldsInOutput()).orElse(emptyList());
+    if (includedFields.isEmpty()) {
+      return emptySet();
+    }
+    return new HashSet<>(includedFields);
+  }
+
+  private static boolean shouldGenerateRowIds(
+      ScoreRequest scoreRequest, Set<String> includedFields) {
     String idField = scoreRequest.getIdField();
     return !Strings.isNullOrEmpty(idField)
-        && scoreRequest.getIncludeFieldsInOutput().contains(idField)
+        && includedFields.contains(idField)
         && !scoreRequest.getFields().contains(idField);
+  }
+
+  private static List<String> getFilteredInputFieldNames(
+      ScoreRequest scoreRequest, Set<String> includedFields) {
+    List<String> outputFields = new ArrayList<>();
+    if (includedFields.isEmpty()) {
+      return outputFields;
+    }
+    for (String field : scoreRequest.getFields()) {
+      if (includedFields.contains(field)) {
+        outputFields.add(field);
+      }
+    }
+    if (shouldGenerateRowIds(scoreRequest, includedFields)) {
+      outputFields.add(scoreRequest.getIdField());
+    }
+    return outputFields;
   }
 
   private static void copyResultFields(MojoFrame mojoFrame, List<Row> outputRows) {

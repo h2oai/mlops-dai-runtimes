@@ -154,6 +154,12 @@ definitions:
         type: array
         items:
           type: string
+      includeFields:
+        description: >
+          If set to `true`. The scorer will also fill column names in `fields` field of its response.
+          This is mostly useful for human processing and debugging to facilitate matching response data to the
+          actual columns.
+        type: boolean
       idField:
         description: >
           Name of the field that holds a row id, e.g., a value that uniquely identifies each row of the request.
@@ -181,6 +187,13 @@ definitions:
         description: >
           A unique id of the model used for scoring.
         type: string
+      fields:
+        description: >
+          An array holding the names of fields in the order of appearance in the rows of the  `score` property.
+          This field is only populated if requested by the `includeFields` request field.
+        type: array
+        items:
+          type: string
       score:
         description: >
           An array of rows consisting the actual scoring output. The order of rows corresponds to the order of the input
