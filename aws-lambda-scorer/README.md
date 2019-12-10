@@ -111,60 +111,6 @@ The expected response should follow this structure, but the actual values may di
 ```json
 {
   "id": "a12e7390-b8ac-406a-ade9-0d5ea4b63ea9",
-  "score": [
-    [
-      "1.0",
-      "0.6240277982943945",
-      "0.045458571508101536",
-      "0.330513630197504"
-    ],
-    [
-      "3.0",
-      "0.7209441819603676",
-      "0.06299909138586585",
-      "0.21605672665376663"
-    ],
-    [
-      "4.0",
-      "0.7209441819603676",
-      "0.06299909138586585",
-      "0.21605672665376663"
-    ]
-  ]
-}
-```
-
-To get back also the names of fields in the order in which they appear in the resulting `score`,
-pass in an extra request field `includeFieldNames` set to `true`.
-
-```json
-{
-  "fields": [
-    "sepal_len", "sepal_wid", "petal_len", "petal_wid"
-  ],
-  "includeFieldsInOutput": [
-    "sepal_len"
-  ],
-  "includeFieldNames": true,
-  "rows": [
-    [
-      "1.0", "1.0", "2.2", "3.5"
-    ],
-    [
-      "3.0", "10.0", "2.2", "3.5"
-    ],
-    [
-      "4.0", "100.0", "2.2", "3.5"
-    ]
-  ]
-}
-```
-
-Resulting in a more verbose answer good for manual queries and debugging:
-
-```json
-{
-  "id": "a12e7390-b8ac-406a-ade9-0d5ea4b63ea9",
   "fields": [
     "sepal_len",
     "class.Iris-setosa",
@@ -193,3 +139,6 @@ Resulting in a more verbose answer good for manual queries and debugging:
   ]
 }
 ```
+
+Note that including the `fields` in the response can be disabled by setting `noFieldNames` to true
+in the input request.

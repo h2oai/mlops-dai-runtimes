@@ -154,11 +154,10 @@ definitions:
         type: array
         items:
           type: string
-      includeFieldNames:
+      noFieldNames:
         description: >
-          If set to `true`. The scorer will also fill column names in `fields` field of its response.
-          This is mostly useful for human processing and debugging to facilitate matching response data to the
-          actual columns.
+          If set to `true`. The scorer will not fill response column names in the `fields` field.
+          This is can be useful to maintain compatibility with older scorer versions or to save bandwidth.
         type: boolean
       idField:
         description: >
@@ -190,7 +189,7 @@ definitions:
       fields:
         description: >
           An array holding the names of fields in the order of appearance in the rows of the  `score` property.
-          This field is only populated if requested by the `includeFieldNames` request field.
+          This field is not populated if requested by setting the `noFieldNames` request field to `true`.
         type: array
         items:
           type: string
