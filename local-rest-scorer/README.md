@@ -89,8 +89,8 @@ The expected response should follow this structure, but the actual values may di
 }
 ```
 
-Note that including the `fields` in the response can be disabled by setting `noFieldNames` to true
-in the input request.
+Note that including the `fields` in the response can be disabled by setting `noFieldNamesInOutput`
+to true in the input request.
 
 ### Score CSV File
 

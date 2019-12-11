@@ -54,7 +54,7 @@ class MojoFrameToResponseConverterTest {
     Type[] types = {Type.Str};
     String[][] values = {{"value"}};
     ScoreRequest scoreRequest = new ScoreRequest();
-    scoreRequest.setNoFieldNames(true);
+    scoreRequest.setNoFieldNamesInOutput(true);
 
     // When
     ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
