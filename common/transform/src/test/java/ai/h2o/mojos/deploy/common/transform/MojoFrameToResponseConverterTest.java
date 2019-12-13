@@ -28,6 +28,7 @@ class MojoFrameToResponseConverterTest {
 
     // Then
     assertThat(result.getScore()).isEmpty();
+    assertThat(result.getFields()).isEmpty();
   }
 
   @Test
@@ -43,6 +44,24 @@ class MojoFrameToResponseConverterTest {
 
     // Then
     assertThat(result.getScore()).containsExactly(asRow("value"));
+    assertThat(result.getFields()).containsExactly("field");
+  }
+
+  @Test
+  void convertSingleFieldResponse_withoutFieldNames_succeeds() {
+    // Given
+    String[] fields = {"field"};
+    Type[] types = {Type.Str};
+    String[][] values = {{"value"}};
+    ScoreRequest scoreRequest = new ScoreRequest();
+    scoreRequest.setNoFieldNamesInOutput(true);
+
+    // When
+    ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
+
+    // Then
+    assertThat(result.getScore()).containsExactly(asRow("value"));
+    assertThat(result.getFields()).isNull();
   }
 
   @Test
@@ -61,6 +80,7 @@ class MojoFrameToResponseConverterTest {
 
     // Then
     assertThat(result.getScore()).containsExactly(asRow("inputValue", "outputValue"));
+    assertThat(result.getFields()).containsExactly("inputField", "outputField").inOrder();
   }
 
   @Test
@@ -80,6 +100,9 @@ class MojoFrameToResponseConverterTest {
     // Then
     assertThat(result.getScore())
         .containsExactly(asRow("inputValue1", "inputValue3", "outputValue1", "outputValue2"));
+    assertThat(result.getFields())
+        .containsExactly("inputField1", "inputField3", "outputField1", "outputField2")
+        .inOrder();
   }
 
   @Test
@@ -99,6 +122,7 @@ class MojoFrameToResponseConverterTest {
 
     // Then
     assertThat(result.getScore()).containsExactly(asRow("inputValue", "testId", "outputValue"));
+    assertThat(result.getFields()).containsExactly("inputField", "id", "outputField").inOrder();
   }
 
   @Test
@@ -124,6 +148,7 @@ class MojoFrameToResponseConverterTest {
         .matches(
             "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}");
     assertThat(result.getScore().get(0).get(2)).isEqualTo("outputValue");
+    assertThat(result.getFields()).containsExactly("inputField", "id", "outputField").inOrder();
   }
 
   @Test
@@ -139,7 +164,9 @@ class MojoFrameToResponseConverterTest {
 
     // Then
     assertThat(result.getScore())
-        .containsExactly(Stream.of(values).map(MojoFrameToResponseConverterTest::asRow).toArray());
+        .containsExactly(Stream.of(values).map(MojoFrameToResponseConverterTest::asRow).toArray())
+        .inOrder();
+    assertThat(result.getFields()).containsExactly("field");
   }
 
   @Test
@@ -159,6 +186,9 @@ class MojoFrameToResponseConverterTest {
     // Then
     assertThat(result.getScore())
         .containsExactly(Stream.of(values).map(MojoFrameToResponseConverterTest::asRow).toArray());
+    assertThat(result.getFields())
+        .containsExactly("Str", "Float32", "Float64", "Bool", "Int32", "Int64")
+        .inOrder();
   }
 
   private static MojoFrame buildMojoFrame(String[] fields, Type[] types, String[][] values) {

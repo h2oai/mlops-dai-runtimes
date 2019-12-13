@@ -110,6 +110,13 @@ The expected response should follow this structure, but the actual values may di
 
 ```json
 {
+  "id": "a12e7390-b8ac-406a-ade9-0d5ea4b63ea9",
+  "fields": [
+    "sepal_len",
+    "class.Iris-setosa",
+    "class.Iris-versicolor",
+    "class.Iris-virginica"
+  ],
   "score": [
     [
       "1.0",
@@ -132,3 +139,6 @@ The expected response should follow this structure, but the actual values may di
   ]
 }
 ```
+
+Note that including the `fields` in the response can be disabled by setting `noFieldNamesInOutput`
+to true in the input request.
