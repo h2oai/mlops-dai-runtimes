@@ -36,5 +36,13 @@ dependencyManagement {
             entry 'slf4j-api'
             entry 'slf4j-log4j12'
         }
+        dependency group: 'org.apache.spark', name: 'spark-core_2.11', version: sparkVersion
+        dependency group: 'org.apache.spark', name: 'spark-sql_2.11', version: sparkVersion
+        dependency group: 'org.apache.spark', name: 'spark-mllib_2.11', version: sparkVersion
+        dependency group: 'org.scala-lang', name: 'scala-library', version: scalaVersion
+        dependency group: 'ai.h2o', name: 'sparkling-water-scoring_2.11', version: sparklingWaterVersion
+        dependency group: 'ai.h2o', name: 'sparkling-water-core_2.11', version: sparklingWaterVersion
+        dependency group: 'com.typesafe', name:'config', version: configVersion
+
     }
 }

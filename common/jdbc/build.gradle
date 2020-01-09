@@ -1,0 +1,25 @@
+plugins {
+    id 'scala'
+}
+
+apply from: project(":").file('gradle/java.gradle')
+
+dependencies {
+    implementation project(':common:rest-jdbc-spring-api')
+    implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
+    implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
+    implementation group: 'ai.h2o', name: 'sparkling-water-core_2.11'
+    implementation group: 'ai.h2o', name: 'sparkling-water-scoring_2.11'
+    implementation group: 'org.scala-lang', name: 'scala-library'
+    implementation group: 'org.apache.spark', name: 'spark-core_2.11'
+    implementation group: 'org.apache.spark', name: 'spark-sql_2.11'
+    implementation group: 'org.apache.spark', name: 'spark-mllib_2.11'
+    implementation group: 'com.typesafe', name:'config'
+
+    zinc 'com.typesafe.zinc:zinc:0.3.9'
+    zinc 'org.scala-lang:scala-library:2.10.5'
+}
+
+test {
+    useJUnitPlatform()
+}
