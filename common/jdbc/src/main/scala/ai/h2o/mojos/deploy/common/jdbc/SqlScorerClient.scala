@@ -2,6 +2,7 @@ package ai.h2o.mojos.deploy.common.jdbc
 
 import java.io.{File, IOException}
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import java.util
 import java.util.Properties
 
@@ -10,7 +11,7 @@ import ai.h2o.mojos.runtime.lic.LicenseException
 import ai.h2o.sparkling.ml.models.H2OMOJOPipelineModel
 import com.google.common.base.{Preconditions, Strings}
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.{DataFrame, SparkSession, SaveMode}
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.slf4j.{Logger, LoggerFactory}
 
 object SqlScorerClient {
@@ -43,7 +44,9 @@ class SqlScorerClient {
     var preds: DataFrame = null
     val df: DataFrame = read(scoreRequest)
     if (!scoreRequest.getIdColumn.isEmpty) {
-      preds = pipeline.transform(df).select(scoreRequest.getIdColumn, "prediction.*")
+      preds = pipeline
+        .transform(df)
+        .select(sanitizeInputString(scoreRequest.getIdColumn), "prediction.*")
     } else {
       preds = pipeline.transform(df)
     }
@@ -73,16 +76,20 @@ class SqlScorerClient {
         scoreRequest.getIdColumn
       )
     )
+    val sqlQuery: String = String.format(
+      "(%s) queryTable",
+      sanitizeInputString(scoreRequest.getQuery)
+    )
     if (!scoreRequest.getIdColumn.isEmpty) {
-      logger.info("Generating partitions for query")
+      logger.info("Generating partitions for query: {}", sqlQuery)
       generatePartitionMapping(
         jdbcConfig.dbConnectionString,
-        "(SELECT * FROM creditcardtrain) testQuery",
-        scoreRequest.getIdColumn
+        sqlQuery,
+        sanitizeInputString(scoreRequest.getIdColumn)
       )
     }
     logger.info("Executing query")
-    doQuery(jdbcConfig.dbConnectionString, scoreRequest.getQuery)
+    doQuery(jdbcConfig.dbConnectionString, sqlQuery)
   }
 
   private def write(scoreRequest: ScoreRequest, predsDf: DataFrame): Unit = {
@@ -171,5 +178,10 @@ class SqlScorerClient {
       case string: String => string.toInt
       case _ => number.asInstanceOf[Int]
     }
+  }
+
+  private def sanitizeInputString(input: String): String = {
+    val cleanedString: String = new String(input.getBytes(StandardCharsets.UTF_8))
+    cleanedString.stripSuffix("\"").stripPrefix("\"")
   }
 }
