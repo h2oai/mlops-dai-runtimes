@@ -73,14 +73,14 @@ class SqlScorerClient {
     logger.info(
       String.format(
         "Query inputs: query - %s, outputTable - %s, idColumn - %s",
-        scoreRequest.getQuery,
+        scoreRequest.getSqlQuery,
         scoreRequest.getOutputTable,
         scoreRequest.getIdColumn
       )
     )
     val sqlQuery: String = String.format(
       "(%s) queryTable",
-      sanitizeInputString(scoreRequest.getQuery)
+      sanitizeInputString(scoreRequest.getSqlQuery)
     )
     if (!scoreRequest.getIdColumn.isEmpty) {
       logger.info("Generating partitions for query: {}", sqlQuery)
