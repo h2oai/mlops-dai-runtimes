@@ -6,6 +6,7 @@ import ai.h2o.mojos.deploy.common.rest.jdbc.model.ModelSchema;
 import ai.h2o.mojos.deploy.common.rest.jdbc.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.jdbc.model.ScoreResponse;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class MojoScorer {
@@ -17,11 +18,12 @@ public class MojoScorer {
   }
 
   ScoreResponse score(ScoreRequest request) {
-    List<String> previewData = Arrays.asList(sqlScorerClient.scoreQuery(request));
+    HashMap<String, String[]> hashMap = sqlScorerClient.scoreQuery(request);
     ScoreResponse scoreResponse = new ScoreResponse();
     scoreResponse.setId(getModelId());
     scoreResponse.setSuccess(true);
-    scoreResponse.setPreview(previewData);
+    scoreResponse.setPreviewScores(Arrays.asList(hashMap.get("previewScores")));
+    scoreResponse.setPreviewColumns(Arrays.asList(hashMap.get("previewColumns")));
     return scoreResponse;
   }
 

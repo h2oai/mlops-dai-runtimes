@@ -91,6 +91,7 @@ paths:
         - in: query
           name: idColumn
           type: string
+          required: false
         - in: query
           name: saveMethod
           type: string
@@ -122,6 +123,10 @@ definitions:
         $ref: '#/definitions/ModelSchema'
   ScoreRequest:
     type: object
+    required:
+      - sqlQuery
+      - outputTable
+      - saveMethod
     properties:
       sqlQuery:
         description: >
@@ -161,9 +166,15 @@ definitions:
         description: >
           A boolean value dictating whether the scoring request was successful
         type: boolean
-      preview:
+      previewScores:
         description: >
           first few rows, up to 5, of the resultant scored dataset
+        type: array
+        items:
+          type: string
+      previewColumns:
+        description: >
+          names of output columns for scoring preview
         type: array
         items:
           type: string

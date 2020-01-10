@@ -3,10 +3,11 @@ package ai.h2o.mojos.deploy.common.jdbc
 import java.io.{File, IOException}
 import java.net.URL
 import java.nio.charset.StandardCharsets
-import java.util.{Arrays, Properties}
+import java.util
+import java.util.Properties
 
 import ai.h2o.mojos.deploy.common.rest.jdbc.model.ScoreRequest.SaveMethodEnum
-import ai.h2o.mojos.deploy.common.rest.jdbc.model.{Model, ModelSchema, ScoreRequest}
+import ai.h2o.mojos.deploy.common.rest.jdbc.model.ScoreRequest
 import ai.h2o.mojos.runtime.lic.LicenseException
 import ai.h2o.sparkling.ml.models.H2OMOJOPipelineModel
 import com.google.common.base.{Preconditions, Strings}
@@ -40,10 +41,10 @@ class SqlScorerClient {
 
   private final val sqlProperties: Properties = setSqlProperties()
 
-  def scoreQuery(scoreRequest: ScoreRequest): Array[String] = {
+  def scoreQuery(scoreRequest: ScoreRequest): util.HashMap[String, Array[String]] = {
     var preds: DataFrame = null
     val df: DataFrame = read(scoreRequest)
-    if (!scoreRequest.getIdColumn.isEmpty) {
+    if (scoreRequest.getIdColumn != null) {
       preds = pipeline
         .transform(df)
         .select(sanitizeInputString(scoreRequest.getIdColumn), "prediction.*")
@@ -57,7 +58,10 @@ class SqlScorerClient {
       )
       write(scoreRequest, preds)
     }
-    castDataFrameToArray(preds)
+    val hashMap: util.HashMap[String, Array[String]] = new util.HashMap[String, Array[String]]()
+    hashMap.put("previewScores", castDataFrameToArray(preds))
+    hashMap.put("previewColumns", preds.columns)
+    hashMap
   }
 
   def getModelInfo: Array[String] = {
@@ -82,7 +86,7 @@ class SqlScorerClient {
       "(%s) queryTable",
       sanitizeInputString(scoreRequest.getSqlQuery)
     )
-    if (!scoreRequest.getIdColumn.isEmpty) {
+    if (scoreRequest.getIdColumn != null) {
       logger.info("Generating partitions for query: {}", sqlQuery)
       generatePartitionMapping(
         jdbcConfig.dbConnectionString,
