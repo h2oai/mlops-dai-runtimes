@@ -53,11 +53,12 @@ public class ModelsApiController implements ModelApi {
 
   @Override
   public ResponseEntity<ScoreResponse> getScoreByGet(
-      String sqlQuery, String outputTable, String idColumn) {
+      String sqlQuery, String outputTable, String idColumn, String saveMethod) {
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setIdColumn(idColumn);
     scoreRequest.setOutputTable(outputTable);
     scoreRequest.setQuery(sqlQuery);
+    scoreRequest.setSaveMethod(ScoreRequest.SaveMethodEnum.fromValue(saveMethod));
     return getScore(scoreRequest);
   }
 }

@@ -91,6 +91,15 @@ paths:
         - in: query
           name: idColumn
           type: string
+        - in: query
+          name: saveMethod
+          type: string
+          enum:
+            - preview
+            - append
+            - overwrite
+            - ignore
+            - error
       responses:
         '200':
           description: Successful operation
@@ -126,6 +135,21 @@ definitions:
         description: >
           A string containing column name matching the ID column/Primary key of table being queried
         type: string
+      saveMethod:
+        description: >
+          String dictating how the resultant scored data should be written. can be one of:
+          preview - does not write to configured sql database, but returns sample which can be reviewed,
+          append - if output table already exists, data will be appended to that table,
+          overwrite - if the output table already exists, the table will be overwritten with new data,
+          ignore - if output table already exists, the new data will be dropped and nothing will be written,
+          error - if the output table already exists, the new data will be dropped and an error will be thrown
+        type: string
+        enum:
+          - preview
+          - append
+          - overwrite
+          - ignore
+          - error
   ScoreResponse:
     type: object
     properties:
@@ -137,6 +161,12 @@ definitions:
         description: >
           A boolean value dictating whether the scoring request was successful
         type: boolean
+      preview:
+        description: >
+          first few rows, up to 5, of the resultant scored dataset
+        type: array
+        items:
+          type: string
   ModelSchema:
     type: object
     properties:

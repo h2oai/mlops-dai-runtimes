@@ -3,9 +3,9 @@ package ai.h2o.mojos.deploy.common.jdbc
 import java.io.{File, IOException}
 import java.net.URL
 import java.nio.charset.StandardCharsets
-import java.util
-import java.util.Properties
+import java.util.{Arrays, Properties}
 
+import ai.h2o.mojos.deploy.common.rest.jdbc.model.ScoreRequest.SaveMethodEnum
 import ai.h2o.mojos.deploy.common.rest.jdbc.model.{Model, ModelSchema, ScoreRequest}
 import ai.h2o.mojos.runtime.lic.LicenseException
 import ai.h2o.sparkling.ml.models.H2OMOJOPipelineModel
@@ -36,11 +36,11 @@ class SqlScorerClient {
 
   private final val JDBC_CONFIG_FILE_PROPERTY: String = "jdbc.config.path"
   private final val JDBC_CONFIG_FILE: String = System.getProperty(JDBC_CONFIG_FILE_PROPERTY)
-  private final val jdbcConfig: JdbcConfig = new JdbcConfig(JDBC_CONFIG_FILE)
+  private final val jdbcConfig: JdbcConfig = loadJdbcConfigFromFile()
 
   private final val sqlProperties: Properties = setSqlProperties()
 
-  def scoreQuery(scoreRequest: ScoreRequest): Unit = {
+  def scoreQuery(scoreRequest: ScoreRequest): Array[String] = {
     var preds: DataFrame = null
     val df: DataFrame = read(scoreRequest)
     if (!scoreRequest.getIdColumn.isEmpty) {
@@ -48,18 +48,20 @@ class SqlScorerClient {
         .transform(df)
         .select(sanitizeInputString(scoreRequest.getIdColumn), "prediction.*")
     } else {
-      preds = pipeline.transform(df)
+      preds = pipeline.transform(df).select("prediction.*")
     }
-    write(scoreRequest, preds)
+    if (!scoreRequest.getSaveMethod.equals(SaveMethodEnum.PREVIEW)) {
+      logger.info(
+        "Received expected save method {}, attempting to write to database",
+        scoreRequest.getSaveMethod.toString
+      )
+      write(scoreRequest, preds)
+    }
+    castDataFrameToArray(preds)
   }
 
-  def getModelInfo: Model = {
-    val model: Model = new Model
-    model.setId(pipeline.uid)
-    val modelSchema: ModelSchema = new ModelSchema
-    modelSchema.setInputFields(pipeline.getFeaturesCols().asInstanceOf[util.List[String]])
-    model.setSchema(modelSchema)
-    model
+  def getModelInfo: Array[String] = {
+    pipeline.getFeaturesCols()
   }
 
   def getModelId: String = {
@@ -96,7 +98,7 @@ class SqlScorerClient {
     logger.info("Writing scored data to table")
     predsDf
       .write
-      .mode(SaveMode.Append)
+      .mode(castSaveModeFromRequest(scoreRequest))
       .jdbc(
         url = jdbcConfig.dbConnectionString,
         table = scoreRequest.getOutputTable,
@@ -124,13 +126,28 @@ class SqlScorerClient {
     }
     try {
       val pipeline: H2OMOJOPipelineModel = H2OMOJOPipelineModel.createFromMojo(mojoFile.getPath)
-      logger.info("Spark: Mojo pipeline successfully loaded ({})", pipeline.uid)
+      logger.info("Mojo pipeline successfully loaded ({})", pipeline.uid)
       pipeline
     } catch {
       case e: IOException =>
         throw new RuntimeException("Unable to load mojo", e)
       case e: LicenseException =>
         throw new RuntimeException("License file not found", e)
+    }
+  }
+
+  private def loadJdbcConfigFromFile(): JdbcConfig = {
+    Preconditions.checkArgument(
+      !Strings.isNullOrEmpty(JDBC_CONFIG_FILE),
+      "Path to jdbc config file is not specified, set the %s property",
+      JDBC_CONFIG_FILE_PROPERTY
+    )
+    logger.info("Loading the JDBC Config file from path {}", JDBC_CONFIG_FILE)
+    try {
+      new JdbcConfig(JDBC_CONFIG_FILE)
+    } catch {
+      case e: IOException =>
+        throw new RuntimeException("Unable to load JDBC Config file", e)
     }
   }
 
@@ -178,6 +195,21 @@ class SqlScorerClient {
       case string: String => string.toInt
       case _ => number.asInstanceOf[Int]
     }
+  }
+
+  private def castSaveModeFromRequest(scoreRequest: ScoreRequest): SaveMode = {
+    scoreRequest.getSaveMethod match {
+      case SaveMethodEnum.APPEND => SaveMode.Append
+      case SaveMethodEnum.OVERWRITE => SaveMode.Overwrite
+      case SaveMethodEnum.IGNORE => SaveMode.Ignore
+      case SaveMethodEnum.ERROR => SaveMode.ErrorIfExists
+      // Fall through case catches SaveMethodEnum.PREVIEW since it should never get passed here anyways
+      case _ => SaveMode.Append
+    }
+  }
+
+  private def castDataFrameToArray(df: DataFrame): Array[String] = {
+    df.limit(5).collect().map(_.toString())
   }
 
   private def sanitizeInputString(input: String): String = {
