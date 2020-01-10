@@ -57,7 +57,7 @@ public class ModelsApiController implements ModelApi {
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setIdColumn(idColumn);
     scoreRequest.setOutputTable(outputTable);
-    scoreRequest.setQuery(sqlQuery);
+    scoreRequest.setSqlQuery(sqlQuery);
     scoreRequest.setSaveMethod(ScoreRequest.SaveMethodEnum.fromValue(saveMethod));
     return getScore(scoreRequest);
   }
