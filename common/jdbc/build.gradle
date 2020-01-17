@@ -37,6 +37,10 @@ bootJar {
     enabled=false
 }
 
+jar {
+    enabled=true
+}
+
 apply plugin: 'scalaStyle'
 
 scalaStyle {
