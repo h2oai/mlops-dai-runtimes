@@ -3,7 +3,7 @@ package ai.h2o.mojos.deploy.common.jdbc
 import ai.h2o.mojos.deploy.common.jdbc.utils._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.{Disabled, Test}
 import org.junit.jupiter.api.Assertions.{assertFalse, assertTrue}
 import org.scalatest.junit.AssertionsForJUnit
 
@@ -15,7 +15,7 @@ class UtilsTest extends AssertionsForJUnit {
     .setAppName(System.getProperty("app.name", "h2oaiSparkSqlScorer"))
     .setMaster(System.getProperty("spark.master.node", "local[*]"))
     .set("spark.ui.enabled", "false")
-  val sparkSession: SparkSession = SparkSession.builder().config(conf).getOrCreate()
+  var sparkSession: SparkSession = _
 
   @Test
   def sanitizeDoubleQuotedString: Unit = {
@@ -32,7 +32,9 @@ class UtilsTest extends AssertionsForJUnit {
   }
 
   @Test
+  @Disabled
   def testCastDataFrameShort: Unit = {
+    sparkSession = SparkSession.builder().config(conf).getOrCreate()
     val data = Seq(("Java", 20000, 23234.234), ("Python", 100000, 56524.11), ("Scala", 3000, 9348.2))
     val df = sparkSession.createDataFrame(data)
     val responseDf: Array[String] = castDataFrameToArray(df)
@@ -41,7 +43,9 @@ class UtilsTest extends AssertionsForJUnit {
   }
 
   @Test
+  @Disabled
   def testCastDataFrameLong: Unit = {
+    sparkSession = SparkSession.builder().config(conf).getOrCreate()
     val data = Seq(
       ("Java", 20000, 23234.234),
       ("Python", 100000, 56524.11),
