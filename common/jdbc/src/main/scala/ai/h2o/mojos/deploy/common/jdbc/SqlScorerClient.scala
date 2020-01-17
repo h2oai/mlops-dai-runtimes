@@ -25,21 +25,21 @@ object SqlScorerClient {
 class SqlScorerClient {
   val logger: Logger = LoggerFactory.getLogger(classOf[SqlScorerClient])
 
-  private final val conf: SparkConf = new SparkConf()
+  val conf: SparkConf = new SparkConf()
     .setAppName(System.getProperty("app.name", "h2oaiSparkSqlScorer"))
     .setMaster(System.getProperty("spark.master.node", "local[*]"))
     .set("spark.ui.enabled", "false")
-  private final val sparkSession: SparkSession = SparkSession.builder().config(conf).getOrCreate()
+  val sparkSession: SparkSession = SparkSession.builder().config(conf).getOrCreate()
 
-  private final val MOJO_PIPELINE_PATH_PROPERTY: String = "mojo.path"
-  private final val MOJO_PIPELINE_PATH: String = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY)
-  final val pipeline: H2OMOJOPipelineModel = loadMojoPipelineFromFile()
+  val MOJO_PIPELINE_PATH_PROPERTY: String = "mojo.path"
+  val MOJO_PIPELINE_PATH: String = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY)
+  val pipeline: H2OMOJOPipelineModel = loadMojoPipelineFromFile()
 
-  private final val JDBC_CONFIG_FILE_PROPERTY: String = "jdbc.config.path"
-  private final val JDBC_CONFIG_FILE: String = System.getProperty(JDBC_CONFIG_FILE_PROPERTY)
-  private final val jdbcConfig: JdbcConfig = loadJdbcConfigFromFile()
+  val JDBC_CONFIG_FILE_PROPERTY: String = "jdbc.config.path"
+  val JDBC_CONFIG_FILE: String = System.getProperty(JDBC_CONFIG_FILE_PROPERTY)
+  val jdbcConfig: JdbcConfig = loadJdbcConfigFromFile()
 
-  private final val sqlProperties: Properties = setSqlProperties()
+  val sqlProperties: Properties = setSqlProperties()
 
   def scoreQuery(scoreRequest: ScoreRequest): util.HashMap[String, Array[String]] = {
     var preds: DataFrame = null
