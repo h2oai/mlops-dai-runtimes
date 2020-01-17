@@ -2,17 +2,17 @@ package ai.h2o.mojos.deploy.common.jdbc
 
 import java.io.{File, IOException}
 import java.net.URL
-import java.nio.charset.StandardCharsets
 import java.util
 import java.util.Properties
 
 import ai.h2o.mojos.deploy.common.rest.jdbc.model.ScoreRequest.SaveMethodEnum
 import ai.h2o.mojos.deploy.common.rest.jdbc.model.ScoreRequest
+import ai.h2o.mojos.deploy.common.jdbc.utils._
 import ai.h2o.mojos.runtime.lic.LicenseException
 import ai.h2o.sparkling.ml.models.H2OMOJOPipelineModel
 import com.google.common.base.{Preconditions, Strings}
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.slf4j.{Logger, LoggerFactory}
 
 object SqlScorerClient {
@@ -157,6 +157,7 @@ class SqlScorerClient {
 
   private def generatePartitionMapping(url: String, query: String, idColumn: String): Unit = {
     val tmpDf: DataFrame = doQuery(url, query)
+    logger.info("Attempting to cast arbitrary response types to Int")
     val minimum: Int = castToInt(tmpDf.selectExpr(String.format("MIN(%s)", idColumn)).first().get(0))
     val maximum: Int = castToInt(tmpDf.selectExpr(String.format("MAX(%s)", idColumn)).first().get(0))
     val numPartitions: Int = math.ceil((maximum - minimum + 1) / 50000.0).toInt
@@ -187,37 +188,5 @@ class SqlScorerClient {
     properties.setProperty("password", jdbcConfig.dbPassword)
     properties.setProperty("driver", jdbcConfig.dbDriver)
     properties
-  }
-
-  private def castToInt(number: Any): Int = {
-    logger.info("Converting scala numeric types to java types")
-    number match {
-      case bigDecimal: BigDecimal => bigDecimal.intValue
-      case long: Long => long.toInt
-      case double: Double => double.toInt
-      case integer: Integer => integer.toInt
-      case string: String => string.toInt
-      case _ => number.asInstanceOf[Int]
-    }
-  }
-
-  private def castSaveModeFromRequest(scoreRequest: ScoreRequest): SaveMode = {
-    scoreRequest.getSaveMethod match {
-      case SaveMethodEnum.APPEND => SaveMode.Append
-      case SaveMethodEnum.OVERWRITE => SaveMode.Overwrite
-      case SaveMethodEnum.IGNORE => SaveMode.Ignore
-      case SaveMethodEnum.ERROR => SaveMode.ErrorIfExists
-      // Fall through case catches SaveMethodEnum.PREVIEW since it should never get passed here anyways
-      case _ => SaveMode.Append
-    }
-  }
-
-  private def castDataFrameToArray(df: DataFrame): Array[String] = {
-    df.limit(5).collect().map(_.toString())
-  }
-
-  private def sanitizeInputString(input: String): String = {
-    val cleanedString: String = new String(input.getBytes(StandardCharsets.UTF_8))
-    cleanedString.stripSuffix("\"").stripPrefix("\"")
   }
 }
