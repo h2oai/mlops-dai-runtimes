@@ -59,7 +59,7 @@ class SqlScorerClient {
       write(scoreRequest, preds)
     }
     val hashMap: util.HashMap[String, Array[String]] = new util.HashMap[String, Array[String]]()
-    hashMap.put("previewScores", castDataFrameToArray(preds))
+    hashMap.put("previewScores", castDataFrameToArray(preds, 5))
     hashMap.put("previewColumns", preds.columns)
     hashMap
   }
