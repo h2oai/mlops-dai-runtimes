@@ -37,7 +37,7 @@ class UtilsTest extends AssertionsForJUnit {
     sparkSession = SparkSession.builder().config(conf).getOrCreate()
     val data = Seq(("Java", 20000, 23234.234), ("Python", 100000, 56524.11), ("Scala", 3000, 9348.2))
     val df = sparkSession.createDataFrame(data)
-    val responseDf: Array[String] = castDataFrameToArray(df)
+    val responseDf: Array[String] = castDataFrameToArray(df, 5)
     assertTrue(responseDf.isInstanceOf[Array[String]])
     assertTrue(responseDf.length.equals(3))
   }
@@ -58,7 +58,7 @@ class UtilsTest extends AssertionsForJUnit {
       ("Scala2", 30002, 29348.2)
     )
     val df = sparkSession.createDataFrame(data)
-    val responseDf: Array[String] = castDataFrameToArray(df)
+    val responseDf: Array[String] = castDataFrameToArray(df, 5)
     assertTrue(responseDf.isInstanceOf[Array[String]])
     assertTrue(responseDf.length.equals(5))
   }
