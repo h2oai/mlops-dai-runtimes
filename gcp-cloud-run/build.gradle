@@ -7,11 +7,13 @@ apply from: project(":").file('gradle/java.gradle')
 dependencies {
     implementation project(':common:rest-spring-api')
     implementation project(':common:transform')
+    implementation project(':local-rest-scorer')
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
     implementation group: 'io.springfox', name: 'springfox-swagger2'
     implementation group: 'io.springfox', name: 'springfox-swagger-ui'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'com.google.cloud', name: 'google-cloud-storage'
 }
 
 test {
@@ -23,11 +25,7 @@ bootRun {
 }
 
 bootJar {
-    mainClassName = 'ai.h2o.mojos.deploy.local.rest.ScorerApplication'
-}
-
-jar {
-    enabled = true
+    mainClassName = 'ai.h2o.mojos.deploy.gcp.cloud.run.ScorerApplication'
 }
 
 // Include the local rest scorer executable jar in the root package distribution zip file.
@@ -44,7 +42,7 @@ jib {
         image = 'openjdk:8-jre-alpine'
     }
     to {
-        image = dockerRepositoryPrefix + 'rest-scorer'
+        image = dockerRepositoryPrefix + 'google-cloud-run-scorer'
         tags = [version]
     }
     container {
@@ -63,7 +61,4 @@ jib {
     }
 }
 
-// Make docker TAR build part of the build task to ensure the image can be built.
-// No pushing anywhere (not even to local docker). To push to local docker run task `jibDockerBuild` instead.
-// To push to harbor use task `jib`, credentials will be needed though.
 tasks.build.dependsOn tasks.jibBuildTar

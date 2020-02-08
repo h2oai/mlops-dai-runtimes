@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-class ScorerConfiguration {
+public class ScorerConfiguration {
   @Bean
   public MojoFrameToResponseConverter responseConverter() {
     return new MojoFrameToResponseConverter();
