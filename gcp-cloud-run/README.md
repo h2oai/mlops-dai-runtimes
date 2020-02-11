@@ -36,11 +36,8 @@ To deploy the container follow the steps in Google Documentation here:
 https://cloud.google.com/run/docs/deploying
 
 There is one requirement for the container. You __MUST__ include the following environment variables:
-* DRIVERLESS_AI_LICENSE_FILE = /secrets/license.sig 
 * MOJO_GCS_PATH = `gs://path/to/pipeline.mojo`
 * LICENSE_GCS_PATH = `gs://path/to/driverless/ai/license.sig`
-
-NOTE: the value for `DRIVERLESS_AI_LICENSE_FILE` __MUST__ be `/secrets/license.sig` 
 
 ## Scoring
 
