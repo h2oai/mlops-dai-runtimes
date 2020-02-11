@@ -25,7 +25,7 @@ bootRun {
 }
 
 bootJar {
-    mainClassName = 'ai.h2o.mojos.deploy.gcp.cloud.run.ScorerApplication'
+    mainClassName = 'ai.h2o.mojos.deploy.gcp.cloud.run.GcpScorerApplication'
 }
 
 // Include the local rest scorer executable jar in the root package distribution zip file.
@@ -49,17 +49,11 @@ jib {
         tags = [version]
     }
     container {
-        jvmFlags = ['-Dmojo.path=/mojos/pipeline.mojo']
+        jvmFlags = ['-Dmojo.path=/tmp/pipeline.mojo']
         ports = ['8080']
-        volumes = [
-                // For storing the mojo2 file with the model to be used for scoring.
-                '/mojos',
-                // For the DAI license file.
-                '/secrets',
-        ]
         environment = [
                 // The expected path to the DAI license file.
-                DRIVERLESS_AI_LICENSE_FILE: '/secrets/license.sig',
+                DRIVERLESS_AI_LICENSE_FILE: '/tmp/license.sig',
         ]
         extraClasspath = ["/java/main"]
     }

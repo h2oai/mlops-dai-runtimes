@@ -3,11 +3,13 @@ package ai.h2o.mojos.deploy.gcp.cloud.run.config;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +17,13 @@ import org.slf4j.LoggerFactory;
 public class EnvironmentConfiguration {
 
   private static final Logger log = LoggerFactory.getLogger(EnvironmentConfiguration.class);
-  private final String mojoDownloadPath = "/mojos";
-  private final String licenseDownloadPath = "/secrets";
-  private final Storage storage = initiateStorageClient();
+  private static final String MOJO_DOWNLOAD_PATH = "/tmp/pipeline.mojo";
+  private static final String LICENSE_DOWNLOAD_PATH = "/tmp/license.sig";
+  private Storage storage;
+
+  public EnvironmentConfiguration(Storage storage) {
+    this.storage = storage;
+  }
 
   /**
    * Method for ensuring scoring environment is correct and has expected files: pipeline.mojo and
@@ -25,46 +31,35 @@ public class EnvironmentConfiguration {
    */
   public void configureScoringEnvironment() {
     try {
-      assert !System.getenv("DRIVERLESS_AI_LICENSE_FILE").isEmpty();
-      downloadFromGcs();
-      File mojoFile = Paths.get(mojoDownloadPath, "pipeline.mojo").toFile();
-      assert mojoFile.exists();
-      File licenseFile = Paths.get(licenseDownloadPath, "license.sig").toFile();
-      assert licenseFile.exists();
+      Map<String, String> env = System.getenv();
+      Preconditions.checkArgument(
+          !env.getOrDefault("DRIVERLESS_AI_LICENSE_FILE", "").isEmpty(),
+          "Environment Variable: 'DRIVERLESS_AI_LICENSE_FILE' must be set");
+      downloadFromGcs(env);
+      File mojoFile = Paths.get(MOJO_DOWNLOAD_PATH).toFile();
+      File licFile = Paths.get(LICENSE_DOWNLOAD_PATH).toFile();
+      Preconditions.checkArgument(mojoFile.exists(), "File: %s, must exist", mojoFile.toString());
+      Preconditions.checkArgument(licFile.exists(), "File: %s, must exist", licFile.toString());
     } catch (Exception e) {
       throw new RuntimeException("Exception during startup", e);
     }
   }
 
-  private void downloadFromGcs() {
-    ensureDirectoryExists(mojoDownloadPath);
-    downloadFileFromGcs(getFromEnv("MOJO_GCS_PATH"));
-    ensureDirectoryExists(licenseDownloadPath);
-    downloadFileFromGcs(getFromEnv("LICENSE_GCS_PATH"));
+  private void downloadFromGcs(Map<String, String> env) {
+    downloadFileFromGcs(getFromEnv(env, "MOJO_GCS_PATH"), Paths.get(MOJO_DOWNLOAD_PATH));
+    downloadFileFromGcs(getFromEnv(env, "LICENSE_GCS_PATH"), Paths.get(LICENSE_DOWNLOAD_PATH));
   }
 
-  private void downloadFileFromGcs(String filePath) {
-    Properties fileProps = parseGcsPath(filePath);
+  private void downloadFileFromGcs(String gcsPath, Path outputPath) {
+    Properties fileProps = parseGcsPath(gcsPath);
     log.info(
         String.format(
             "Parsed GCS Path to - Bucket: %s, Path: %s",
             fileProps.getProperty("bucket"), fileProps.getProperty("filepath")));
     Blob blob =
         storage.get(BlobId.of(fileProps.getProperty("bucket"), fileProps.getProperty("filepath")));
-    if (filePath.endsWith(".mojo")) {
-      log.info(String.format("Downloading Mojo to: %s/pipeline.mojo", mojoDownloadPath));
-      blob.downloadTo(Paths.get(mojoDownloadPath, "pipeline.mojo"));
-    } else if (filePath.endsWith(".sig")) {
-      log.info(String.format("Downloading license to: %s/license.sig", licenseDownloadPath));
-      blob.downloadTo(Paths.get(licenseDownloadPath, "license.sig"));
-    } else {
-      String errMsg = "Path provided: %s, is not used for this scorer. Not downloading";
-      log.warn(String.format(errMsg, filePath));
-    }
-  }
-
-  private Storage initiateStorageClient() {
-    return StorageOptions.getDefaultInstance().getService();
+    log.info(String.format("Downloading file to: %s", outputPath.toString()));
+    blob.downloadTo(outputPath);
   }
 
   private Properties parseGcsPath(String gcsPath) {
@@ -76,16 +71,12 @@ public class EnvironmentConfiguration {
     return properties;
   }
 
-  private String getFromEnv(String envVar) {
-    if (System.getenv(envVar) == null) {
+  private String getFromEnv(Map<String, String> env, String envVar) {
+    String envValue = env.getOrDefault(envVar, "");
+    if (envValue.isEmpty()) {
       throw new RuntimeException(
           String.format("Error: required environment variable: %s, is not set", envVar));
     }
-    return System.getenv(envVar);
-  }
-
-  private void ensureDirectoryExists(String dirPath) {
-    File dir = new File(dirPath);
-    dir.mkdir();
+    return envValue;
   }
 }
