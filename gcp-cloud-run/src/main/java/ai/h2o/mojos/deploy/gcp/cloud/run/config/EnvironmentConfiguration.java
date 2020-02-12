@@ -5,7 +5,6 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -19,7 +18,7 @@ public class EnvironmentConfiguration {
   private static final Logger log = LoggerFactory.getLogger(EnvironmentConfiguration.class);
   private static final String MOJO_DOWNLOAD_PATH = "/tmp/pipeline.mojo";
   private static final String LICENSE_DOWNLOAD_PATH = "/tmp/license.sig";
-  private Storage storage;
+  private final Storage storage;
 
   public EnvironmentConfiguration(Storage storage) {
     this.storage = storage;
@@ -30,19 +29,14 @@ public class EnvironmentConfiguration {
    * license.sig.
    */
   public void configureScoringEnvironment() {
-    try {
-      Map<String, String> env = System.getenv();
-      Preconditions.checkArgument(
-          !env.getOrDefault("DRIVERLESS_AI_LICENSE_FILE", "").isEmpty(),
-          "Environment Variable: 'DRIVERLESS_AI_LICENSE_FILE' must be set");
-      downloadFromGcs(env);
-      File mojoFile = Paths.get(MOJO_DOWNLOAD_PATH).toFile();
-      File licFile = Paths.get(LICENSE_DOWNLOAD_PATH).toFile();
-      Preconditions.checkArgument(mojoFile.exists(), "File: %s, must exist", mojoFile.toString());
-      Preconditions.checkArgument(licFile.exists(), "File: %s, must exist", licFile.toString());
-    } catch (Exception e) {
-      throw new RuntimeException("Exception during startup", e);
-    }
+    Map<String, String> env = System.getenv();
+    String errMsg = "Environment Variable: 'DRIVERLESS_AI_LICENSE_FILE' must be set and be: %s";
+    Preconditions.checkArgument(
+        env.getOrDefault("DRIVERLESS_AI_LICENSE_FILE", "").equals(LICENSE_DOWNLOAD_PATH),
+        errMsg,
+        LICENSE_DOWNLOAD_PATH);
+    downloadFromGcs(env);
+    log.info("Successfully downloaded files from GCS. Starting rest scoring service");
   }
 
   private void downloadFromGcs(Map<String, String> env) {
