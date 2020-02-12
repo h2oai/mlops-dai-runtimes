@@ -5,14 +5,8 @@ plugins {
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
-    implementation project(':common:rest-spring-api')
-    implementation project(':common:transform')
     implementation project(':local-rest-scorer')
-    implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
-    implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
-    implementation group: 'io.springfox', name: 'springfox-swagger2'
-    implementation group: 'io.springfox', name: 'springfox-swagger-ui'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.slf4j', name: 'slf4j-api'
     implementation group: 'com.google.cloud', name: 'google-cloud-storage'
 }
 
