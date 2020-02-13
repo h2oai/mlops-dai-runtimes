@@ -32,9 +32,6 @@ rootProject.distributionZip {
 
 // Docker image configuration.
 jib {
-    extraDirectories {
-        paths = "${project.rootDir}/local-rest-scorer/build/classes/"
-    }
     from {
         image = 'openjdk:8-jre-alpine'
     }
@@ -49,7 +46,6 @@ jib {
                 // The expected path to the DAI license file.
                 DRIVERLESS_AI_LICENSE_FILE: '/tmp/license.sig',
         ]
-        extraClasspath = ["/java/main"]
     }
 }
 
