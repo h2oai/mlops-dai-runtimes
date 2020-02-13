@@ -1,0 +1,52 @@
+plugins {
+    id 'com.google.cloud.tools.jib'
+    id 'org.springframework.boot'
+}
+apply from: project(":").file('gradle/java.gradle')
+
+dependencies {
+    implementation project(':local-rest-scorer')
+    implementation group: 'org.slf4j', name: 'slf4j-api'
+    implementation group: 'com.google.cloud', name: 'google-cloud-storage'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+bootRun {
+    systemProperties System.properties
+}
+
+bootJar {
+    mainClassName = 'ai.h2o.mojos.deploy.gcp.cloud.run.GcpScorerApplication'
+}
+
+// Include the local rest scorer executable jar in the root package distribution zip file.
+rootProject.distributionZip {
+    dependsOn bootJar
+    into(this.project.path.replace(":", "/")) {
+        from bootJar.archivePath
+    }
+}
+
+// Docker image configuration.
+jib {
+    from {
+        image = 'openjdk:8-jre-alpine'
+    }
+    to {
+        image = dockerRepositoryPrefix + 'google-cloud-run-scorer'
+        tags = [version]
+    }
+    container {
+        jvmFlags = ['-Dmojo.path=/tmp/pipeline.mojo']
+        ports = ['8080']
+        environment = [
+                // The expected path to the DAI license file.
+                DRIVERLESS_AI_LICENSE_FILE: '/tmp/license.sig',
+        ]
+    }
+}
+
+tasks.build.dependsOn tasks.jibBuildTar

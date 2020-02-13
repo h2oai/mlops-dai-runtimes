@@ -24,6 +24,11 @@ bootRun {
 
 bootJar {
     mainClassName = 'ai.h2o.mojos.deploy.local.rest.ScorerApplication'
+    archiveClassifier = 'boot'
+}
+
+jar {
+    enabled = true
 }
 
 // Include the local rest scorer executable jar in the root package distribution zip file.
