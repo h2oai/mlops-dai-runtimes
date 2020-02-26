@@ -18,7 +18,7 @@ from azureml.core.webservice import AciWebservice, AksWebservice, Webservice
 from azureml.core.compute import AksCompute, ComputeTarget
 from azureml.core.webservice import LocalWebservice
 #Azure Blob
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.storage.blob import BlockBlobService, PublicAccess
 #Azure Mgmt
 from azure.mgmt.resource import ResourceManagementClient
 from azure.common.credentials import ServicePrincipalCredentials
@@ -76,26 +76,22 @@ storage_account = storage_async_operation.result()
 storage_keys = storage_client.storage_accounts.list_keys(config['resource_group_name'], config['storage_name'])
 storage_keys = {v.key_name: v.value for v in storage_keys.keys}
 
-url = "https://{}.blob.core.windows.net".format(config['storage_name'])
-blob_service_client = BlobServiceClient(account_url=url, credential=storage_keys['key1'])
-
+block_blob_service = BlockBlobService(
+    account_name=config['storage_name'], account_key=storage_keys['key1'])
 
 container_name = 'mojodependencies'
-container_client = blob_service_client.create_container(container_name,public_access="blob" )
+block_blob_service.create_container(container_name)
+
+# Set the permission so the blobs are public.
+block_blob_service.set_container_acl(
+    container_name, public_access=PublicAccess.Container)
 
 # Upload packages and modify dai_deploy.yml    
 
-blob_client = blob_service_client.get_blob_client(container=container_name, blob=os.path.basename(config['daimojo_path']))
-with open(config['daimojo_path'], "rb") as data:
-    blob_client.upload_blob(data)
-    
-daimojo_url=blob_client.url
 
-blob_client = blob_service_client.get_blob_client(container=container_name, blob=os.path.basename(config['datatable_path']))
-with open(config['datatable_path'], "rb") as data:
-    blob_client.upload_blob(data)
-    
-datatable_url=blob_client.url
+block_blob_service.create_blob_from_path(
+    container_name, os.path.basename(config['daimojo_path']), config['daimojo_path'])
+daimojo_url=block_blob_service.make_blob_url(container_name,os.path.basename(config['daimojo_path']))
 
 shutil.copy('../scoring-pipeline/dai_deploy_template.yml', '../scoring-pipeline/dai_deploy.yml')
 
@@ -103,7 +99,6 @@ with open('../scoring-pipeline/dai_deploy.yml', 'r') as f:
     template = f.read()
 
 template = template.replace('@@DAI MOJO URL@@', daimojo_url)
-template = template.replace('@@DATA TABLE URLL@@', datatable_url)
 
 with open('../scoring-pipeline/dai_deploy.yml', 'w') as f:
     f.write(template)
