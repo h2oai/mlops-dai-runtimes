@@ -9,7 +9,6 @@ dependencies {
     implementation project(':common:rest-jdbc-spring-api')
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
-    implementation group: 'ai.h2o', name: 'sparkling-water-core_2.11'
     implementation group: 'ai.h2o', name: 'sparkling-water-scoring_2.11'
     implementation group: 'org.scala-lang', name: 'scala-library'
     implementation group: 'org.apache.spark', name: 'spark-core_2.11'
