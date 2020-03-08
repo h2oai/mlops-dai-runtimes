@@ -1,0 +1,187 @@
+swagger: '2.0'
+info:
+  description: >-
+    This is a definition of the REST API for scoring from H2O. This API is
+    intended to be used within DAI and eventually across all H2O scoring systems
+  version: 1.0.0
+  title: Scoring API - v1
+  termsOfService: ''
+  contact:
+    email: support@h2o.ai
+  license:
+    name: License
+    url: 'http://www.h2o.ai'
+host: localhost
+basePath: /
+schemes:
+  - https
+  - http
+paths:
+  /model/id:
+    get:
+      tags:
+        - metadata
+      summary: Returns model id
+      description: Returns unique id of the model loaded in the server and used for scoring
+      operationId: getModelId
+      produces:
+        - text/plain
+      parameters: []
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: string
+      security:
+        - api_key: []
+  '/model/schema':
+    get:
+      tags:
+        - metadata
+      summary: Describe a model
+      description: Returns information about the model used for scoring, e.g., input schema.
+      operationId: getModelInfo
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Model'
+  '/model/score':
+    post:
+      tags:
+        - scoring
+      summary: Score on given rows
+      description: Computes score of the rows sent in the body of the post request
+      operationId: getScore
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: payload
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ScoreRequest'
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ScoreResponse'
+        '400':
+          description: Invalid payload
+    get:
+      tags:
+        - scoring
+      summary: Score on given file
+      description: Computes score of the rows in the file specified by the path in the query parameter
+      operationId: getScoreByGet
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: sqlQuery
+          type: string
+        - in: query
+          name: outputTable
+          type: string
+        - in: query
+          name: idColumn
+          type: string
+          required: false
+        - in: query
+          name: saveMethod
+          type: string
+          enum:
+            - preview
+            - append
+            - overwrite
+            - ignore
+            - error
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ScoreResponse'
+        '400':
+          description: Invalid payload
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+definitions:
+  Model:
+    type: object
+    properties:
+      id:
+        type: string
+      schema:
+        $ref: '#/definitions/ModelSchema'
+  ScoreRequest:
+    type: object
+    required:
+      - sqlQuery
+      - outputTable
+      - saveMethod
+    properties:
+      sqlQuery:
+        description: >
+          A string that is the SQL statement to be used for querying the configured database
+        type: string
+      outputTable:
+        description: >
+          A string containing the name of the sql table to which the scored data will be written to.
+        type: string
+      idColumn:
+        description: >
+          A string containing column name matching the ID column/Primary key of table being queried
+        type: string
+      saveMethod:
+        description: >
+          String dictating how the resultant scored data should be written. can be one of:
+          preview - does not write to configured sql database, but returns sample which can be reviewed,
+          append - if output table already exists, data will be appended to that table,
+          overwrite - if the output table already exists, the table will be overwritten with new data,
+          ignore - if output table already exists, the new data will be dropped and nothing will be written,
+          error - if the output table already exists, the new data will be dropped and an error will be thrown
+        type: string
+        enum:
+          - preview
+          - append
+          - overwrite
+          - ignore
+          - error
+  ScoreResponse:
+    type: object
+    properties:
+      id:
+        description: >
+          A unique id of the model used for scoring.
+        type: string
+      success:
+        description: >
+          A boolean value dictating whether the scoring request was successful
+        type: boolean
+      previewScores:
+        description: >
+          first few rows, up to 5, of the resultant scored dataset
+        type: array
+        items:
+          type: string
+      previewColumns:
+        description: >
+          names of output columns for scoring preview
+        type: array
+        items:
+          type: string
+  ModelSchema:
+    type: object
+    properties:
+      inputFields:
+        type: array
+        items:
+          type: string

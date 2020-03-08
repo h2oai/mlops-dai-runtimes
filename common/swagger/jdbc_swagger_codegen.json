@@ -1,0 +1,7 @@
+{
+  "basePackage":"ai.h2o.mojos.deploy.common.rest.jdbc",
+  "configPackage":"ai.h2o.mojos.deploy.common.rest.jdbc.config",
+  "modelPackage": "ai.h2o.mojos.deploy.common.rest.jdbc.model",
+  "apiPackage" : "ai.h2o.mojos.deploy.common.rest.jdbc.api",
+  "interfaceOnly" : true
+}
