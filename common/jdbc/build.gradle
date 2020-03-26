@@ -16,9 +16,6 @@ dependencies {
     implementation group: 'org.apache.spark', name: 'spark-mllib_2.11'
     implementation group: 'com.typesafe', name:'config'
 
-    zinc group: 'com.typesafe.zinc', name: 'zinc', version: '0.3.9'
-    zinc group: 'org.scala-lang', name: 'scala-library', version: '2.10.5'
-
     testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '3.0.5'
     testRuntimeOnly group:'org.scala-lang.modules', name: 'scala-xml_2.11', version: '1.1.1'
     testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'
