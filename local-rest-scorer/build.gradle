@@ -7,6 +7,8 @@ apply from: project(":").file('gradle/java.gradle')
 dependencies {
     implementation project(':common:rest-spring-api')
     implementation project(':common:transform')
+    implementation group: 'ai.h2o', name: 'h2o-genmodel'
+    implementation group: 'ai.h2o', name: 'h2o-genmodel-ext-xgboost'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-h2o3-impl'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'

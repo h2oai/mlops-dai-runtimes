@@ -9,6 +9,10 @@ dependencyManagement {
             entry 'mojo2-runtime-h2o3-impl'
             entry 'mojo2-runtime-impl'
         }
+        dependencySet(group: 'ai.h2o', version: h2oVersion) {
+            entry 'h2o-genmodel'
+            entry 'h2o-genmodel-ext-xgboost'
+        }
         dependency group: 'com.amazonaws', name: 'aws-lambda-java-core', version: awsLambdaCoreVersion
         dependency group: 'com.amazonaws', name: 'aws-lambda-java-events', version: awsLambdaEventsVersion
         dependency group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsSdkS3Version
