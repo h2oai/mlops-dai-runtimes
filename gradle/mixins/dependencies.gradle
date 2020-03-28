@@ -4,8 +4,13 @@ apply plugin: 'io.spring.dependency-management'
 
 dependencyManagement {
     dependencies {
+        dependencySet(group: 'ai.h2o', version: h2oVersion) {
+            entry 'h2o-genmodel'
+            entry 'h2o-genmodel-ext-xgboost'
+        }
         dependencySet(group: 'ai.h2o', version: mojoRuntimeVersion) {
             entry 'mojo2-runtime-api'
+            entry 'mojo2-runtime-h2o3-impl'
             entry 'mojo2-runtime-impl'
         }
         dependency group: 'com.amazonaws', name: 'aws-lambda-java-core', version: awsLambdaCoreVersion
