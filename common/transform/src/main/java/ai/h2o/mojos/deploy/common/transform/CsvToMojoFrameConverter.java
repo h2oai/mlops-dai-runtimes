@@ -6,8 +6,6 @@ import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
 import ai.h2o.mojos.runtime.utils.BatchedCsvMojoProcessor;
-import com.opencsv.CSVReader;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,9 +21,8 @@ public class CsvToMojoFrameConverter {
 
     Reader reader = new InputStreamReader(inputStream, UTF_8);
     // Use default CSV parser settings.
-    final Iterator<String[]> csvReaderIter  = BatchedCsvMojoProcessor
-        .readerToCsvReader(reader)
-        .iterator();
+    final Iterator<String[]> csvReaderIter =
+        BatchedCsvMojoProcessor.readerToCsvReader(reader).iterator();
     // Read first row as column labels
     final String[] labels = csvReaderIter.next();
 
