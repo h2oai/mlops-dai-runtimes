@@ -7,6 +7,8 @@ import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
 import ai.h2o.mojos.runtime.utils.BatchedCsvMojoProcessor;
 import com.opencsv.CSVReader;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -15,16 +17,22 @@ import java.util.Iterator;
 /** Converts the CSV from {@link InputStream} to the {@link MojoFrame} for scoring. */
 public class CsvToMojoFrameConverter {
   /** Converts the CSV data from the given {@link InputStream} to a {@link MojoFrame}. */
-  public MojoFrame apply(InputStream inputStream, MojoFrameBuilder frameBuilder) {
+  public MojoFrame apply(InputStream inputStream, MojoFrameBuilder frameBuilder)
+      throws IOException {
     MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
 
     Reader reader = new InputStreamReader(inputStream, UTF_8);
-
-    final CSVReader csvReader = BatchedCsvMojoProcessor.readerToCsvReader(reader);
-
-    final Iterator<String[]> csvReaderIter = csvReader.iterator();
-
+    // Use default CSV parser settings.
+    final Iterator<String[]> csvReaderIter  = BatchedCsvMojoProcessor
+        .readerToCsvReader(reader)
+        .iterator();
+    // Read first row as column labels
     final String[] labels = csvReaderIter.next();
+
+    // It looks like empty file, so follow original contract and throw IOException
+    if (labels == null) {
+      throw new IOException("Empty csv file!");
+    }
 
     if (labels.length != rowBuilder.size()) {
       throw new IllegalArgumentException(

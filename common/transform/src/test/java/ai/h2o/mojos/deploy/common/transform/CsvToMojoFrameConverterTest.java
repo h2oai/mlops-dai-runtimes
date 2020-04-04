@@ -20,6 +20,15 @@ class CsvToMojoFrameConverterTest {
   private final CsvToMojoFrameConverter converter = new CsvToMojoFrameConverter();
 
   @Test
+  void convertEmptyFile_fails() {
+    // Given
+    InputStream csv = toCsvStream("");
+
+    // When & Then
+    assertThrows(IOException.class, () -> converter.apply(csv, emptyFrameBuilder()));
+  }
+
+  @Test
   void convertColumnCountsMismatch_fails() {
     // Given
     InputStream csv = toCsvStream("Field1,Field2,Field3");
