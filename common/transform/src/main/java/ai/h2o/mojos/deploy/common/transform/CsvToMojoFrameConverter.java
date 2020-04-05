@@ -12,9 +12,23 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Iterator;
 
-/** Converts the CSV from {@link InputStream} to the {@link MojoFrame} for scoring. */
+/**
+ * Converts the CSV from {@link InputStream} to the {@link MojoFrame} for scoring.
+ *
+ * @deprecated use {@link BatchedCsvMojoProcessor} instead, it is better for large datasets as it
+ *     can process it by batches of configurable size.
+ */
+@Deprecated
 public class CsvToMojoFrameConverter {
-  /** Converts the CSV data from the given {@link InputStream} to a {@link MojoFrame}. */
+  /**
+   * Converts the CSV data from the given {@link InputStream} to a {@link MojoFrame}.
+   *
+   * @deprecated use {@link BatchedCsvMojoProcessor} instead, it is better for large datasets as it
+   *     can process it by batches of configurable size. An example usage is here:
+   *     https://github.com/h2oai/mojo2/blob/master/java/mojo2-runtime-impl/src-examples/main/java/ai/h2o/mojos/ExecuteMojo.java#L67-L77
+   *     .
+   */
+  @Deprecated
   public MojoFrame apply(InputStream inputStream, MojoFrameBuilder frameBuilder)
       throws IOException {
     MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
