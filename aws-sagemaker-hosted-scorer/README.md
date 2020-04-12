@@ -1,4 +1,4 @@
-# Sagemaker Hosted Scorer
+# SageMaker Hosted Scorer
 
 
 ## Summary
@@ -112,4 +112,114 @@ test.json:
     "field1" : "value1",
     "field2" : "value2"
 }
+```
+
+
+## Simple standalone REST server without SageMaker
+
+There is a second endpoint, predict_parameters, which you can use with just
+a vanilla HTTP GET and specifying model parameters with the query string
+instead of with a JSON payload.
+
+This is handy for local testing.  After building the image, you can run it
+locally as follows:
+
+```
+DRIVERLESS_AI_LICENSE_KEY=<paste key here> java -jar build/libs/serve.jar
+```
+
+(You can put the license key in ~/.driverlessai/license.sig instead if that is easier.)
+
+This opens an HTTP server on port 8080.
+
+You can then send traffic to the server using standard tools like curl:
+
+```
+curl -v "http://localhost:8080/predict_parameters?field1=value1&field2=value2"
+```
+
+output:
+
+```
+* Trying ::1...
+* TCP_NODELAY set
+* Connected to localhost (::1) port 8080 (#0)
+> GET /predict_parameters?step=0&customer=C1093826151&age=4&gender=M&zipcodeOri=28007&merchant=M348934600&zipMerchant=28007&category=es_transportation&amount=4.55 HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.52.1
+> Accept: */*
+> 
+< HTTP/1.1 200 
+< Content-Type: application/json;charset=UTF-8
+< Transfer-Encoding: chunked
+< Date: Sun, 12 Apr 2020 19:30:05 GMT
+< 
+* Curl_http_done: called premature == 0
+* Connection #0 to host localhost left intact
+{"fraud.1":"0.01028668978375894","fraud.0":"0.9897133102162411"}
+```
+
+and apachebench for simple load-testing:
+
+```
+ab -k -c 40 -n 100000 "http://localhost:8080/predict_parameters?field1=value1&field2=value2"
+```
+
+output:
+
+```
+This is ApacheBench, Version 2.3 <$Revision: 1706008 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+Completed 10000 requests
+Completed 20000 requests
+Completed 30000 requests
+Completed 40000 requests
+Completed 50000 requests
+Completed 60000 requests
+Completed 70000 requests
+Completed 80000 requests
+Completed 90000 requests
+Completed 100000 requests
+Finished 100000 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            8080
+
+Document Path:          /predict_parameters?step=0&customer=C1093826151&age=4&gender=M&zipcodeOri=28007&merchant=M348934600&zipMerchant=28007&category=es_transportation&amount=4.55
+Document Length:        64 bytes
+
+Concurrency Level:      40
+Time taken for tests:   6.540 seconds
+Complete requests:      100000
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      18300000 bytes
+HTML transferred:       6400000 bytes
+Requests per second:    15290.97 [#/sec] (mean)
+Time per request:       2.616 [ms] (mean)
+Time per request:       0.065 [ms] (mean, across all concurrent requests)
+Transfer rate:          2732.66 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.2      1       2
+Processing:     1    2   1.1      2      31
+Waiting:        1    2   1.1      2      30
+Total:          1    3   1.1      3      32
+
+Percentage of the requests served within a certain time (ms)
+  50%      3
+  66%      3
+  75%      3
+  80%      3
+  90%      3
+  95%      3
+  98%      3
+  99%      4
+ 100%     32 (longest request)
 ```
