@@ -27,7 +27,7 @@ task buildZip(type: Zip) {
     from compileJava
     from processResources
     into('lib') {
-        from configurations.compileClasspath
+        from configurations.runtimeClasspath
     }
 }
 build.dependsOn buildZip
