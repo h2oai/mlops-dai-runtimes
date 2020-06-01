@@ -162,11 +162,6 @@ class MojoPipelineToModelInfoConverterTest {
     }
 
     @Override
-    public MojoFrame transform(MojoFrame inputFrame) {
-      throw new AssertionError("Not supported by test DummyPipeline.");
-    }
-
-    @Override
     public MojoFrame transform(MojoFrame inputFrame, MojoFrame outputFrame) {
       throw new AssertionError("Not supported by test DummyPipeline.");
     }
