@@ -23,6 +23,9 @@ for i, row in sample_df.iterrows():
 
 
 # Score all rows in single request
+# Replace any null values with stringified version
+# Else will result in json parsing errors
+sample_df = sample_df.fillna("NaN")
 payload = {"fields": list(sample_df.columns), "rows": sample_df.values.tolist()}
 res = requests.post(URL, data=payload, headers=HEADERS)
 
