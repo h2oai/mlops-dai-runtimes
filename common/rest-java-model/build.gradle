@@ -7,6 +7,7 @@ dependencies {
     implementation group: 'com.google.code.gson', name: 'gson'
     implementation group: 'javax.annotation', name: 'javax.annotation-api'
     implementation group: 'io.swagger.core.v3', name: 'swagger-annotations'
+    
     swaggerCodegen project(path: ':common:swagger', configuration: 'archives')
     swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
 }

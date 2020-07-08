@@ -41,7 +41,7 @@ task verifySwaggerApiHash {
             | (1) update property `swaggerApiVersion` in `gradle.properties`:
             |     - if the change of API is minor then update minor part of version.
             |     - if you change version of API then update major part of version.
-            | (2) run `gradle generateSwaggerApiHash` to get new hash and
+            | (2) run `./gradlew generateSwaggerApiHash` to get new hash and
             |     update the `swaggerApiHash` variable in `gradle.properties`.
             |""".stripMargin())
 
@@ -61,7 +61,9 @@ task generateSwaggerApiHash {
         print("""--- Copy to gradle.properties ---
         |swaggerApiVersion = ${swaggerApiVersion}
         |swaggerApiHash = ${hash}
-        |------------""".stripMargin())
+        |------------
+        | NOTE: Do not forget to bump minorVersion for the Swagger change!
+        |""".stripMargin())
     }
 }
 
