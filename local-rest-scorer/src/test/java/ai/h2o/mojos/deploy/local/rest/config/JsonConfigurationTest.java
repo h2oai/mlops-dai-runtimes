@@ -4,14 +4,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ai.h2o.mojos.deploy.common.rest.model.Row;
-
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -31,7 +28,6 @@ class JsonConfigurationTest {
   private ObjectMapper objectMapper;
 
   private ObjectMapper defaultObjectMapper = new ObjectMapper();
-
 
   @ParameterizedTest
   @MethodSource
@@ -54,22 +50,17 @@ class JsonConfigurationTest {
             Arguments.arguments("[]", toRow()),
             Arguments.arguments("[null]", toRow((String) null)),
             Arguments.arguments("[1,\"NaN\",3]", toRow("1", "NaN", "3")),
-            Arguments.arguments("[0,1,2,\"Infinity\"]", toRow("0", "1", "2", "Infinity"))
-        ),
-        defaultObjectMapperShouldFailOnNonNumericRows()
-    );
+            Arguments.arguments("[0,1,2,\"Infinity\"]", toRow("0", "1", "2", "Infinity"))),
+        defaultObjectMapperShouldFailOnNonNumericRows());
   }
 
   @ParameterizedTest
   @MethodSource
   public void defaultObjectMapperShouldFailOnNonNumericRows(
-      String givenRowJson,
-      @SuppressWarnings("unused") Row expRow) {
+      String givenRowJson, @SuppressWarnings("unused") Row expRow) {
     // When & Then
     assertThrows(
-        JsonMappingException.class,
-        () -> defaultObjectMapper.readValue(givenRowJson, Row.class)
-    );
+        JsonMappingException.class, () -> defaultObjectMapper.readValue(givenRowJson, Row.class));
   }
 
   @SuppressWarnings("unused")
@@ -77,8 +68,7 @@ class JsonConfigurationTest {
     return Stream.of(
         Arguments.arguments("[1,NaN,3]", toRow("1", "NaN", "3")),
         Arguments.arguments("[Infinity]", toRow("Infinity")),
-        Arguments.arguments("[-Infinity, -2, -1, 0.0]", toRow("-Infinity", "-2", "-1", "0.0"))
-    );
+        Arguments.arguments("[-Infinity, -2, -1, 0.0]", toRow("-Infinity", "-2", "-1", "0.0")));
   }
 
   private static Row toRow(String... values) {
