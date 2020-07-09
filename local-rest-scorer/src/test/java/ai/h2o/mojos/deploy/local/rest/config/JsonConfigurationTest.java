@@ -31,7 +31,7 @@ class JsonConfigurationTest {
 
   @ParameterizedTest
   @MethodSource
-  public void objectMapperShouldHandlesMixedValueRows(String givenRowJson, Row expRow)
+  public void objectMapperShouldHandleMixedValueRows(String givenRowJson, Row expRow)
       throws IOException {
     // When
     Row row = objectMapper.readValue(givenRowJson, Row.class);
@@ -41,7 +41,7 @@ class JsonConfigurationTest {
   }
 
   @SuppressWarnings("unused")
-  private static Stream<Arguments> objectMapperShouldHandlesMixedValueRows() {
+  private static Stream<Arguments> objectMapperShouldHandleMixedValueRows() {
     return Stream.concat(
         Stream.of(
             Arguments.arguments("[1,2,3]", toRow("1", "2", "3")),
