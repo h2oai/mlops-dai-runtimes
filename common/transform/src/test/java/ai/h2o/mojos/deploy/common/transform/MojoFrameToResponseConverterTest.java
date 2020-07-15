@@ -1,5 +1,11 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Bool;
+import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Float32;
+import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Float64;
+import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Int32;
+import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Int64;
+import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Str;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Arrays.asList;
 
@@ -13,6 +19,9 @@ import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class MojoFrameToResponseConverterTest {
   private final MojoFrameToResponseConverter converter = new MojoFrameToResponseConverter();
@@ -35,7 +44,7 @@ class MojoFrameToResponseConverterTest {
   void convertSingleFieldResponse_succeeds() {
     // Given
     String[] fields = {"field"};
-    Type[] types = {Type.Str};
+    Type[] types = {Str};
     String[][] values = {{"value"}};
     ScoreRequest scoreRequest = new ScoreRequest();
 
@@ -51,7 +60,7 @@ class MojoFrameToResponseConverterTest {
   void convertSingleFieldResponse_withoutFieldNames_succeeds() {
     // Given
     String[] fields = {"field"};
-    Type[] types = {Type.Str};
+    Type[] types = {Str};
     String[][] values = {{"value"}};
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setNoFieldNamesInOutput(true);
@@ -68,7 +77,7 @@ class MojoFrameToResponseConverterTest {
   void convertIncludesOneField_succeeds() {
     // Given
     String[] fields = {"outputField"};
-    Type[] types = {Type.Str};
+    Type[] types = {Str};
     String[][] values = {{"outputValue"}};
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.addFieldsItem("inputField");
@@ -87,7 +96,7 @@ class MojoFrameToResponseConverterTest {
   void convertIncludesSomeFields_succeeds() {
     // Given
     String[] fields = {"outputField1", "outputField2"};
-    Type[] types = {Type.Str, Type.Str};
+    Type[] types = {Str, Str};
     String[][] values = {{"outputValue1", "outputValue2"}};
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setFields(asList("inputField1", "inputField2", "inputField3"));
@@ -109,7 +118,7 @@ class MojoFrameToResponseConverterTest {
   void convertIncludePresentIdField_succeeds() {
     // Given
     String[] fields = {"outputField"};
-    Type[] types = {Type.Str};
+    Type[] types = {Str};
     String[][] values = {{"outputValue"}};
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setFields(asList("inputField", "omittedField", "id"));
@@ -129,7 +138,7 @@ class MojoFrameToResponseConverterTest {
   void convertIncludeMissingIdField_generateUuid() {
     // Given
     String[] fields = {"outputField"};
-    Type[] types = {Type.Str};
+    Type[] types = {Str};
     String[][] values = {{"outputValue"}};
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setFields(asList("inputField", "omittedField"));
@@ -155,7 +164,7 @@ class MojoFrameToResponseConverterTest {
   void convertMoreRowsResponse_succeeds() {
     // Given
     String[] fields = {"field"};
-    Type[] types = {Type.Str};
+    Type[] types = {Str};
     String[][] values = {{"value1"}, {"value2"}, {"value3"}};
     ScoreRequest scoreRequest = new ScoreRequest();
 
@@ -169,11 +178,11 @@ class MojoFrameToResponseConverterTest {
     assertThat(result.getFields()).containsExactly("field");
   }
 
-  @Test
-  void convertMoreTypesResponse_succeeds() {
+  @ParameterizedTest
+  @MethodSource("provideValues_convertMoreTypesResponse_succeeds")
+  void convertMoreTypesResponse_succeeds(String[][] values) {
     // Given
-    Type[] types = {Type.Str, Type.Float32, Type.Float64, Type.Bool, Type.Int32, Type.Int64};
-    String[][] values = {{"str", "1.1", "2.2", "1", "123", "123456789"}};
+    Type[] types = {Str, Float32, Float64, Bool, Int32, Int64};
     ScoreRequest scoreRequest = new ScoreRequest();
 
     // When
@@ -191,14 +200,81 @@ class MojoFrameToResponseConverterTest {
         .inOrder();
   }
 
+  @SuppressWarnings("unused")
+  private static Stream<Arguments> provideValues_convertMoreTypesResponse_succeeds() {
+    return Stream.of(
+        Arguments.of((Object) new String[][] {{"str", "1.1", "2.2", "1", "123", "123456789"}}),
+        Arguments.of((Object) new String[][] {{null, null, null, null, null, null}}));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideValues_convertMoreTypesResponse_actualValues_succeeds")
+  void convertMoreTypesResponse_actualValues_succeeds(Object[][] values, String[][] expValues) {
+    // Given
+    Type[] types = {Str, Float32, Float64, Bool, Int32, Int64};
+    ScoreRequest scoreRequest = new ScoreRequest();
+
+    // When
+    ScoreResponse result =
+        converter.apply(
+            buildMojoFrame(
+                Stream.of(types).map(Object::toString).toArray(String[]::new),
+                types,
+                values,
+                (rb, type, col, value) -> setJavaValue(rb, type, col, value)),
+            scoreRequest);
+
+    // Then
+    assertThat(result.getScore())
+        .containsExactly(
+            Stream.of(expValues).map(MojoFrameToResponseConverterTest::asRow).toArray());
+    assertThat(result.getFields())
+        .containsExactly("Str", "Float32", "Float64", "Bool", "Int32", "Int64")
+        .inOrder();
+  }
+
+  @SuppressWarnings("unused")
+  private static Stream<Arguments> provideValues_convertMoreTypesResponse_actualValues_succeeds() {
+    return Stream.of(
+        Arguments.of(
+            aao("foo", -1.0f, -2.0, true, 1, 2L), aas("foo", "-1.0", "-2.0", "1", "1", "2")),
+        Arguments.of(
+            aao(null, Float.NaN, Double.NaN, null, null, null),
+            aas(null, null, null, null, null, null)),
+        Arguments.of(
+            aao(
+                null,
+                Float.NEGATIVE_INFINITY,
+                Double.NEGATIVE_INFINITY,
+                null,
+                Integer.MIN_VALUE,
+                Long.MIN_VALUE),
+            aas(null, "-Infinity", "-Infinity", null, null, null)),
+        Arguments.of(
+            aao(
+                null,
+                Float.POSITIVE_INFINITY,
+                Double.POSITIVE_INFINITY,
+                null,
+                Integer.MAX_VALUE,
+                Long.MAX_VALUE),
+            aas(null, "Infinity", "Infinity", null, "2147483647", "9223372036854775807")));
+  }
+
   private static MojoFrame buildMojoFrame(String[] fields, Type[] types, String[][] values) {
+    return buildMojoFrame(fields, types, values, (rb, type, col, value) -> rb.setValue(col, value));
+  }
+
+  private static <T> MojoFrame buildMojoFrame(
+      String[] fields, Type[] types, T[][] values, RowBuilderSetter<T> setter) {
     MojoFrameMeta meta = new MojoFrameMeta(fields, types);
     MojoFrameBuilder frameBuilder = new MojoFrameBuilder(meta);
-    for (String[] row : values) {
+    for (T[] row : values) {
       MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
       int col = 0;
-      for (String value : row) {
-        rowBuilder.setValue(col++, value);
+      for (T value : row) {
+        Type type = types[col];
+        setter.setValue(rowBuilder, type, col++, value);
       }
       frameBuilder.addRow(rowBuilder);
     }
@@ -210,5 +286,37 @@ class MojoFrameToResponseConverterTest {
     row.ensureCapacity(values.length);
     row.addAll(asList(values));
     return row;
+  }
+
+  private static Object[][] aao(Object... values) {
+    return new Object[][] {values};
+  }
+
+  private static String[][] aas(String... values) {
+    return new String[][] {values};
+  }
+
+  private static MojoRowBuilder setJavaValue(MojoRowBuilder rb, Type type, int col, Object value) {
+    switch (type) {
+      case Bool:
+        return rb.setBool(col, (Boolean) value);
+      case Str:
+        return rb.setString(col, (String) value);
+      case Int32:
+        return rb.setInt(col, (Integer) value);
+      case Int64:
+        return rb.setLong(col, (Long) value);
+      case Float32:
+        return rb.setFloat(col, (Float) value);
+      case Float64:
+        return rb.setDouble(col, (Double) value);
+      default:
+        throw new IllegalArgumentException("Unsupported type " + type);
+    }
+  }
+
+  @FunctionalInterface
+  interface RowBuilderSetter<T> {
+    void setValue(MojoRowBuilder rb, Type colType, int col, T value);
   }
 }
