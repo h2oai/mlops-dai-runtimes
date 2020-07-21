@@ -18,7 +18,7 @@ pipeline {
     options {
         ansiColor('xterm')
         timestamps()
-        timeout(time: 60, unit: 'MINUTES')
+        timeout(time: 180, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
@@ -61,10 +61,12 @@ pipeline {
                 }
             }
             steps {
-                script {
-                    versionText = getVersion()
-                    echo "Version: ${versionText}"
-                    sh "./gradlew check"
+                timeout(time: 30, unit: 'MINUTES') {
+                    script {
+                        versionText = getVersion()
+                        echo "Version: ${versionText}"
+                        sh "./gradlew check"
+                    }
                 }
             }
             post {
@@ -83,10 +85,12 @@ pipeline {
                 }
             }
             steps {
-                script {
-                    sh "./gradlew distributionZip"
-                    if (isReleaseVersion(versionText)) {
-                        utilsLib.appendBuildDescription("Release ${versionText}")
+                timeout(time: 60, unit: 'MINUTES') {
+                    script {
+                        sh "./gradlew distributionZip"
+                        if (isReleaseVersion(versionText)) {
+                            utilsLib.appendBuildDescription("Release ${versionText}")
+                        }
                     }
                 }
             }
@@ -107,15 +111,17 @@ pipeline {
                 }
             }
             steps {
-                script {
-                    unstash name: "distribution-zip"
-                    s3upDocker {
-                        localArtifact = "build/dai-deployment-templates-${versionText}.zip"
-                        artifactId = 'dai-deployment-templates'
-                        version = "${versionText}"
-                        keepPrivate = false
-                        isRelease = isReleaseVersion(versionText)
-                        platform = "any"
+                timeout(time: 30, unit: 'MINUTES') {
+                    script {
+                        unstash name: "distribution-zip"
+                        s3upDocker {
+                            localArtifact = "build/dai-deployment-templates-${versionText}.zip"
+                            artifactId = 'dai-deployment-templates'
+                            version = "${versionText}"
+                            keepPrivate = false
+                            isRelease = isReleaseVersion(versionText)
+                            platform = "any"
+                        }
                     }
                 }
             }
@@ -142,16 +148,18 @@ pipeline {
                 }
             }
             steps {
-                script {
-                    def gitCommitHash = env.GIT_COMMIT
-                    def imageTags = "${versionText},${gitCommitHash}"
-                    withDockerCredentials("harbor.h2o.ai") {
-                        sh "./gradlew jib \
+                timeout(time: 30, unit: 'MINUTES') {
+                    script {
+                        def gitCommitHash = env.GIT_COMMIT
+                        def imageTags = "${versionText},${gitCommitHash}"
+                        withDockerCredentials("harbor.h2o.ai") {
+                            sh "./gradlew jib \
                             -Djib.to.auth.username=${DOCKER_USERNAME} \
                             -Djib.to.auth.password=${DOCKER_PASSWORD} \
                             -Djib.to.tags=${imageTags} \
                             -Djib.allowInsecureRegistries=true \
                             -DsendCredentialsOverHttp=true"
+                        }
                     }
                 }
             }
@@ -170,15 +178,17 @@ pipeline {
                 }
             }
             steps {
-                script {
-                    def gitCommitHash = env.GIT_COMMIT
-                    def imageTags = "${versionText},${gitCommitHash}"
-                    withDockerCredentials("dockerhub") {
-                        sh "./gradlew jib \
+                timeout(time: 30, unit: 'MINUTES') {
+                    script {
+                        def gitCommitHash = env.GIT_COMMIT
+                        def imageTags = "${versionText},${gitCommitHash}"
+                        withDockerCredentials("dockerhub") {
+                            sh "./gradlew jib \
                             -Djib.to.auth.username=${DOCKER_USERNAME} \
                             -Djib.to.auth.password=${DOCKER_PASSWORD} \
                             -Djib.to.tags=${imageTags} \
                             -PdockerRepositoryPrefix=h2oai/"
+                        }
                     }
                 }
             }
