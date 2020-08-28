@@ -129,6 +129,13 @@ curl -X GET http://localhost:8080/model/sample_request
 
 The resulting JSON is a valid input for the POST `/model/score` request.
 
+For example:
+```bash
+curl -X GET http://localhost:8080/model/sample_request | curl -X POST \
+  -H "Content-Type: application/json" \
+  -d @- http://localhost:8080/model/score
+```
+
 ### API Inspection
 
 You can use SpringFox endpoints that allow both programmatic and manual inspection of the API:
