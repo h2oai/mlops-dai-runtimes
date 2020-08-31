@@ -6,8 +6,11 @@ import static java.util.Collections.emptyList;
 
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
+import ai.h2o.mojos.runtime.api.MojoColumnMeta;
 import ai.h2o.mojos.runtime.frame.MojoColumn;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +21,7 @@ class SampleRequestBuilderTest {
   @Test
   void build_EmptyMeta() {
     // Given
-    MojoFrameMeta inputMeta = new MojoFrameMeta(new String[] {}, new MojoColumn.Type[] {});
+    final MojoFrameMeta inputMeta = new MojoFrameMeta(Collections.emptyList());
 
     // When
     ScoreRequest result = builder.build(inputMeta);
@@ -34,7 +37,8 @@ class SampleRequestBuilderTest {
   void build_OneField() {
     // Given
     MojoFrameMeta inputMeta =
-        new MojoFrameMeta(new String[] {"field"}, new MojoColumn.Type[] {MojoColumn.Type.Str});
+        new MojoFrameMeta(
+            Collections.singletonList(MojoColumnMeta.newOutput("field", MojoColumn.Type.Str)));
 
     // When
     ScoreRequest result = builder.build(inputMeta);
@@ -59,7 +63,11 @@ class SampleRequestBuilderTest {
       MojoColumn.Type.Time64
     };
     String[] columns = Stream.of(types).map(Object::toString).toArray(String[]::new);
-    MojoFrameMeta inputMeta = new MojoFrameMeta(columns, types);
+    final MojoFrameMeta inputMeta =
+        new MojoFrameMeta(
+            Stream.of(types)
+                .map(t -> MojoColumnMeta.newInput(t.toString(), t))
+                .collect(Collectors.toList()));
 
     // When
     ScoreRequest result = builder.build(inputMeta);

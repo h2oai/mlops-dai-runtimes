@@ -7,9 +7,13 @@ import static org.mockito.BDDMockito.given;
 
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
+import ai.h2o.mojos.runtime.api.MojoColumnMeta;
 import ai.h2o.mojos.runtime.frame.MojoColumn;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +33,8 @@ class RequestCheckerTest {
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
     MojoFrameMeta expectedMeta =
-        new MojoFrameMeta(new String[] {"field1"}, new MojoColumn.Type[] {MojoColumn.Type.Str});
+        new MojoFrameMeta(
+            Collections.singletonList(MojoColumnMeta.newOutput("field1", MojoColumn.Type.Str)));
 
     // When
     checker.verify(request, expectedMeta);
@@ -73,7 +78,8 @@ class RequestCheckerTest {
     ScoreRequest request = new ScoreRequest();
     request.addRowsItem(toRow("text"));
     MojoFrameMeta expectedMeta =
-        new MojoFrameMeta(new String[] {"field1"}, new MojoColumn.Type[] {MojoColumn.Type.Str});
+        new MojoFrameMeta(
+            Collections.singletonList(MojoColumnMeta.newOutput("field1", MojoColumn.Type.Str)));
     given(sampleRequestBuilder.build(any())).willReturn(exampleRequest);
 
     // When & then
@@ -90,7 +96,8 @@ class RequestCheckerTest {
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     MojoFrameMeta expectedMeta =
-        new MojoFrameMeta(new String[] {"field1"}, new MojoColumn.Type[] {MojoColumn.Type.Str});
+        new MojoFrameMeta(
+            Collections.singletonList(MojoColumnMeta.newOutput("field1", MojoColumn.Type.Str)));
     given(sampleRequestBuilder.build(any())).willReturn(exampleRequest);
 
     // When & then
@@ -109,7 +116,8 @@ class RequestCheckerTest {
     request.addRowsItem(toRow("text"));
     MojoFrameMeta expectedMeta =
         new MojoFrameMeta(
-            new String[] {"different_fields"}, new MojoColumn.Type[] {MojoColumn.Type.Str});
+            Collections.singletonList(
+                MojoColumnMeta.newOutput("different_fields", MojoColumn.Type.Str)));
     given(sampleRequestBuilder.build(any())).willReturn(exampleRequest);
 
     // When & then
@@ -126,10 +134,10 @@ class RequestCheckerTest {
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
-    MojoFrameMeta expectedMeta =
-        new MojoFrameMeta(
-            new String[] {"field1", "field2"},
-            new MojoColumn.Type[] {MojoColumn.Type.Str, MojoColumn.Type.Str});
+    final List<MojoColumnMeta> columns = new ArrayList<>();
+    columns.add(MojoColumnMeta.newOutput("field1", MojoColumn.Type.Str));
+    columns.add(MojoColumnMeta.newOutput("field2", MojoColumn.Type.Str));
+    final MojoFrameMeta expectedMeta = new MojoFrameMeta(columns);
     given(sampleRequestBuilder.build(any())).willReturn(exampleRequest);
 
     // When & then
@@ -148,7 +156,8 @@ class RequestCheckerTest {
     request.addFieldsItem("field2");
     request.addRowsItem(toRow("text1", "text2"));
     MojoFrameMeta expectedMeta =
-        new MojoFrameMeta(new String[] {"field1"}, new MojoColumn.Type[] {MojoColumn.Type.Str});
+        new MojoFrameMeta(
+            Collections.singletonList(MojoColumnMeta.newOutput("field1", MojoColumn.Type.Str)));
 
     // When
     checker.verify(request, expectedMeta);
@@ -164,7 +173,8 @@ class RequestCheckerTest {
     request.addRowsItem(toRow("text"));
     request.addRowsItem(toRow("text", "additional text"));
     MojoFrameMeta expectedMeta =
-        new MojoFrameMeta(new String[] {"field1"}, new MojoColumn.Type[] {MojoColumn.Type.Str});
+        new MojoFrameMeta(
+            Collections.singletonList(MojoColumnMeta.newOutput("field1", MojoColumn.Type.Str)));
     given(sampleRequestBuilder.build(any())).willReturn(exampleRequest);
 
     // When & then
