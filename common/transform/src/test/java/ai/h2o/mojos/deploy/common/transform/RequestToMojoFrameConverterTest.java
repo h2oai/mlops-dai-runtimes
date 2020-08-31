@@ -7,10 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
+import ai.h2o.mojos.runtime.api.MojoColumnMeta;
+import ai.h2o.mojos.runtime.frame.MojoColumn;
 import ai.h2o.mojos.runtime.frame.MojoColumn.Type;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -152,16 +155,23 @@ class RequestToMojoFrameConverterTest {
   }
 
   private static MojoFrameBuilder emptyFrameBuilder() {
-    return new MojoFrameBuilder(MojoFrameMeta.getEmpty());
+    return new MojoFrameBuilder(
+        MojoFrameMeta.getEmpty(), Collections.emptyList(), Collections.emptyMap());
   }
 
   private static MojoFrameBuilder frameBuilder(String[] columns, Type[] types) {
-    return new MojoFrameBuilder(new MojoFrameMeta(columns, types));
+    return new MojoFrameBuilder(
+        new MojoFrameMeta(MojoColumnMeta.toColumns(columns, types, MojoColumn.Kind.Output)),
+        Collections.emptyList(),
+        Collections.emptyMap());
   }
 
   private static MojoFrameBuilder frameBuilderWithMissingValues(
       String[] columns, Type[] types, String[] missingValues) {
-    return new MojoFrameBuilder(new MojoFrameMeta(columns, types), asList(missingValues));
+    return new MojoFrameBuilder(
+        new MojoFrameMeta(MojoColumnMeta.toColumns(columns, types, MojoColumn.Kind.Output)),
+        asList(missingValues),
+        Collections.emptyMap());
   }
 
   private static Row asRow(String... values) {

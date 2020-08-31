@@ -1,5 +1,6 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import static ai.h2o.mojos.runtime.frame.MojoColumn.Kind;
 import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Bool;
 import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Float32;
 import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Float64;
@@ -12,11 +13,14 @@ import static java.util.Arrays.asList;
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
+import ai.h2o.mojos.runtime.api.MojoColumnMeta;
 import ai.h2o.mojos.runtime.frame.MojoColumn.Type;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,7 +34,10 @@ class MojoFrameToResponseConverterTest {
   void convertEmptyRowsResponse_succeeds() {
     // Given
     ScoreRequest scoreRequest = new ScoreRequest();
-    MojoFrame mojoFrame = new MojoFrameBuilder(MojoFrameMeta.getEmpty()).toMojoFrame();
+    MojoFrame mojoFrame =
+        new MojoFrameBuilder(
+                MojoFrameMeta.getEmpty(), Collections.emptyList(), Collections.emptyMap())
+            .toMojoFrame();
 
     // When
     ScoreResponse result = converter.apply(mojoFrame, scoreRequest);
@@ -267,8 +274,10 @@ class MojoFrameToResponseConverterTest {
 
   private static <T> MojoFrame buildMojoFrame(
       String[] fields, Type[] types, T[][] values, RowBuilderSetter<T> setter) {
-    MojoFrameMeta meta = new MojoFrameMeta(fields, types);
-    MojoFrameBuilder frameBuilder = new MojoFrameBuilder(meta);
+    final List<MojoColumnMeta> columns = MojoColumnMeta.toColumns(fields, types, Kind.Output);
+    final MojoFrameMeta meta = new MojoFrameMeta(columns);
+    final MojoFrameBuilder frameBuilder =
+        new MojoFrameBuilder(meta, Collections.emptyList(), Collections.emptyMap());
     for (T[] row : values) {
       MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
       int col = 0;

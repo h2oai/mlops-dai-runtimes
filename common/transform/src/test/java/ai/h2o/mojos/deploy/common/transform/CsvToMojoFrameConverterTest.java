@@ -1,10 +1,12 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import static ai.h2o.mojos.runtime.frame.MojoColumn.Kind;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ai.h2o.mojos.runtime.api.MojoColumnMeta;
 import ai.h2o.mojos.runtime.frame.MojoColumn.Type;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
@@ -12,6 +14,8 @@ import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -144,16 +148,21 @@ class CsvToMojoFrameConverterTest {
   }
 
   private static MojoFrameBuilder emptyFrameBuilder() {
-    return new MojoFrameBuilder(MojoFrameMeta.getEmpty());
+    return new MojoFrameBuilder(
+        MojoFrameMeta.getEmpty(), Collections.emptyList(), Collections.emptyMap());
   }
 
-  private static MojoFrameBuilder frameBuilder(String[] columns, Type[] types) {
-    return new MojoFrameBuilder(new MojoFrameMeta(columns, types));
+  private static MojoFrameBuilder frameBuilder(String[] names, Type[] types) {
+    final List<MojoColumnMeta> columns = MojoColumnMeta.toColumns(names, types, Kind.Output);
+    return new MojoFrameBuilder(
+        new MojoFrameMeta(columns), Collections.emptyList(), Collections.emptyMap());
   }
 
   private static MojoFrameBuilder frameBuilderWithMissingValues(
-      String[] columns, Type[] types, String[] missingValues) {
-    return new MojoFrameBuilder(new MojoFrameMeta(columns, types), asList(missingValues));
+      String[] names, Type[] types, String[] missingValues) {
+    final List<MojoColumnMeta> columns = MojoColumnMeta.toColumns(names, types, Kind.Output);
+    return new MojoFrameBuilder(
+        new MojoFrameMeta(columns), asList(missingValues), Collections.emptyMap());
   }
 
   private static InputStream toCsvStream(String... rows) {

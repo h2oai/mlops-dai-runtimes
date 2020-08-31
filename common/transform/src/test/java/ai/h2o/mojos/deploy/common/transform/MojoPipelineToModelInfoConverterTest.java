@@ -6,11 +6,15 @@ import ai.h2o.mojos.deploy.common.rest.model.DataField;
 import ai.h2o.mojos.deploy.common.rest.model.DataField.DataTypeEnum;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.runtime.MojoPipeline;
+import ai.h2o.mojos.runtime.api.MojoColumnMeta;
 import ai.h2o.mojos.runtime.frame.MojoColumn;
+import ai.h2o.mojos.runtime.frame.MojoColumn.Kind;
 import ai.h2o.mojos.runtime.frame.MojoColumn.Type;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
@@ -37,9 +41,10 @@ class MojoPipelineToModelInfoConverterTest {
   void convertSingleInputField_succeeds() {
     // Given
     String[] inputNames = {"field1"};
-    Type[] inputTypes = {Type.Str};
+    final List<MojoColumnMeta> columns =
+        Collections.singletonList(MojoColumnMeta.newInput(inputNames[0], Type.Str));
     MojoPipeline pipeline =
-        DummyPipeline.ofMeta(new MojoFrameMeta(inputNames, inputTypes), MojoFrameMeta.getEmpty());
+        DummyPipeline.ofMeta(new MojoFrameMeta(columns), MojoFrameMeta.getEmpty());
 
     // When
     Model result = converter.apply(pipeline);
@@ -56,9 +61,10 @@ class MojoPipelineToModelInfoConverterTest {
   void convertSingleOutputField_succeeds() {
     // Given
     String[] outputNames = {"field1"};
-    Type[] outputTypes = {Type.Str};
+    final List<MojoColumnMeta> columns =
+        Collections.singletonList(MojoColumnMeta.newOutput(outputNames[0], Type.Str));
     MojoPipeline pipeline =
-        DummyPipeline.ofMeta(MojoFrameMeta.getEmpty(), new MojoFrameMeta(outputNames, outputTypes));
+        DummyPipeline.ofMeta(MojoFrameMeta.getEmpty(), new MojoFrameMeta(columns));
 
     // When
     Model result = converter.apply(pipeline);
@@ -80,7 +86,8 @@ class MojoPipelineToModelInfoConverterTest {
     Type[] outputTypes = {Type.Int64, Type.Int64};
     MojoPipeline pipeline =
         DummyPipeline.ofMeta(
-            new MojoFrameMeta(inputNames, inputTypes), new MojoFrameMeta(outputNames, outputTypes));
+            new MojoFrameMeta(MojoColumnMeta.toColumns(inputNames, inputTypes, Kind.Feature)),
+            new MojoFrameMeta(MojoColumnMeta.toColumns(outputNames, outputTypes, Kind.Output)));
 
     // When
     Model result = converter.apply(pipeline);
@@ -101,8 +108,10 @@ class MojoPipelineToModelInfoConverterTest {
     // Given
     Type[] outputTypes = Type.values();
     String[] outputNames = Stream.of(Type.values()).map(Type::toString).toArray(String[]::new);
+    final List<MojoColumnMeta> columns =
+        MojoColumnMeta.toColumns(outputNames, outputTypes, Kind.Output);
     MojoPipeline pipeline =
-        DummyPipeline.ofMeta(MojoFrameMeta.getEmpty(), new MojoFrameMeta(outputNames, outputTypes));
+        DummyPipeline.ofMeta(MojoFrameMeta.getEmpty(), new MojoFrameMeta(columns));
 
     // When
     Model result = converter.apply(pipeline);
