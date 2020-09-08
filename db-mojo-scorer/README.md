@@ -230,7 +230,9 @@ RAW ResultSet: 162.87
 RAW ResultSet: 10
 RAW ResultSet: RENT
 RAW ResultSet: 24000
+
 ...
+
 Script init completed 
 Invoking SQL Script snowflake/SnowflakeUpdate.sql
 put file://results.csv @~/staged
