@@ -132,10 +132,8 @@ The System has 8 Processors
 The DB scorer stores the score/prediction for each row from the given dataset in a file called `results.csv` in the main directory.
 
 ```
-#input
 java -Derrors=true -Dverbose=true -Dthreads=2 -Dcapacity=4000 -Xms2g -Xmx10g -Dpropertiesfilename=properties/DAIMojoRunner_DB.properties-Snowflake -jar build/libs/dai-mojo-db-2.30.jar
 
-#output
 H2O DAI Mojo Database Scoring v2.30
  
 Using properties file: properties/DAIMojoRunner_DB.properties-Snowflake
