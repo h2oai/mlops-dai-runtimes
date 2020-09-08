@@ -256,3 +256,63 @@ SQL Script completed
 
  > It is important for the execution of the above command to have a `results.csv` file in the main dir to save the data processed by the scorer as the code **will not create the file itself if it doesn't exist**.
 
+Handing Passwords:
+- Support encrypted password
+	
+	Store the encrypted password in the DAIMojoRunner_DB.properties
+	
+	Encrypt the password from Linux command line: (type in the password):
+	
+	echo h2oh2o | base64 -i –
+	
+	Encrypt the password from Windows PowerShell (password passed as h2oh2o)
+[convert]::toBASe64String([Text.Encoding]::UTF8.GetBytes("h2oh2o"))
+
+	Save the encrypted string to the SQLPassword parameter
+	
+	The password encryption can also be performed by setting the SQLPrompt to encrypt then run java -jar DAIMojoRunner_DB.jar you will be prompted to enter the JDBC password, it will then be encrypted so you can paste it into the properties file. 
+
+- Prompting for password  
+	Set SQLPrompt= Enables prompting for the password in the DAIMojoRunner_DB.properties
+	
+	Add the username to the SQLUser line make sure SQLPassword, is set SQLPassword=
+Set SQLPrompt=true
+
+Using Environment Variables:
+If the execution environment has variables with the values for the parameters they can be used in the properties file. The setting EnvVariables=true must be in the properties file ideally the first line or before substitution is needed.
+
+Then use the environment variables like this:    
+`jdbc:sqlserver://'$ADW_HOST';databaseName='$ADW_DB';user='$ADW_USER';password='$ADW_PWD'`
+
+Variable names start with $ and are delimited by ' 
+
+For example:  
+If the environments are:  
+`ADW_DB=MyDatabase    `  
+
+`ADW_HOST=127.0.0.1:5033  ` 
+
+`ADW_PWD=%@#$^* `  
+`ADW_USER=Admin `
+
+At runtime it would substitute:
+
+'jdbc:sqlserver://127.0.0.1:5033;databaseName=MyDatabase;user=Admin;password=%@#$^*'
+
+Using Windows Active Directory
+Some scoring environments want to use the credentials of the user executing the scoring rather than a service account.
+
+The score can use the AD for this, follow these steps: 
+
+1. Add to the command line:
+   `-Djava.library.path=\sqljdbc_6.0\auth`  
+
+2. Add to the SQLConnectionString
+   `;integratedSecurity=true`
+   
+For example the command line would look like this: `java -Xms4g 
+-Xmx4g -Dlogging=true -Dpropertiesfilename=DAIMojoRunner_DB.properties-MSSQL-Auth -Dai.h2o.mojos.runtime.license.file=c:\DB\license.sig -Djava.library.path=C:\sqljdbc_6.0\enu\auth\x64 -cp c:\\sqljdbc42.jar;dist/DAIMojoRunner_DB.jar daimojorunner_db.DAIMojoRunner_DB`   
+
+The SQLConnectionString in the properties file would look like this: `SQLConnectionString=jdbc:sqlserver://192.168.1.173:1433;databaseName=LendingClub;integratedSecurity=true`
+
+The SQLUser and SQLPassword would be commented out.
