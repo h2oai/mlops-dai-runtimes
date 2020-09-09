@@ -6,33 +6,7 @@ To run the local scorer, you can directly run the executable jar:
  ```
  java -Dai.h2o.mojos.runtime.license.file={LICENSE_FILE} -DModelDirectory={PATH_TO_MOJO_PIPELINE} -jar dai-mojo-restserver-{YOUR_CURRENT_VERSION}.jar
 ```
-
-### Score JSON Request
-To test the endpoint, send a request to http://localhost:8080 as follows:
-```
-curl "http://127.0.0.1:8080/model?name=pipeline.mojo&verbose=true&row=5000,36months,10.65,162.87,10,RENT,24000,VERIFIED-income,AZ,27.65,0,1,0,13648,83.7,0"
-```
-In the curl request above, I'm simply sending a row from the dataset for the restserver to process and give out `bad_loan.0` and `bad_loan.1` values for the input row
-
-## Default Port
-The application uses port 8080, if a different port is required add -Dserver.port=xxxx before the -jar on the command line.
-```
-java -Dai.h2o.mojos.runtime.license.file=license.sig -DServer.port=8989 -jar dai-mojo-restserver.jar
-```
-Any of the Spring Application properties can be overridden in this way.
-
-## Security
-The example uses Basic Authentication on the /modelsecure end point only.
-
-The parameter `-DSecureEndPoint="/**"` can be added to the command line, to secure all the end points.
-
-To access a secure end point, the username h2o password h2o123 must be passed.
-
-If you are using a web browser, a logon panel will prompt you.
-If using a Rest API call, then pass a base64 encoded username password.
-I use PostMan as a tool to setup and test the API call.
-
-## URL Requests
+### URL Requests
 The general format is:
 ```
 curl "127.0.0.1:8080/model?name=/tmp/pipeline.mojo&row=5000,36%20months,10.65,162.87,10,RENT,24000,VERIFIED%20-%20income,AZ,27.65,0,1,0,13648,83.7,0"
@@ -98,7 +72,7 @@ Following requests are supported:
 - `/model2JSON`     
    Like `/model` but returns just the prediction as separate JSON elements for easier parsing by some tools.
 
-## URL Variables
+### URL Variables
 
 - `name`    
    Absolute path to the model name on the server, default /tmp/pipeline.mojo
@@ -124,6 +98,24 @@ The server will log the latency in nanoseconds of the scoring function to the pr
 The client issuing the request (curl, python, java etc) will receive a JSON response, with one key called `result`.
 
 If the result contains multiple lines, then the JSON response is a list within the bodies response, for example the response from a `/modelstats` request.
+
+## Default Port
+The application uses port 8080, if a different port is required add -Dserver.port=xxxx before the -jar on the command line.
+```
+java -Dai.h2o.mojos.runtime.license.file=license.sig -DServer.port=8989 -jar dai-mojo-restserver.jar
+```
+Any of the Spring Application properties can be overridden in this way.
+
+## Security
+The example uses Basic Authentication on the /modelsecure end point only.
+
+The parameter `-DSecureEndPoint="/**"` can be added to the command line, to secure all the end points.
+
+To access a secure end point, the username h2o password h2o123 must be passed.
+
+If you are using a web browser, a logon panel will prompt you.
+If using a Rest API call, then pass a base64 encoded username password.
+I use PostMan as a tool to setup and test the API call.
 
 ## Command Line Parameters
 The following options are also available when starting the Server.
