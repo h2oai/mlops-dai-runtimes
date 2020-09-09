@@ -89,9 +89,6 @@ Following requests are supported:
 - `explainability`  
    Boolean to indicate if MLI results should be returned for this request. Default false.
 
-**Note:**
-> You can also pass the mojo's feature names as variables, see goCurlVars.sh as an example.
-
 ## Response Output
 The server will log the latency in nanoseconds of the scoring function to the processes standard out.
 
