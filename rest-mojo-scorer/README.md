@@ -35,7 +35,7 @@ Following requests are supported:
     
     Example: 
     ```
-    modelvars?name=pipeline.mojo&loan_amnt=5000&term=36months&int_rate=10.65&installment=162.87&emp_length=10&home_ownership=RENT&annual_inc=24000&verification_status=VERIFIED-income&addr_state=AZ&dti=27.65&delinq_2yrs=0&inq_last_6mths=1&pub_rec=0&revol_bal=13648&revol_util=83.7&total_acc=0
+    curl "127.0.0.1:8080/modelvars?name=pipeline.mojo&loan_amnt=5000&term=36months&int_rate=10.65&installment=162.87&emp_length=10&home_ownership=RENT&annual_inc=24000&verification_status=VERIFIED-income&addr_state=AZ&dti=27.65&delinq_2yrs=0&inq_last_6mths=1&pub_rec=0&revol_bal=13648&revol_util=83.7&total_acc=0
     ```
   
 - `/modeltext`    
