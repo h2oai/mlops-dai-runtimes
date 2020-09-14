@@ -202,7 +202,7 @@ For Example
 
 The command line would look like this: 
 ```
-java -Xms4g -Xmx4g -Dlogging=true -Dpropertiesfilename=DAIMojoRunner_DB.properties-MSSQL-Auth -Dai.h2o.mojos.runtime.license.file=c:\DB\license.sig -Djava.library.path=C:\sqljdbc_6.0\enu\auth\x64 -cp c:\\sqljdbc42.jar;dist/DAIMojoRunner_DB.jar daimojorunner_db.DAIMojoRunner_DB   
+java -Xms4g -Xmx4g -Dlogging=true -Dpropertiesfilename=DAIMojoRunner_DB.properties-MSSQL-Auth -Dai.h2o.mojos.runtime.license.file={PATH_TO_LICENSE}/license.sig -Djava.library.path=C:\sqljdbc_6.0\enu\auth\x64 -cp {PATH_TO_JAR}/dai-mojo-db-2.30.jar ai.h2oai.mojos.db.daimojorunner_db.DAIMojoRunner_DB   
 ```
 The SQLConnectionString in the properties file would look like this: 
 ```
