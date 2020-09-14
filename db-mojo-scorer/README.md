@@ -1,7 +1,8 @@
 # Database Scorer
 Some customers need to select rows from a Database, score and write back the predictions.Using DAI and then this program enables them to quickly build and use models.
+This scorer contains scoring implementation for Driverless AI Model MOJO pipiline with Java runtime on various different databases and can be used to do Real-time scoring on single or multiple rows.
 
-Supports following databases
+Database Scorer Supports following databases
 1. Postgres DB
 2. Microsoft SQL Server 12
 3. TerraData
@@ -11,8 +12,12 @@ Supports following databases
 7. Azure Data Warehouse
 8. Snowflake
 9. ElasticSearch
+
+## Downloading Instructions
+
+You can download the database scorer from the [downloads page](https://s3.amazonaws.com/artifacts.h2o.ai/releases/ai/h2o/dai-custom-scorers/downloads/index.in.html)
   
-## Running 
+## Deployment
 - You must have a DAI license to score, so add the license (via command line) in one of the standard ways, as a parameter, as a environment vailable for example:
     `Dai.h2o.mojos.runtime.license.file=/Driverless-AI/license/license.sig`
     ```
