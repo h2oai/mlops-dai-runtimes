@@ -11,12 +11,7 @@ Supports following databases
 7. Azure Data Warehouse
 8. Snowflake
 9. ElasticSearch
- 
-## Building
-The code of the local SpringBoot scorer is a gradle project build as usual by `./gradlew build`.
-
-The resulting executable jar is located in the `build/libs` folder.
- 
+  
 ## Running 
 - You must have a DAI license to score, so add the license (via command line) in one of the standard ways, as a parameter, as a environment vailable for example:
     `Dai.h2o.mojos.runtime.license.file=/Driverless-AI/license/license.sig`
