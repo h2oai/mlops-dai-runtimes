@@ -7,7 +7,10 @@ The UDF enables the model name to use used as part of the query, this means the 
 
 This UDF have been used with both Hive and Beeline shells.
 
-## Running
+## Downloading Instructions
+You can download the Hive Scorer from the [downloads page](https://s3.amazonaws.com/artifacts.h2o.ai/releases/ai/h2o/dai-custom-scorers/downloads/index.in.html)
+
+## Deployment
 Include the runtime that matches the DAI version the model was created with.
 
 ```
