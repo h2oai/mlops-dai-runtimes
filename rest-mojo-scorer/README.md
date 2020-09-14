@@ -1,7 +1,12 @@
 # REST Sever Scorer
-This is a very simple server that accepts URL/Rest call and produces a score using a MOJO that was created from DAI.
+This scorer contains sources of a generic Java scorer implementation for Driverless AI MOJO scoring pipiline with Java runtime, based on SpringBoot.
 
-## Running
+It is a server that accepts URL/Rest call and produces a score using a MOJO that was created from DAI.
+
+## Downloading Instructions
+You can download the REST scorer from the [downloads page](https://s3.amazonaws.com/artifacts.h2o.ai/releases/ai/h2o/dai-custom-scorers/downloads/index.in.html)
+
+## Deployment
 To run the local scorer, you can directly run the executable jar:
  ```
  java -Dai.h2o.mojos.runtime.license.file={LICENSE_FILE} -DModelDirectory={PATH_TO_MOJO_PIPELINE} -jar dai-mojo-restserver-{YOUR_CURRENT_VERSION}.jar
