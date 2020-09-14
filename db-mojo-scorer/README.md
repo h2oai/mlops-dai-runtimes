@@ -82,45 +82,133 @@ java -Derrors=true -Dverbose=true -Dthreads=2 -Dcapacity=4000 -Xms2g -Xmx10g -Dp
 
 ## Deployment Tricks
 
-The option `-Dinspect=true` helps, see this example. Assumes the model is called `pipeline.mojo` but could be change using the properties file.
-```
-# input
-java -Dinspect=true -jar DAIMojoRunner_DB.jar
+- Its important to also have a key for each row being scored, this is because the scorer will execute in parallel (based on the -Dthreads= parameter) 
+so updating the databases will be faster if a unique key is used for each row (use a customer id or even the row number) for the SQLKey statement.
 
-# output
-Details of Model: pipeline.mojo
-UUID: b2fce6c1-6ddc-4c78-8355-f437945a613c Input Features
-0 = Name: loan_amnt Type: Float32
-1 = Name: term Type: Str
-2 = Name: int_rate Type: Float32
-3 = Name: installment Type: Float32
-4 = Name: emp_length Type: Float32
-5 = Name: home_ownership Type: Str
-6 = Name: annual_inc Type: Float32
-7 = Name: verification_status Type: Str
-8 = Name: addr_state Type: Str
-9 = Name: dti Type: Float32
-10 = Name: delinq_2yrs Type: Float32
-11 = Name: inq_last_6mths Type: Float32
-12 = Name: pub_rec Type: Float32
-13 = Name: revol_bal Type: Float32
-14 = Name: revol_util Type: Float32
-15 = Name: total_acc Type: Float32
-Output Features
-0 = Name: bad_loan.0 Type: Float64
-1 = Name: bad_loan.1 Type: Float64
-Suggested configuration for properties file:
+- The option -Dinsepect=true can be used to generate the SQL based on the model, this helps when a large number of database columns are required.
 
-select {add-table-index}, loan_amnt, term, int_rate, installment, emp_length, home_ownership, annual_inc, verification_status, addr_state, dti, delinq_2yrs, inq_last_6mths, pub_rec, revol_bal, revol_util, total_acc from {add-table-name}
+    This example assumes the model is called `pipeline.mojo` but could be change using the properties file.
+    ```
+    # input
+    java -Dinspect=true -jar DAIMojoRunner_DB.jar
+    
+    # output
+    Details of Model: pipeline.mojo
+    UUID: b2fce6c1-6ddc-4c78-8355-f437945a613c Input Features
+    0 = Name: loan_amnt Type: Float32
+    1 = Name: term Type: Str
+    2 = Name: int_rate Type: Float32
+    3 = Name: installment Type: Float32
+    4 = Name: emp_length Type: Float32
+    5 = Name: home_ownership Type: Str
+    6 = Name: annual_inc Type: Float32
+    7 = Name: verification_status Type: Str
+    8 = Name: addr_state Type: Str
+    9 = Name: dti Type: Float32
+    10 = Name: delinq_2yrs Type: Float32
+    11 = Name: inq_last_6mths Type: Float32
+    12 = Name: pub_rec Type: Float32
+    13 = Name: revol_bal Type: Float32
+    14 = Name: revol_util Type: Float32
+    15 = Name: total_acc Type: Float32
+    Output Features
+    0 = Name: bad_loan.0 Type: Float64
+    1 = Name: bad_loan.1 Type: Float64
+    Suggested configuration for properties file:
+    
+    select {add-table-index}, loan_amnt, term, int_rate, installment, emp_length, home_ownership, annual_inc, verification_status, addr_state, dti, delinq_2yrs, inq_last_6mths, pub_rec, revol_bal, revol_util, total_acc from {add-table-name}
+    
+    update {add-table-name} set where {add-table-index}=
+    ```
 
-update {add-table-name} set where {add-table-index}=
-```
 
 **Note** 
 > Change the values in {} above and manually test before using them in the program.
 
 > The System has 16GB available physically. This program is using 0GB Consider adjusting `-Xms` and `-Xmx` to no more than 12GB
 The System has 8 Processors
+
+## Handling Passwords
+
+### Support For Encrypted Password
+
+- Store the encrypted password in the DAIMojoRunner_DB.properties
+	
+- Encrypt the password from Linux command line: (type in the password):
+  ```
+  echo h2oh2o | base64 -i –
+  ```  
+- Encrypt the password from Windows PowerShell (password passed as h2oh2o)
+  ```
+  [convert]::toBASe64String([Text.Encoding]::UTF8.GetBytes("h2oh2o"))
+  ```
+  Save the encrypted string to the SQLPassword parameter
+
+- The password encryption can also be performed by setting the SQLPrompt to encrypt then run 
+  ```
+  java -jar DAIMojoRunner_DB.jar
+  ```     
+  you will be prompted to enter the JDBC password, it will then be encrypted so you can paste it into the properties file. 
+
+### Prompting for password  
+
+- Set `SQLPrompt= Enables` prompting for the password in the `DAIMojoRunner_DB.properties`
+	
+- Add the username to the SQLUser line make sure SQLPassword, is set `SQLPassword=Set` `SQLPrompt=true`
+
+#### Using Environment Variables
+
+If the execution environment has variables with the values for the parameters they can be used in the properties file. The setting `EnvVariables=true` must be in the properties file ideally the first line or before substitution is needed.
+
+Then use the environment variables like this:    
+```
+jdbc:sqlserver://'$ADW_HOST';databaseName='$ADW_DB';user='$ADW_USER';password='$ADW_PWD'
+```
+
+**Variable names start with $ and are delimited by '** 
+
+For example:  
+
+```
+# IF THE ENVIRONMENTS ARE...  
+  
+ADW_DB=MyDatabase    
+ADW_HOST=127.0.0.1:5033 
+ADW_PWD=%@#$^*   
+ADW_USER=Admin 
+
+# AT RUNTIME IT WOULD SUBSTITUTE TO...
+
+jdbc:sqlserver://127.0.0.1:5033;databaseName=MyDatabase;user=Admin;password=%@#$^*
+
+``` 
+ 
+#### Using Windows Active Directory
+
+- Some scoring environments want to use the credentials of the user executing the scoring rather than a service account.
+
+- The score can use the AD for this, follow these steps: 
+
+    1. Add to the command line:
+       ```
+       -Djava.library.path=\sqljdbc_6.0\auth
+       ```            
+    2. Add to the SQLConnectionString
+        ```
+        ;integratedSecurity=true
+        ```
+   
+For Example 
+
+The command line would look like this: 
+```
+java -Xms4g -Xmx4g -Dlogging=true -Dpropertiesfilename=DAIMojoRunner_DB.properties-MSSQL-Auth -Dai.h2o.mojos.runtime.license.file=c:\DB\license.sig -Djava.library.path=C:\sqljdbc_6.0\enu\auth\x64 -cp c:\\sqljdbc42.jar;dist/DAIMojoRunner_DB.jar daimojorunner_db.DAIMojoRunner_DB   
+```
+The SQLConnectionString in the properties file would look like this: 
+```
+SQLConnectionString=jdbc:sqlserver://192.168.1.173:1433;databaseName=LendingClub;integratedSecurity=true
+```
+The SQLUser and SQLPassword would be commented out.
 
 ## Result
 
@@ -250,64 +338,3 @@ SQL Script completed
  >  Please create a `results.csv` file in the main directory (if it doesn't exist already). 
 
  > It is important for the execution of the above command to have a `results.csv` file in the main dir to save the data processed by the scorer as the code **will not create the file itself if it doesn't exist**.
-
-Handing Passwords:
-- Support encrypted password
-	
-	Store the encrypted password in the DAIMojoRunner_DB.properties
-	
-	Encrypt the password from Linux command line: (type in the password):
-	
-	echo h2oh2o | base64 -i –
-	
-	Encrypt the password from Windows PowerShell (password passed as h2oh2o)
-[convert]::toBASe64String([Text.Encoding]::UTF8.GetBytes("h2oh2o"))
-
-	Save the encrypted string to the SQLPassword parameter
-	
-	The password encryption can also be performed by setting the SQLPrompt to encrypt then run java -jar DAIMojoRunner_DB.jar you will be prompted to enter the JDBC password, it will then be encrypted so you can paste it into the properties file. 
-
-- Prompting for password  
-	Set SQLPrompt= Enables prompting for the password in the DAIMojoRunner_DB.properties
-	
-	Add the username to the SQLUser line make sure SQLPassword, is set SQLPassword=
-Set SQLPrompt=true
-
-Using Environment Variables:
-If the execution environment has variables with the values for the parameters they can be used in the properties file. The setting EnvVariables=true must be in the properties file ideally the first line or before substitution is needed.
-
-Then use the environment variables like this:    
-`jdbc:sqlserver://'$ADW_HOST';databaseName='$ADW_DB';user='$ADW_USER';password='$ADW_PWD'`
-
-Variable names start with $ and are delimited by ' 
-
-For example:  
-If the environments are:  
-`ADW_DB=MyDatabase    `  
-
-`ADW_HOST=127.0.0.1:5033  ` 
-
-`ADW_PWD=%@#$^* `  
-`ADW_USER=Admin `
-
-At runtime it would substitute:
-
-'jdbc:sqlserver://127.0.0.1:5033;databaseName=MyDatabase;user=Admin;password=%@#$^*'
-
-Using Windows Active Directory
-Some scoring environments want to use the credentials of the user executing the scoring rather than a service account.
-
-The score can use the AD for this, follow these steps: 
-
-1. Add to the command line:
-   `-Djava.library.path=\sqljdbc_6.0\auth`  
-
-2. Add to the SQLConnectionString
-   `;integratedSecurity=true`
-   
-For example the command line would look like this: `java -Xms4g 
--Xmx4g -Dlogging=true -Dpropertiesfilename=DAIMojoRunner_DB.properties-MSSQL-Auth -Dai.h2o.mojos.runtime.license.file=c:\DB\license.sig -Djava.library.path=C:\sqljdbc_6.0\enu\auth\x64 -cp c:\\sqljdbc42.jar;dist/DAIMojoRunner_DB.jar daimojorunner_db.DAIMojoRunner_DB`   
-
-The SQLConnectionString in the properties file would look like this: `SQLConnectionString=jdbc:sqlserver://192.168.1.173:1433;databaseName=LendingClub;integratedSecurity=true`
-
-The SQLUser and SQLPassword would be commented out.
