@@ -1,0 +1,42 @@
+site_name: Driverless AI Deployment Templates
+site_author: Nidhi Mehta
+
+copyright: "© Copyright 2017-2020 H2O.ai"
+
+theme: 
+ name: material
+ logo: img/h2oai.png
+ palette:
+     primary: 'black'
+     accent: 'blue'
+ icon:
+     repo: fontawesome/brands/github
+ features:
+    - navigation.expand
+    
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - markdown_blockdiag
+  
+
+repo_url: https://github.com/h2oai/dai-deployment-templates
+repo_name: h2oai/dai-deployment-templates
+
+
+nav:
+    - Overview: index.md
+    - 'Driverless AI MOJO Scoring':
+       - AWS Lambda Scorer: aws_lambda_scorer.md
+       - AWS Sagemaker Hosted Scorer: aws-sagemaker-hosted-scorer.md
+       - Google Cloud Run Scorer: gcp.md
+       - Local Rest Server Scorer: local-rest-scorer.md
+       - SQL JDBC Scorer: sql-jdbc-scorer.md
+
+extra_javascript:
+   - javascripts/mermaid.min.js
+   - javascripts/nav-expand.js
+
+extra_css:
+   - css/mermaid.css

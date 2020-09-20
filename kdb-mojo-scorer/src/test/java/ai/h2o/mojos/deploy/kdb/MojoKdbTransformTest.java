@@ -1,10 +1,14 @@
 package ai.h2o.mojos.deploy.kdb;
 
+import ai.h2o.mojos.runtime.api.MojoColumnMeta;
 import ai.h2o.mojos.runtime.frame.MojoColumn.Type;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import kx.c;
 import org.junit.jupiter.api.Test;
 
@@ -84,20 +88,22 @@ class MojoKdbTransformTest {
     }
 
     private MojoFrameBuilder generateMojoFrameBuilder() {
-        Type[] types = {Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64,
-                Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64,
-                Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64, Type.Int64};
         String[] names = {"LIMIT_BAL", "SEX", "EDUCATION", "MARRIAGE", "AGE", "PAY_1",
                 "PAY_2", "PAY_3", "PAY_4", "PAY_5", "PAY_6", "BILL_AMT1", "BILL_AMT2", "BILL_AMT3", "BILL_AMT4",
                 "BILL_AMT5", "BILL_AMT6", "PAY_AMT1", "PAY_AMT2", "PAY_AMT3", "PAY_AMT4", "PAY_AMT5", "PAY_AMT6"};
-        return new MojoFrameBuilder(new MojoFrameMeta(names, types), singletonList("NA"));
+        final List<MojoColumnMeta> columns = new ArrayList<>();
+        for (String name : names) {
+            columns.add(MojoColumnMeta.newOutput(name, Type.Int64));
+        }
+        return new MojoFrameBuilder(new MojoFrameMeta(columns), singletonList("NA"), Collections.emptyMap());
     }
 
     private MojoFrame generateDummyTransformedMojoFrame() {
-        Type[] types = {Type.Float64, Type.Float64};
-        String[] names = {"Prediction.0", "Prediction.1"};
-        MojoFrameMeta meta = new MojoFrameMeta(names, types);
-        MojoFrameBuilder frameBuilder = new MojoFrameBuilder(meta);
+        final List<MojoColumnMeta> columns = new ArrayList<>();
+        columns.add(MojoColumnMeta.newOutput("Prediction.0", Type.Float64));
+        columns.add(MojoColumnMeta.newOutput("Prediction.1", Type.Float64));
+        final MojoFrameMeta meta = new MojoFrameMeta(columns);
+        final MojoFrameBuilder frameBuilder = new MojoFrameBuilder(meta, Collections.emptyList(), Collections.emptyMap());
         MojoRowBuilder mojoRowBuilder = frameBuilder.getMojoRowBuilder();
         mojoRowBuilder.setValue("Prediction.0", "0.64");
         mojoRowBuilder.setValue("Prediction.1", "0.36");

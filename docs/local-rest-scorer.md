@@ -1,7 +1,8 @@
-# DAI Deployment Template for Local SpringBoot Scorer
+# Driverless AI Deployment Template for Local SpringBoot Scorer
 
-This package contains sources of a generic Java scorer implementation based on SpringBoot
-and its Docker image.
+This [template](https://github.com/h2oai/dai-deployment-templates/tree/master/local-rest-scorer) contains sources of a generic Java scorer implementation for `Driverless AI MOJO scoring pipiline` with `Java runtime`, based on SpringBoot and its Docker image.
+
+This scorer can be used to do Real-time scoring on single or multiple rows. The user needs to provide Driverless AI license key and  model's  pipeline.mojo file for scoring. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/dai-deployment-templates/blob/master/gradle.properties#L8).
 
 ## Building
 
@@ -128,13 +129,6 @@ curl -X GET http://localhost:8080/model/sample_request
 ```
 
 The resulting JSON is a valid input for the POST `/model/score` request.
-
-For example:
-```bash
-curl -X GET http://localhost:8080/model/sample_request | curl -X POST \
-  -H "Content-Type: application/json" \
-  -d @- http://localhost:8080/model/score
-```
 
 ### API Inspection
 
