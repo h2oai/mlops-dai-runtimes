@@ -343,16 +343,21 @@
   AA--&gt;AAC[&quot;As GCP Cloud Run&quot;]
   AA--&gt;AAD[&quot;As AzureML&quot;]
   AA--&gt;AAE[&quot;As library&quot;]
-  AA--&gt;AAF[&quot;As Nifi &quot;]
+  AA--&gt;AAF[&quot;As Apache NiFi &quot;]
+  AA--&gt;AAG[&quot;As Apache Flink&quot;]
 
   AB--&gt;ABA[&quot;As library&quot;]
-  AB--&gt;ABB[&quot;As Nifi &quot;]
+  AB--&gt;ABB[&quot;As Apache NiFi &quot;]
 
   AC--&gt;ACA[&quot;As REST Server&quot;]
-  AC--&gt;ACB[&quot;As Nifi &quot;]
+  AC--&gt;ACB[&quot;As Apache NiFi&quot;]
 
-  classDef className fill:#f9f,stroke:#333,stroke-width:4px;
-  class A,AA,AB className;
+  click AAA &quot;./local-rest-scorer&quot;
+  click AAB &quot;./aws_lambda_scorer&quot;
+  click AAC &quot;./gcp&quot;
+  click AAF &quot;https://github.com/james94/dai-deployment-examples/tree/mojo-nifi/mojo-nifi&quot;
+  click AAG &quot;https://github.com/h2oai/dai-deployment-examples/tree/master/mojo-flink&quot;
+
 </code></pre>
 
 <pre><code class="mermaid">graph LR;
@@ -361,35 +366,38 @@
   A--&gt;AB[DAI MOJO Pipeline with C++ Runtime];
   A--&gt;AC[DAI PYTHON Scoring Pipeline];
 
-  AA--&gt;AAA[&quot;As Spark batch&quot;]
+  AA--&gt;AAA[&quot;As Apache Spark batch&quot;]
   AA--&gt;AAB[&quot;As library&quot;]
   AA--&gt;AAC[&quot;As Hive UDF&quot;]
   AA--&gt;AAD[&quot;As DB scorer&quot;]
-  AA--&gt;AAE[&quot;As Nifi&quot;]
+  AA--&gt;AAE[&quot;As Apache NiFi&quot;]
+  AA--&gt;AAF[&quot;As Apache Flink&quot;]
+  AA--&gt;AAG[&quot;As Snowflake Workflow&quot;]
 
   AB--&gt;ABA[&quot;As library&quot;]
-  AB--&gt;ABB[&quot;As Nifi &quot;]
+  AB--&gt;ABB[&quot;As Apache NiFi&quot;]
 
   AC--&gt;ACA[&quot;As library&quot;]
-  AC--&gt;ACB[&quot;As Nifi &quot;]
+  AC--&gt;ACB[&quot;As Apache NiFi&quot;]
 
-  classDef className fill:#f9f,stroke:#333,stroke-width:4px;
-  style A fill:#FFFFCC
-  class start,A,AA,AB className;
+  click AAA &quot;http://docs.h2o.ai/sparkling-water/3.0/latest-stable/doc/deployment/load_mojo_pipeline.html#loading-and-score-the-mojo&quot;
+  click AAD &quot;./sql-jdbc-scorer&quot;
+  click AAE &quot;https://github.com/james94/dai-deployment-examples/tree/mojo-nifi/mojo-nifi&quot;
+  click AAF &quot;https://github.com/h2oai/dai-deployment-examples/tree/master/mojo-flink&quot;
+  click AAG &quot;https://www.youtube.com/watch?v=EMpGVer01WE&quot;
 </code></pre>
 
 <pre><code class="mermaid">graph LR;
 
   A[&quot;Stream Scoring&quot;]--&gt;AA[DAI MOJO Pipeline with Java Runtime];
 
-  AA--&gt;AAA[&quot;As Spark Stream&quot;]
+  AA--&gt;AAA[&quot;As Apache Spark Stream&quot;]
   AA--&gt;AAB[&quot;As Task Queue &quot;]
   AA--&gt;AAC[&quot;As Active MQ&quot;]
   AA--&gt;AAD[&quot;As Kafka Topic&quot;]
 
-  classDef className fill:#f9f,stroke:#333,stroke-width:4px;
-  style A fill:#FFFFCC
-  class start,A,AA,AB className;
+  click AAD &quot;https://github.com/h2oai/dai-deployment-examples/blob/master/mojo-flink/daimojo-flink-kafka.md&quot;
+
 </code></pre>
                 
               
