@@ -19,16 +19,21 @@ graph LR;
   AA-->AAC["As GCP Cloud Run"]
   AA-->AAD["As AzureML"]
   AA-->AAE["As library"]
-  AA-->AAF["As Nifi "]
+  AA-->AAF["As Apache NiFi "]
+  AA-->AAG["As Apache Flink"]
   
   AB-->ABA["As library"]
-  AB-->ABB["As Nifi "]
+  AB-->ABB["As Apache NiFi "]
   
   AC-->ACA["As REST Server"]
-  AC-->ACB["As Nifi "]
+  AC-->ACB["As Apache NiFi"]
   
-  classDef className fill:#f9f,stroke:#333,stroke-width:4px;
-  class A,AA,AB className;
+  click AAA "./local-rest-scorer"
+  click AAB "./aws_lambda_scorer"
+  click AAC "./gcp"
+  click AAF "https://github.com/james94/dai-deployment-examples/tree/mojo-nifi/mojo-nifi"
+  click AAG "https://github.com/h2oai/dai-deployment-examples/tree/master/mojo-flink"
+  
 ```
 ```mermaid
 graph LR;
@@ -37,21 +42,25 @@ graph LR;
   A-->AB[DAI MOJO Pipeline with C++ Runtime];
   A-->AC[DAI PYTHON Scoring Pipeline];
   
-  AA-->AAA["As Spark batch"]
+  AA-->AAA["As Apache Spark batch"]
   AA-->AAB["As library"]
   AA-->AAC["As Hive UDF"]
   AA-->AAD["As DB scorer"]
-  AA-->AAE["As Nifi"]
+  AA-->AAE["As Apache NiFi"]
+  AA-->AAF["As Apache Flink"]
+  AA-->AAG["As Snowflake Workflow"]
   
   AB-->ABA["As library"]
-  AB-->ABB["As Nifi "]
+  AB-->ABB["As Apache NiFi"]
   
   AC-->ACA["As library"]
-  AC-->ACB["As Nifi "]
+  AC-->ACB["As Apache NiFi"]
   
-  classDef className fill:#f9f,stroke:#333,stroke-width:4px;
-  style A fill:#FFFFCC
-  class start,A,AA,AB className;
+  click AAA "http://docs.h2o.ai/sparkling-water/3.0/latest-stable/doc/deployment/load_mojo_pipeline.html#loading-and-score-the-mojo"
+  click AAD "./sql-jdbc-scorer"
+  click AAE "https://github.com/james94/dai-deployment-examples/tree/mojo-nifi/mojo-nifi"
+  click AAF "https://github.com/h2oai/dai-deployment-examples/tree/master/mojo-flink"
+  click AAG "https://www.youtube.com/watch?v=EMpGVer01WE"
 ```
 
 ```mermaid
@@ -59,12 +68,11 @@ graph LR;
   
   A["Stream Scoring"]-->AA[DAI MOJO Pipeline with Java Runtime];
   
-  AA-->AAA["As Spark Stream"]
+  AA-->AAA["As Apache Spark Stream"]
   AA-->AAB["As Task Queue "]
   AA-->AAC["As Active MQ"]
   AA-->AAD["As Kafka Topic"]
   
-  classDef className fill:#f9f,stroke:#333,stroke-width:4px;
-  style A fill:#FFFFCC
-  class start,A,AA,AB className;
+  click AAD "https://github.com/h2oai/dai-deployment-examples/blob/master/mojo-flink/daimojo-flink-kafka.md"
+  
 ```
