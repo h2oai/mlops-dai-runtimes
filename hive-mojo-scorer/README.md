@@ -1,17 +1,20 @@
-# DriverlessAI Hive 
-Use a Driverless AI Model in Hive via HQL
+# Driverless AI Model Deployment: Apache Hive
 
-Using DAI and then this program enables them to quickly build and use models. 
+Driverless AI models can be deployed in Hive with HiveQL (HQL). Using Driverless AI and Hive together lets you quickly build and deploy models. 
 
-The UDF enables the model name to use used as part of the query, this means the UDF can dynamically load and score from a single UDF, this helps in deployment otherwise a UDF per model might be required.
+The following User-Defined Function (UDF) lets the model name be used as part of the query, which means that a single UDF can dynamically load and score multiple models.
 
-This UDF have been used with both Hive and Beeline shells.
+This UDF have been tested with both Hive and Beeline shells.
 
-## Downloading Instructions
-You can download the Hive Scorer from the [downloads page](https://s3.amazonaws.com/artifacts.h2o.ai/releases/ai/h2o/dai-custom-scorers/downloads/index.in.html)
+## Hive UDF Scorer Download
+
+Download the Hive scorer from the [Custom Scorers download page](https://s3.amazonaws.com/artifacts.h2o.ai/releases/ai/h2o/dai-custom-scorers/DAI-1.8.9/index.html).
 
 ## Deployment
-Include the runtime that matches the DAI version the model was created with.
+
+Run the following in the Hive console.
+
+**Note**: Use the runtime that matches the Driverless AI version the model was created with.
 
 ```
 hive> add jar mojo2-runtime-1.5.5.jar;  
@@ -38,12 +41,12 @@ Synonyms: daipredict
 ```
 
 ### Variables:  
-- ```DRIVERLESS_AI_LICENSE_FILE``` path to license file 
-- ```DRIVERLESS_AI_MODEL_NAME``` to override mojo name   (default: pipeline.mojo)  
-- ```DRIVERLESS_AI_MODEL_OUTPUT_LABELS``` (true | false) to output target labels (default: true)  
+- ```DRIVERLESS_AI_LICENSE_FILE```: Path to license file 
+- ```DRIVERLESS_AI_MODEL_NAME```: Overrides mojo name (default: pipeline.mojo)  
+- ```DRIVERLESS_AI_MODEL_OUTPUT_LABELS``` (true | false): Specify whether to output target labels (default: true)  
     Example: select daiPredict(col1, col2). 
 
 
 ## Environment Variables
-The Hive UDF uses environment variables to pass the Driverless License, Model Name and if feature labels should be output.
+The Hive UDF uses environment variables to pass the Driverless AI license and model name. It also uses an environment variable to specify whether feature labels are included as part of the output.
 	
