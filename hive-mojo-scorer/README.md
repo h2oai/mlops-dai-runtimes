@@ -10,6 +10,16 @@ This UDF have been tested with both Hive and Beeline shells.
 
 Download the Hive scorer from the [Custom Scorers download page](https://s3.amazonaws.com/artifacts.h2o.ai/releases/ai/h2o/dai-custom-scorers/DAI-1.8.9/index.html).
 
+## Environment Variables
+
+The Hive UDF uses environment variables to pass the Driverless AI license and model name. It also uses an environment variable to specify whether feature labels are included as part of the output.
+
+### Variables:  
+- ```DRIVERLESS_AI_LICENSE_FILE```: Path to license file 
+- ```DRIVERLESS_AI_MODEL_NAME```: Overrides mojo name (default: pipeline.mojo)  
+- ```DRIVERLESS_AI_MODEL_OUTPUT_LABELS``` (true | false): Specify whether to output target labels (default: true)  
+    Example: select daiPredict(col1, col2).
+
 ## Deployment
 
 Run the following in the Hive console.
@@ -39,14 +49,4 @@ hive> describe function extended daiPredict;
 Call a Driverless AI Mojo for scoring prediction  
 Synonyms: daipredict  
 ```
-
-### Variables:  
-- ```DRIVERLESS_AI_LICENSE_FILE```: Path to license file 
-- ```DRIVERLESS_AI_MODEL_NAME```: Overrides mojo name (default: pipeline.mojo)  
-- ```DRIVERLESS_AI_MODEL_OUTPUT_LABELS``` (true | false): Specify whether to output target labels (default: true)  
-    Example: select daiPredict(col1, col2). 
-
-
-## Environment Variables
-The Hive UDF uses environment variables to pass the Driverless AI license and model name. It also uses an environment variable to specify whether feature labels are included as part of the output.
 	
