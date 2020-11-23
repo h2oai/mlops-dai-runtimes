@@ -22,6 +22,22 @@ The Hive UDF uses environment variables to pass the Driverless AI license and mo
 
 ## Deployment
 
+### Requirements
+
+1. Driverless AI MOJO: Copy the MOJO file to the `models/` directory.
+
+2. Driverless AI license: Provided through the partnership portal. Copy the license to the license.sig file in the `license/` directory, then run `export DRIVERLESS_AI_LICENSE_FILE=/path/to/license.sig`
+
+3. Java Development Kit 1.8: Run `java -version` to verify that the available JVM on your platform has JDK 1.8 installed. If the output does not show JDK 1.8, download a 1.8 JDK for your environment. The following sites provide current builds for free:
+    * https://www.azul.com/downloads/zulu-community/
+    * https://openjdk.java.net/install/
+
+4. H2O Runtime Drivers: Runtime drivers required to run the scorer are located in the `lib/` directory. 
+
+5. JAR File: DAI-Mojo-Hive JAR file in `scorer/` directory.
+
+### Example
+
 Run the following in the Hive console.
 
 **Note**: Use the runtime that matches the Driverless AI version the model was created with.
