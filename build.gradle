@@ -10,12 +10,15 @@ buildscript {
                 version: springBootPluginVersion
         classpath group: 'gradle.plugin.org.hidetake', name: 'gradle-swagger-generator-plugin',
                 version: swaggerGradlePluginVersion
-        classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: shadowJarVersion
+        classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow',
+                version: shadowJarVersion
 //        classpath group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: spotlessPluginVersion
-        classpath group: 'net.ltgt.gradle', name: 'gradle-errorprone-plugin', version: errorpronePluginVersion
+        classpath group: 'net.ltgt.gradle', name: 'gradle-errorprone-plugin',
+                version: errorpronePluginVersion
         classpath group: 'com.google.cloud.tools.jib', name: 'com.google.cloud.tools.jib.gradle.plugin',
                 version: jibPluginVersion
-        classpath group: 'org.github.ngbinh.scalastyle', name: 'gradle-scalastyle-plugin_2.11', version: '1.0.1'
+        classpath group: 'org.github.ngbinh.scalastyle', name: 'gradle-scalastyle-plugin_2.11',
+                version: '1.0.1'
     }
 }
 
