@@ -1,0 +1,14 @@
+name: Example workflow for Gradle using Snyk 
+on: push
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/gradle@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+
