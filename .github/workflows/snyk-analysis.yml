@@ -1,4 +1,4 @@
-name: Example workflow for Gradle using Snyk 
+name: Check Gradle projects using Snyk 
 on: push
 jobs:
   security:
@@ -10,5 +10,5 @@ jobs:
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: --severity-threshold=high
+        args: --severity-threshold=high --all-sub-projects --configuration-attributes=buildtype:release,usage:java-runtime
 
