@@ -18,6 +18,8 @@ To run the local scorer, you can either use `bootRun` gradle task or run directl
 java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}-boot.jar
 ``` 
 
+> Tip: If you run into an error loading the MOJO, ensure you specify its full path and are not triggering shell expansion (e.g. avoid the `~` character).
+
 ### Score JSON Request
 
 To test the endpoint, send a request to http://localhost:8080 as follows:
