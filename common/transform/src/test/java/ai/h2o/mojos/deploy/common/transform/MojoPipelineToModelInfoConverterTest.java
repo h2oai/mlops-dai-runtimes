@@ -6,6 +6,7 @@ import ai.h2o.mojos.deploy.common.rest.model.DataField;
 import ai.h2o.mojos.deploy.common.rest.model.DataField.DataTypeEnum;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.runtime.MojoPipeline;
+import ai.h2o.mojos.runtime.api.BasePipelineListener;
 import ai.h2o.mojos.runtime.api.MojoColumnMeta;
 import ai.h2o.mojos.runtime.frame.MojoColumn;
 import ai.h2o.mojos.runtime.frame.MojoColumn.Kind;
@@ -172,6 +173,11 @@ class MojoPipelineToModelInfoConverterTest {
 
     @Override
     public MojoFrame transform(MojoFrame inputFrame, MojoFrame outputFrame) {
+      throw new AssertionError("Not supported by test DummyPipeline.");
+    }
+
+    @Override
+    public void setListener(BasePipelineListener listener) {
       throw new AssertionError("Not supported by test DummyPipeline.");
     }
   }
