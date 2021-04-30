@@ -38,7 +38,9 @@ public class ModelsApiController implements ModelApi {
   }
 
   @Override
-  public ResponseEntity<ScoreResponse> getScore(ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest gcpRequest) {
+  public ResponseEntity<ScoreResponse> getScore(
+      ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest gcpRequest
+  ) {
     try {
       log.info("Got scoring request");
       // Convert GCP request to REST request
@@ -56,9 +58,12 @@ public class ModelsApiController implements ModelApi {
   /**
    * Converts GCP AI Unified request to REST module request.
    *
-   * @param gcpRequest {@link ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest} GCP unified request to be converted
+   * @param gcpRequest {@link ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest} GCP
+   *     unified request to be converted
    */
-  public static ScoreRequest getRestScoreRequest(ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest gcpRequest) {
+  public static ScoreRequest getRestScoreRequest(
+      ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest gcpRequest
+  ) {
     ScoreRequest request = new ScoreRequest();
     
     if (gcpRequest.getParameters().getIncludeFieldsInOutput() != null) {
@@ -70,7 +75,9 @@ public class ModelsApiController implements ModelApi {
     request.setFields(gcpRequest.getParameters().getFields());
     
     Row row;
-    for (ai.h2o.mojos.deploy.common.rest.unified.model.Row gcpRow: gcpRequest.getInstances()) {
+    for (ai.h2o.mojos.deploy.common.rest.unified.model.Row gcpRow: 
+        gcpRequest.getInstances()
+    ) {
       row = new Row();
       for (int i = 0; i < gcpRow.size(); i++) {
         row.add(gcpRow.get(i));
@@ -85,9 +92,12 @@ public class ModelsApiController implements ModelApi {
   /**
    * Converts REST module response to GCP AI Unified response.
    *
-   * @param restResponse {@link ai.h2o.mojos.deploy.common.rest.model.ScoreResponse} REST module response to convert
+   * @param restResponse {@link ai.h2o.mojos.deploy.common.rest.model.ScoreResponse} REST
+   *     module response to convert
    */
-  public static ScoreResponse getGcpScoreResponse(ai.h2o.mojos.deploy.common.rest.model.ScoreResponse restResponse) {
+  public static ScoreResponse getGcpScoreResponse(
+      ai.h2o.mojos.deploy.common.rest.model.ScoreResponse restResponse
+  ) {
     ScoreResponse response = new ScoreResponse();
     
     response.setId(restResponse.getId());
