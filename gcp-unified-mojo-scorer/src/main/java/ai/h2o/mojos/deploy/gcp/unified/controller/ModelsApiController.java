@@ -1,11 +1,11 @@
 package ai.h2o.mojos.deploy.gcp.unified.controller;
 
+import ai.h2o.mojos.deploy.common.rest.model.Row;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.unified.api.ModelApi;
 import ai.h2o.mojos.deploy.common.rest.unified.model.Model;
-import ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.unified.model.ScoreResponse;
-import ai.h2o.mojos.deploy.common.transform.unified.MojoScorer;
-import ai.h2o.mojos.deploy.common.transform.unified.SampleRequestBuilder;
+import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -19,7 +19,6 @@ public class ModelsApiController implements ModelApi {
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
   private final MojoScorer scorer;
-  private final SampleRequestBuilder sampleRequestBuilder;
 
   /**
    * Simple Api controller. Inherits from {@link ModelApi}, which controls global, expected request
@@ -27,18 +26,10 @@ public class ModelsApiController implements ModelApi {
    *
    * @param scorer {@link MojoScorer} initialized class containing loaded mojo, and mojo interaction
    *     methods
-   * @param sampleRequestBuilder {@link SampleRequestBuilder} initialized class, for generating
-   *     sample request.
    */
   @Autowired
-  public ModelsApiController(MojoScorer scorer, SampleRequestBuilder sampleRequestBuilder) {
+  public ModelsApiController(MojoScorer scorer) {
     this.scorer = scorer;
-    this.sampleRequestBuilder = sampleRequestBuilder;
-  }
-
-  @Override
-  public ResponseEntity<Model> getModelInfo() {
-    return ResponseEntity.ok(scorer.getModelInfo());
   }
 
   @Override
@@ -47,39 +38,71 @@ public class ModelsApiController implements ModelApi {
   }
 
   @Override
-  public ResponseEntity<ScoreResponse> getScore(ScoreRequest request) {
+  public ResponseEntity<ScoreResponse> getScore(ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest gcpRequest) {
     try {
       log.info("Got scoring request");
-      return ResponseEntity.ok(scorer.score(request));
+      // Convert GCP request to REST request
+      ScoreRequest request = getRestScoreRequest(gcpRequest);
+      ScoreResponse response = getGcpScoreResponse(scorer.score(request));
+      // return ResponseEntity.ok(scorer.score(request));
+      return ResponseEntity.ok(response);
     } catch (Exception e) {
-      log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
+      log.info("Failed scoring request: {}, due to: {}", gcpRequest, e.getMessage());
       log.debug(" - failure cause: ", e);
       return ResponseEntity.badRequest().build();
     }
   }
-
-  @Override
-  public ResponseEntity<ScoreResponse> getScoreByFile(String file) {
-    if (Strings.isNullOrEmpty(file)) {
-      log.info("Request is missing a valid CSV file path");
-      return ResponseEntity.badRequest().build();
+  
+  /**
+   * Converts GCP AI Unified request to REST module request.
+   *
+   * @param gcpRequest {@link ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest} GCP unified request to be converted
+   */
+  public static ScoreRequest getRestScoreRequest(ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest gcpRequest) {
+    ScoreRequest request = new ScoreRequest();
+    
+    if (gcpRequest.getParameters().getIncludeFieldsInOutput() != null) {
+      request.setIncludeFieldsInOutput(gcpRequest.getParameters().getIncludeFieldsInOutput());
     }
-    try {
-      log.info("Got scoring request for CSV");
-      return ResponseEntity.ok(scorer.scoreCsv(file));
-    } catch (IOException e) {
-      log.info("Failed loading CSV file: {}, due to: {}", file, e.getMessage());
-      log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
-    } catch (Exception e) {
-      log.info("Failed scoring CSV file: {}, due to: {}", file, e.getMessage());
-      log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+    
+    request.setNoFieldNamesInOutput(gcpRequest.getParameters().isNoFieldNamesInOutput());
+    request.setIdField(gcpRequest.getParameters().getIdField());
+    request.setFields(gcpRequest.getParameters().getFields());
+    
+    Row row;
+    for (ai.h2o.mojos.deploy.common.rest.unified.model.Row gcpRow: gcpRequest.getInstances()) {
+      row = new Row();
+      for (int i = 0; i < gcpRow.size(); i++) {
+        row.add(gcpRow.get(i));
+      }
+      
+      request.addRowsItem(row);
     }
+    
+    return request;
   }
-
-  // @Override
-  // public ResponseEntity<ScoreRequest> getSampleRequest() {
-  //   return ResponseEntity.ok(sampleRequestBuilder.build(scorer.getPipeline().getInputMeta()));
-  // }
+  
+  /**
+   * Converts REST module response to GCP AI Unified response.
+   *
+   * @param restResponse {@link ai.h2o.mojos.deploy.common.rest.model.ScoreResponse} REST module response to convert
+   */
+  public static ScoreResponse getGcpScoreResponse(ai.h2o.mojos.deploy.common.rest.model.ScoreResponse restResponse) {
+    ScoreResponse response = new ScoreResponse();
+    
+    response.setId(restResponse.getId());
+    response.setFields(restResponse.getFields());
+    
+    ai.h2o.mojos.deploy.common.rest.unified.model.Row row;
+    for (Row restRow: restResponse.getScore()) {
+      row = new ai.h2o.mojos.deploy.common.rest.unified.model.Row();
+      for (int i = 0; i < restRow.size(); i++) {
+        row.add(restRow.get(i));
+      }
+      
+      response.addPredictionsItem(row);
+    }
+    
+    return response;
+  }
 }

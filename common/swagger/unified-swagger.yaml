@@ -34,21 +34,6 @@ paths:
             type: string
       security:
         - api_key: []
-  '/model/schema':
-    get:
-      tags:
-        - metadata
-      summary: Describe a model
-      description: Returns information about the model used for scoring, e.g., input schema.
-      operationId: getModelInfo
-      produces:
-        - application/json
-      parameters: []
-      responses:
-        '200':
-          description: Successful operation
-          schema:
-            $ref: '#/definitions/Model'
   '/model/score':
     post:
       tags:
@@ -66,25 +51,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ScoreRequest'
-      responses:
-        '200':
-          description: Successful operation
-          schema:
-            $ref: '#/definitions/ScoreResponse'
-        '400':
-          description: Invalid payload
-    get:
-      tags:
-        - scoring
-      summary: Score on given file
-      description: Computes score of the rows in the file specified by the path in the query parameter
-      operationId: getScoreByFile
-      produces:
-        - application/json
-      parameters:
-        - in: query
-          name: file
-          type: string
       responses:
         '200':
           description: Successful operation

@@ -1,11 +1,11 @@
 package ai.h2o.mojos.deploy.gcp.unified.config;
 
-import ai.h2o.mojos.deploy.common.transform.unified.CsvToMojoFrameConverter;
-import ai.h2o.mojos.deploy.common.transform.unified.MojoFrameToResponseConverter;
-import ai.h2o.mojos.deploy.common.transform.unified.MojoPipelineToModelInfoConverter;
-import ai.h2o.mojos.deploy.common.transform.unified.MojoScorer;
-import ai.h2o.mojos.deploy.common.transform.unified.RequestToMojoFrameConverter;
-import ai.h2o.mojos.deploy.common.transform.unified.SampleRequestBuilder;
+import ai.h2o.mojos.deploy.common.transform.CsvToMojoFrameConverter;
+import ai.h2o.mojos.deploy.common.transform.MojoFrameToResponseConverter;
+import ai.h2o.mojos.deploy.common.transform.MojoPipelineToModelInfoConverter;
+import ai.h2o.mojos.deploy.common.transform.MojoScorer;
+import ai.h2o.mojos.deploy.common.transform.RequestToMojoFrameConverter;
+import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
