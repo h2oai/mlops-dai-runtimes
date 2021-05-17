@@ -31,7 +31,7 @@ graph LR;
   click AAA "./local-rest-scorer"
   click AAB "./aws_lambda_scorer"
   click AAC "./gcp"
-  click AAF "https://github.com/james94/dai-deployment-examples/tree/mojo-nifi/mojo-nifi"
+  click AAF "https://github.com/h2oai/dai-deployment-examples/tree/master/mojo-nifi"
   click AAG "https://github.com/h2oai/dai-deployment-examples/tree/master/mojo-flink"
   
 ```
@@ -58,7 +58,7 @@ graph LR;
   
   click AAA "http://docs.h2o.ai/sparkling-water/3.0/latest-stable/doc/deployment/load_mojo_pipeline.html#loading-and-score-the-mojo"
   click AAD "./sql-jdbc-scorer"
-  click AAE "https://github.com/james94/dai-deployment-examples/tree/mojo-nifi/mojo-nifi"
+  click AAE "https://github.com/h2oai/dai-deployment-examples/tree/master/mojo-nifi"
   click AAF "https://github.com/h2oai/dai-deployment-examples/tree/master/mojo-flink"
   click AAG "https://www.youtube.com/watch?v=EMpGVer01WE"
 ```
