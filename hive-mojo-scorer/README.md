@@ -4,7 +4,7 @@ Driverless AI models can be deployed in Hive with HiveQL (HQL). Using Driverless
 
 The following User-Defined Function (UDF) lets the model name be used as part of the query, which means that a single UDF can dynamically load and score multiple models.
 
-This UDF have been tested with both Hive and Beeline shells.
+This UDF has been tested with both Hive and Beeline shells.
 
 ## Hive UDF Scorer Download
 
@@ -16,7 +16,7 @@ The Hive UDF uses environment variables to pass the Driverless AI license and mo
 
 ### Variables:  
 - ```DRIVERLESS_AI_LICENSE_FILE```: Path to license file 
-- ```DRIVERLESS_AI_MODEL_NAME```: Overrides mojo name (default: pipeline.mojo)  
+- ```DRIVERLESS_AI_MODEL_NAME```: Overrides MOJO name (default: pipeline.mojo)  
 - ```DRIVERLESS_AI_MODEL_OUTPUT_LABELS``` (true | false): Specify whether to output target labels (default: true)  
     Example: select daiPredict(col1, col2).
 
