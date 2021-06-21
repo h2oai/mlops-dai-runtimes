@@ -43,23 +43,29 @@ Run the following in the Hive console.
 **Note**: Use the runtime that matches the Driverless AI version the model was created with.
 
 ```
-hive> add jar mojo2-runtime-1.5.5.jar;  
-Added [mojo2-runtime-1.5.5.jar] to class path  
-Added resources: [mojo2-runtime-1.5.5.jar]  
+hive> add jar /path/to/mojo2-runtime.jar;
+Added [/home/munish/DAI-Mojo-Hive/lib/mojo2-runtime.jar] to class path
+Added resources: [/home/munish/DAI-Mojo-Hive/lib/mojo2-runtime.jar]  
 
-hive> add jar DAIMojoRunner_Hive.jar;  
-Added [DAIMojoRunner_Hive.jar] to class path  
-Added resources: [DAIMojoRunner_Hive.jar]  
+hive> add jar /path/to/DAI-Mojo-Hive-2.0.jar;
+Added [/home/munish/DAI-Mojo-Hive/scorer/DAI-Mojo-Hive-2.0.jar] to class path
+Added resources: [/home/munish/DAI-Mojo-Hive/scorer/DAI-Mojo-Hive-2.0.jar]
 
-hive> list jar;  
-mojo2-runtime-1.5.5.jar  
-DAIMojoRunner_Hive.jar  
+hive> list jar;
+/home/munish/DAI-Mojo-Hive/lib/mojo2-runtime.jar
+/home/munish/DAI-Mojo-Hive/scorer/DAI-Mojo-Hive-2.0.jar
 
-hive> create temporary function daiPredict as 'daimojorunner_hive.daiPredict';  
+hive> create temporary function daiPredict as 'ai.h2o.mojos.hive.daiPredict';
+OK
+Time taken: 0.75 seconds   
 
-hive> set DRIVERLESS_AI_LICENSE_FILE=license.sig;  
-hive> select id, daiPredict(loan_amnt, term, int_rate, installment, emp_length, home_ownership, annual_inc, verification_status, addr_state, dti, delinq_2yrs, inq_last_6mths, pub_rec, revol_bal, revol_util, total_acc) from lcdata where addr_state='CA' and loan_amnt>34000;  
-1068159	"bad_loan.0"='0.7421794315246639', "bad_loan.1"='0.2578205684753361’
+hive> set DRIVERLESS_AI_LICENSE_FILE=/path/to/license.sig;  
+
+select id, daiPredict("DRIVERLESS_AI_MODELNAME=/path/to/mojo/pipeline.mojo verbose",loan_amnt, term, int_rate, installment, emp_length, home_ownership, annual_inc, verification_status, addr_state, dti, delinq_2yrs, inq_last_6mths, pub_rec, revol_bal, revol_util, total_acc) from lcdata where addr_state='CA' and loan_amnt>34000 limit 1;  
+calling load
+returned load
+1068159	0.8994684115021625 0.10053158849783754
+Time taken: 1.389 seconds, Fetched: 1 row(s)
 
 hive> describe function extended daiPredict;  
 Call a Driverless AI Mojo for scoring prediction  
