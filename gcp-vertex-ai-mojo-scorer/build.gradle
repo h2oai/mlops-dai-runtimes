@@ -5,7 +5,7 @@ plugins {
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
-    implementation project(':common:rest-unified-spring-api')
+    implementation project(':common:rest-vertex-ai-spring-api')
     implementation project(':common:rest-spring-api')
     implementation project(':common:transform')
     implementation group: 'ai.h2o', name: 'h2o-genmodel'
@@ -35,7 +35,7 @@ bootRun {
 }
 
 bootJar {
-    mainClassName = 'ai.h2o.mojos.deploy.gcp.unified.GCPUnifiedScorerApplication'
+    mainClassName = 'ai.h2o.mojos.deploy.gcp.vertex.ai.GcpVertexAiApplication'
     archiveClassifier = 'boot'
 }
 
@@ -49,7 +49,7 @@ jib {
         image = 'openjdk:8-jre-alpine'
     }
     to {
-        image = dockerRepositoryPrefix + 'google-unified-scorer'
+        image = dockerRepositoryPrefix + 'google-vertex-ai-scorer'
         tags = [version]
     }
     container {

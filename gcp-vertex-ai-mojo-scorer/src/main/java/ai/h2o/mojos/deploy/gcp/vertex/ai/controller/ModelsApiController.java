@@ -1,10 +1,10 @@
-package ai.h2o.mojos.deploy.gcp.unified.controller;
+package ai.h2o.mojos.deploy.gcp.vertex.ai.controller;
 
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
-import ai.h2o.mojos.deploy.common.rest.unified.api.ModelApi;
-import ai.h2o.mojos.deploy.common.rest.unified.model.Model;
-import ai.h2o.mojos.deploy.common.rest.unified.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.vertex.ai.api.ModelApi;
+import ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Model;
+import ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import com.google.common.base.Strings;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class ModelsApiController implements ModelApi {
 
   @Override
   public ResponseEntity<ScoreResponse> getScore(
-      ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest gcpRequest
+      ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest gcpRequest
   ) {
     try {
       log.info("Got scoring request");
@@ -56,13 +56,13 @@ public class ModelsApiController implements ModelApi {
   }
   
   /**
-   * Converts GCP AI Unified request to REST module request.
+   * Converts GCP Vertex AI request to REST module request.
    *
-   * @param gcpRequest {@link ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest} GCP
-   *     unified request to be converted
+   * @param gcpRequest {@link ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest} GCP
+   *     Vertex AI request to be converted
    */
   public static ScoreRequest getRestScoreRequest(
-      ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest gcpRequest
+      ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest gcpRequest
   ) {
     ScoreRequest request = new ScoreRequest();
     
@@ -75,7 +75,7 @@ public class ModelsApiController implements ModelApi {
     request.setFields(gcpRequest.getParameters().getFields());
     
     Row row;
-    for (ai.h2o.mojos.deploy.common.rest.unified.model.Row gcpRow: 
+    for (ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row gcpRow: 
         gcpRequest.getInstances()
     ) {
       row = new Row();
@@ -90,7 +90,7 @@ public class ModelsApiController implements ModelApi {
   }
   
   /**
-   * Converts REST module response to GCP AI Unified response.
+   * Converts REST module response to GCP Vertex AI response.
    *
    * @param restResponse {@link ai.h2o.mojos.deploy.common.rest.model.ScoreResponse} REST
    *     module response to convert
@@ -103,9 +103,9 @@ public class ModelsApiController implements ModelApi {
     response.setId(restResponse.getId());
     response.setFields(restResponse.getFields());
     
-    ai.h2o.mojos.deploy.common.rest.unified.model.Row row;
+    ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row row;
     for (Row restRow: restResponse.getScore()) {
-      row = new ai.h2o.mojos.deploy.common.rest.unified.model.Row();
+      row = new ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row();
       for (int i = 0; i < restRow.size(); i++) {
         row.add(restRow.get(i));
       }

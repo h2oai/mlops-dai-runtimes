@@ -1,4 +1,4 @@
-package ai.h2o.mojos.deploy.gcp.unified.config;
+package ai.h2o.mojos.deploy.gcp.vertex.ai.config;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;

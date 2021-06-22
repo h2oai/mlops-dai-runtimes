@@ -1,4 +1,4 @@
-package ai.h2o.mojos.deploy.gcp.unified.config;
+package ai.h2o.mojos.deploy.gcp.vertex.ai.config;
 
 import ai.h2o.mojos.deploy.common.transform.CsvToMojoFrameConverter;
 import ai.h2o.mojos.deploy.common.transform.MojoFrameToResponseConverter;

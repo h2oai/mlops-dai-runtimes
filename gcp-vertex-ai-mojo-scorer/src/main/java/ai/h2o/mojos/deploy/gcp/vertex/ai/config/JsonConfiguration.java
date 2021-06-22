@@ -1,4 +1,4 @@
-package ai.h2o.mojos.deploy.gcp.unified.config;
+package ai.h2o.mojos.deploy.gcp.vertex.ai.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;

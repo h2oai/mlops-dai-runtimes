@@ -1,7 +1,7 @@
-# DAI Deployment Template for GCP AI Platform Unified
+# DAI Deployment Template for GCP Vertex AI
 
 The docker image that is built by this project can be pushed to gcr.io and used for scoring
-Driverless AI Mojos in GCP AI Platform Unified. 
+Driverless AI Mojos in GCP Vertex AI. 
 
 ## Building
 
@@ -12,14 +12,14 @@ shell should have a similar output to `/my/path/to/dai-deployment-templates`.
   ```shell script
   ./gradlew build
   ```
-  and the docker image required for GCP AI Platform Unified will be in the directory `gcp-unified-mojo-scorer/build`:
+  and the docker image required for GCP Vertex AI will be in the directory `gcp-vertex-ai-mojo-scorer/build`:
   ```shell script
-  /path/to/dai-deployment-templates/gcp-unified-mojo-scorer/build/jib-image.tar
+  /path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
   ```
 
 * Load the resulting `jib-image.tar` file to docker
   ```shell script
-  docker load < /path/to/dai-deployment-templates/gcp-unified-mojo-scorer/build/jib-image.tar
+  docker load < /path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
   ``` 
 
 * Follow the steps explained here in Google Documentation: https://cloud.google.com/run/docs/building/containers, to 
@@ -28,7 +28,7 @@ push the container to gcr.io
 ## Deploying
 
 To deploy the container follow the steps in Google Documentation here to import the model:
-https://cloud.google.com/ai-platform-unified/docs/predictions/importing-custom-trained-model
+https://cloud.google.com/vertex-ai/docs/general/import-model
 
 There is one requirement for the container. You __MUST__ include the following environment variables:
 * MOJO_GCS_PATH = `gs://path/to/pipeline.mojo`
