@@ -48,7 +48,7 @@ jar {
 // Docker image configuration.
 jib {
     from {
-        if (dockerUsePython.toBoolean()) {
+        if (dockerIncludePython.toBoolean()) {
           image = 'openkbs/jre-mvn-py3:latest'
         } else {
           image = 'openjdk:8-jre-alpine'

@@ -35,15 +35,15 @@ public class EnvironmentConfiguration {
         env.getOrDefault("DRIVERLESS_AI_LICENSE_FILE", "").equals(LICENSE_DOWNLOAD_PATH),
         errMsg,
         LICENSE_DOWNLOAD_PATH);
-    downloadFromGcs(env);
+    downloadArtifactsFromGcs(env);
     log.info("Successfully downloaded files from GCS. Starting rest scoring service");
   }
 
-  private void downloadFromGcs(Map<String, String> env) {
+  private void downloadArtifactsFromGcs(Map<String, String> env) {
     downloadFileFromGcs(getFromEnv(env, "MOJO_GCS_PATH"), Paths.get(MOJO_DOWNLOAD_PATH));
     downloadFileFromGcs(getFromEnv(env, "LICENSE_GCS_PATH"), Paths.get(LICENSE_DOWNLOAD_PATH));
     // Only use pre-processing script if one is provided
-    if (!getFromEnv(env, "PREPROCESSING_SCRIPT_PATH").isEmpty()) {
+    if (!env.getOrDefault("PREPROCESSING_SCRIPT_PATH", "").isEmpty()) {
       downloadFileFromGcs(
           getFromEnv(env, "PREPROCESSING_SCRIPT_PATH"),
           Paths.get(PREPROCESSING_SCRIPT_PATH));
@@ -73,7 +73,7 @@ public class EnvironmentConfiguration {
 
   private String getFromEnv(Map<String, String> env, String envVar) {
     String envValue = env.getOrDefault(envVar, "");
-    if (envValue.isEmpty() && !envVar.equals("PREPROCESSING_SCRIPT_PATH")) {
+    if (envValue.isEmpty()) {
       throw new RuntimeException(
           String.format("Error: required environment variable: %s, is not set", envVar));
     }
