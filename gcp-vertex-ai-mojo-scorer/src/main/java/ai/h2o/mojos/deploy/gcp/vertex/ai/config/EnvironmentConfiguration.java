@@ -17,6 +17,7 @@ public class EnvironmentConfiguration {
   private static final Logger log = LoggerFactory.getLogger(EnvironmentConfiguration.class);
   private static final String MOJO_DOWNLOAD_PATH = "/tmp/pipeline.mojo";
   private static final String LICENSE_DOWNLOAD_PATH = "/tmp/license.sig";
+  private static final String PREPROCESSING_SCRIPT_PATH = "/tmp/preprocessing_script.py";
   private final Storage storage;
 
   public EnvironmentConfiguration(Storage storage) {
@@ -41,6 +42,12 @@ public class EnvironmentConfiguration {
   private void downloadFromGcs(Map<String, String> env) {
     downloadFileFromGcs(getFromEnv(env, "MOJO_GCS_PATH"), Paths.get(MOJO_DOWNLOAD_PATH));
     downloadFileFromGcs(getFromEnv(env, "LICENSE_GCS_PATH"), Paths.get(LICENSE_DOWNLOAD_PATH));
+    // Only use pre-processing script if one is provided
+    if (!getFromEnv(env, "PREPROCESSING_SCRIPT_PATH").isEmpty()) {
+      downloadFileFromGcs(
+          getFromEnv(env, "PREPROCESSING_SCRIPT_PATH"),
+          Paths.get(PREPROCESSING_SCRIPT_PATH));
+    }
   }
 
   private void downloadFileFromGcs(String gcsPath, Path outputPath) {
@@ -66,7 +73,7 @@ public class EnvironmentConfiguration {
 
   private String getFromEnv(Map<String, String> env, String envVar) {
     String envValue = env.getOrDefault(envVar, "");
-    if (envValue.isEmpty()) {
+    if (envValue.isEmpty() && !envVar.equals("PREPROCESSING_SCRIPT_PATH")) {
       throw new RuntimeException(
           String.format("Error: required environment variable: %s, is not set", envVar));
     }

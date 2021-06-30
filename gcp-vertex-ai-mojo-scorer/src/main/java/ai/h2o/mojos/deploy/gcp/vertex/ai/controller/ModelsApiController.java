@@ -7,7 +7,18 @@ import ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Model;
 import ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import com.google.common.base.Strings;
-import java.io.IOException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
+import java.io.File;
+import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +74,7 @@ public class ModelsApiController implements ModelApi {
    */
   public static ScoreRequest getRestScoreRequest(
       ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest gcpRequest
-  ) {
+  ) throws Exception {
     ScoreRequest request = new ScoreRequest();
     
     if (gcpRequest.getParameters().getIncludeFieldsInOutput() != null) {
@@ -73,6 +84,38 @@ public class ModelsApiController implements ModelApi {
     request.setNoFieldNamesInOutput(gcpRequest.getParameters().isNoFieldNamesInOutput());
     request.setIdField(gcpRequest.getParameters().getIdField());
     request.setFields(gcpRequest.getParameters().getFields());
+    
+    // Check if a pre-processing script was provided, if so, use it first
+    Map<String, String> env = System.getenv();
+    String preProccessingScript = env.getOrDefault("PREPROCESSING_SCRIPT_PATH", "");
+    
+    if (!preProccessingScript.isEmpty()) {
+      // Write request body to JSON file to be consumed by Python script
+      ObjectMapper mapper = new ObjectMapper();
+      
+      String fileName = UUID.randomUUID().toString();
+      mapper.writeValue(new File("/tmp/" + fileName), gcpRequest);
+      
+      // Run Python pre processing script and reload request body with updated data
+      ProcessBuilder processBuilder;
+      processBuilder = new ProcessBuilder("python", "/tmp/preprocessing_script.py", fileName);
+      processBuilder.redirectErrorStream(true);
+      log.info("Waiting for script to run");
+      Process process = processBuilder.start();
+      int exitCode = process.waitFor();
+      
+      if (exitCode != 0) {
+        throw new Exception("Preprocessing script failed.");
+      }
+      
+      // Read preprocessed data
+      JsonReader reader = new JsonReader(new FileReader("/tmp/" + fileName));
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      gcpRequest = gson.fromJson(reader,
+          ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest.class);
+      
+      Files.deleteIfExists(Paths.get("/tmp" + fileName));
+    }
     
     Row row;
     for (ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row gcpRow: 

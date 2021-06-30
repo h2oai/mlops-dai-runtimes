@@ -8,22 +8,34 @@ Driverless AI Mojos in GCP Vertex AI.
 Make sure you are in the working directory `dai-deployment-templates`. Typing `pwd` in the terminal
 shell should have a similar output to `/my/path/to/dai-deployment-templates`.
 
-* Run the following command: 
+You can build the Docker image in two ways. The first only includes the ability to score and the second
+includes the ability to set a preprocessing script.
+
+* Run the following command to build without preprocessing script option: 
   ```shell script
-  ./gradlew build
+  ./gradlew build -PdockerRepositoryPrefix=gcr.io/your/repository -PdockerUsePython=false
   ```
   and the docker image required for GCP Vertex AI will be in the directory `gcp-vertex-ai-mojo-scorer/build`:
   ```shell script
   /path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
   ```
 
+* Run the following command to build with preprocessing script option:
+```shell script
+./gradlew build -PdockerRepositoryPrefix=gcr.io/your/repository
+```
+and the docker image required for GCP Vertex AI will be in the directory `gcp-vertex-ai-mojo-scorer/build`:
+```shell script
+/path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
+```
+
 * Load the resulting `jib-image.tar` file to docker
-  ```shell script
-  docker load < /path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
-  ``` 
+```shell script
+docker load < /path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
+``` 
 
 * Follow the steps explained here in Google Documentation: https://cloud.google.com/run/docs/building/containers, to 
-push the container to gcr.io
+push the image to gcr.io.
 
 ## Deploying
 
@@ -34,7 +46,43 @@ There is one requirement for the container. You __MUST__ include the following e
 * MOJO_GCS_PATH = `gs://path/to/pipeline.mojo`
 * LICENSE_GCS_PATH = `gs://path/to/driverless/ai/license.sig`
 
+If you built the Docker image with the preprocessing script option, you also __MUST__ include the following environment variable:
+* PREPROCESSING_SCRIPT_PATH = `gs://path/to/preprocessing_script.py`
+
+The prediction route will be `/model/score` and the health route will be `/model/id`.
+
 You can then deploy an endpoint once the model has been imported.
+
+## Preprocessing Script
+
+If you are including a Python data preprocessing script, here is an example:
+
+```
+#!/usr/bin/env python
+# coding: utf-8
+import json
+import sys
+
+fileName = str(sys.argv[1])
+
+# Load JSON file with request data
+with open("/tmp/"+fileName) as f:
+    request = json.load(f)
+    
+data = [
+    [69338.0,0.7315255726985329,-0.5847660267950631,0.386082437076677,0.821180632502935,-0.0312602331172659,1.1980865440065802,-0.13618956328652698,0.391451241672127,0.3738906601386479,-0.461823737560995,0.625861374468075,1.07615129929773,0.0718516496509022,0.0620528341180761,0.850326761944984,-1.6339872927690802,1.3467406501738701,-2.7597098786627994,-1.5048495641502198,0.0533811518528488,0.00272572637419962,0.00836864608482666,0.0456492844845917,-0.5780279514412049,0.0478507743996201,0.36036065876766993,0.0224220501004547,0.0282128845008635,157.49],
+    [81081.0,-0.873286664580274,0.5383418573374871,2.65055031553525,0.331972130017534,0.0510277957117218,0.6364468979718391,0.6719139650867261,0.18165642237906401,0.0793536531651418,-0.684037044169426,0.8644669396918221,0.8734041370577021,-0.7131054601776229,-0.494781246049671,-1.94685930894166,-0.6014164255583699,-0.0460304794694537,-0.356068770928204,-0.537032123913058,-0.0619970210088985,-0.00642393408573803,0.32916282786391804,-0.33233023038250503,0.22704204810440198,0.546100808417714,-0.40064788122765005,-0.0896039366748501,-0.166155749695546,38.0]
+]
+
+# Replace data with new samples
+request["instances"] = data
+
+# Dump new request to JSON
+with open("/tmp/"+fileName, 'w') as f:
+    json.dump(request, f)
+```
+
+The deployed Docker image will pass the original request and data through a JSON file to the provided Python preprocessing script. The name of the JSON file is passed to the preprocessing script as a command line argument. The JSON file is located at `/tmp`. The preprocessing script will have to overwrite the original JSON (just like in the example above) with the modified data.
 
 ## Scoring
 

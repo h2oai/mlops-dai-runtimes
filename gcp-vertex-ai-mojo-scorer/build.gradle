@@ -18,6 +18,8 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.slf4j', name: 'slf4j-api'
     implementation group: 'com.google.cloud', name: 'google-cloud-storage'
+    implementation 'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
+    
     
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'
@@ -46,7 +48,11 @@ jar {
 // Docker image configuration.
 jib {
     from {
-        image = 'openjdk:8-jre-alpine'
+        if (dockerUsePython.toBoolean()) {
+          image = 'openkbs/jre-mvn-py3:latest'
+        } else {
+          image = 'openjdk:8-jre-alpine'
+        }
     }
     to {
         image = dockerRepositoryPrefix + 'google-vertex-ai-scorer'
