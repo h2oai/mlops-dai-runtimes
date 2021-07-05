@@ -13,6 +13,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -74,7 +75,7 @@ public class ModelsApiController implements ModelApi {
    */
   public static ScoreRequest getRestScoreRequest(
       ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest gcpRequest
-  ) throws Exception {
+  ) {
     ScoreRequest request = new ScoreRequest();
     
     if (gcpRequest.getParameters().getIncludeFieldsInOutput() != null) {
@@ -94,27 +95,32 @@ public class ModelsApiController implements ModelApi {
       ObjectMapper mapper = new ObjectMapper();
       
       String fileName = UUID.randomUUID().toString();
-      mapper.writeValue(new File("/tmp/" + fileName), gcpRequest);
       
-      // Run Python pre processing script and reload request body with updated data
-      ProcessBuilder processBuilder;
-      processBuilder = new ProcessBuilder("python", "/tmp/preprocessing_script.py", fileName);
-      processBuilder.redirectErrorStream(true);
-      log.info("Waiting for script to run");
-      Process process = processBuilder.start();
-      int exitCode = process.waitFor();
-      
-      if (exitCode != 0) {
-        throw new Exception("Preprocessing script failed.");
+      try {
+        mapper.writeValue(new File("/tmp/" + fileName), gcpRequest);
+        
+        // Run Python pre processing script and reload request body with updated data
+        ProcessBuilder processBuilder;
+        processBuilder = new ProcessBuilder("python", "/tmp/preprocessing_script.py", fileName);
+        processBuilder.redirectErrorStream(true);
+        log.info("Waiting for script to run");
+        Process process = processBuilder.start();
+        process.waitFor();
+        
+        // Read preprocessed data
+        JsonReader reader = new JsonReader(new FileReader("/tmp/" + fileName));
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        gcpRequest = gson.fromJson(reader,
+            ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest.class);
+        
+        Files.deleteIfExists(Paths.get("/tmp" + fileName));
+      } catch (JsonSyntaxException e) {
+        log.error("Malformed JSON when reading from file: {}", e.getMessage());
+      } catch (IOException e) {
+        log.error("JSON File not found: {}", e.getMessage());
+      } catch (Exception e) {
+        log.error("Unexpected error during data preprocessing step: {}", e.getMessage());
       }
-      
-      // Read preprocessed data
-      JsonReader reader = new JsonReader(new FileReader("/tmp/" + fileName));
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      gcpRequest = gson.fromJson(reader,
-          ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest.class);
-      
-      Files.deleteIfExists(Paths.get("/tmp" + fileName));
     }
     
     Row row;
