@@ -5,7 +5,7 @@ plugins {
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
-    implementation project(':common:rest-unified-spring-api')
+    implementation project(':common:rest-vertex-ai-spring-api')
     implementation project(':common:rest-spring-api')
     implementation project(':common:transform')
     implementation group: 'ai.h2o', name: 'h2o-genmodel'
@@ -18,6 +18,8 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.slf4j', name: 'slf4j-api'
     implementation group: 'com.google.cloud', name: 'google-cloud-storage'
+    implementation 'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
+    
     
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'
@@ -35,7 +37,7 @@ bootRun {
 }
 
 bootJar {
-    mainClassName = 'ai.h2o.mojos.deploy.gcp.unified.GCPUnifiedScorerApplication'
+    mainClassName = 'ai.h2o.mojos.deploy.gcp.vertex.ai.GcpVertexAiApplication'
     archiveClassifier = 'boot'
 }
 
@@ -46,10 +48,14 @@ jar {
 // Docker image configuration.
 jib {
     from {
-        image = 'openjdk:8-jre-alpine'
+        if (dockerIncludePython.toBoolean()) {
+          image = 'openkbs/jre-mvn-py3:latest'
+        } else {
+          image = 'openjdk:8-jre-alpine'
+        }
     }
     to {
-        image = dockerRepositoryPrefix + 'google-unified-scorer'
+        image = dockerRepositoryPrefix + 'google-vertex-ai-scorer'
         tags = [version]
     }
     container {

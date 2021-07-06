@@ -1,40 +1,67 @@
-# DAI Deployment Template for GCP AI Platform Unified
+# DAI Deployment Template for GCP Vertex AI
 
 The docker image that is built by this project can be pushed to gcr.io and used for scoring
-Driverless AI Mojos in GCP AI Platform Unified. 
+Driverless AI Mojos in GCP Vertex AI. 
 
 ## Building
 
 Make sure you are in the working directory `dai-deployment-templates`. Typing `pwd` in the terminal
 shell should have a similar output to `/my/path/to/dai-deployment-templates`.
 
-* Run the following command: 
+You can build the Docker image in two ways. The first only includes the ability to score and the second
+includes the ability to set a preprocessing script. The difference between the two options is the base
+image used. If you choose to include Python and the option for the preprocessing script, then the base
+image used is `openkbs/jre-mvn-py3:latest`. Otherwise, the base image used is `openjdk:8-jre-alpine`.
+
+* Run the following command to build without preprocessing script option: 
   ```shell script
-  ./gradlew build
+  ./gradlew build -PdockerRepositoryPrefix=gcr.io/your/repository -PdockerUsePython=false
   ```
-  and the docker image required for GCP AI Platform Unified will be in the directory `gcp-unified-mojo-scorer/build`:
+  and the docker image required for GCP Vertex AI will be in the directory `gcp-vertex-ai-mojo-scorer/build`:
   ```shell script
-  /path/to/dai-deployment-templates/gcp-unified-mojo-scorer/build/jib-image.tar
+  /path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
   ```
+
+* Run the following command to build with preprocessing script option:
+```shell script
+./gradlew build -PdockerRepositoryPrefix=gcr.io/your/repository
+```
+and the docker image required for GCP Vertex AI will be in the directory `gcp-vertex-ai-mojo-scorer/build`:
+```shell script
+/path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
+```
 
 * Load the resulting `jib-image.tar` file to docker
-  ```shell script
-  docker load < /path/to/dai-deployment-templates/gcp-unified-mojo-scorer/build/jib-image.tar
-  ``` 
+```shell script
+docker load < /path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
+``` 
 
 * Follow the steps explained here in Google Documentation: https://cloud.google.com/run/docs/building/containers, to 
-push the container to gcr.io
+push the image to gcr.io.
 
 ## Deploying
 
 To deploy the container follow the steps in Google Documentation here to import the model:
-https://cloud.google.com/ai-platform-unified/docs/predictions/importing-custom-trained-model
+https://cloud.google.com/vertex-ai/docs/general/import-model
 
 There is one requirement for the container. You __MUST__ include the following environment variables:
 * MOJO_GCS_PATH = `gs://path/to/pipeline.mojo`
 * LICENSE_GCS_PATH = `gs://path/to/driverless/ai/license.sig`
 
+If you built the Docker image with the preprocessing script option, you also should include the following environment variable:
+* PREPROCESSING_SCRIPT_PATH = `gs://path/to/preprocessing_script.py`
+If the environment variable `PREPROCESSING_SCRIPT_PATH` is not included, then the Docker image will not use
+a preprocessing script. In which case, we highly recommend that you build the image without Python included.
+
+The prediction route will be `/model/score` and the health route will be `/model/id`.
+
 You can then deploy an endpoint once the model has been imported.
+
+## Preprocessing Script
+
+If you are including a Python data preprocessing script, you can find an example in the examples folder here: [preprocessing_script_example.py](examples/preprocessing_script_example.py)
+
+The deployed Docker image will pass the original request and data through a JSON file to the provided Python preprocessing script. The name of the JSON file is passed to the preprocessing script as a command line argument. The JSON file is located at `/tmp`. The preprocessing script will have to overwrite the original JSON (just like in the example above) with the modified data. Therefor, there is some disk IO that is required when using a preprocessing script.
 
 ## Scoring
 

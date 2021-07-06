@@ -1,13 +1,26 @@
-package ai.h2o.mojos.deploy.gcp.unified.controller;
+package ai.h2o.mojos.deploy.gcp.vertex.ai.controller;
 
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
-import ai.h2o.mojos.deploy.common.rest.unified.api.ModelApi;
-import ai.h2o.mojos.deploy.common.rest.unified.model.Model;
-import ai.h2o.mojos.deploy.common.rest.unified.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.vertex.ai.api.ModelApi;
+import ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Model;
+import ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +52,7 @@ public class ModelsApiController implements ModelApi {
 
   @Override
   public ResponseEntity<ScoreResponse> getScore(
-      ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest gcpRequest
+      ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest gcpRequest
   ) {
     try {
       log.info("Got scoring request");
@@ -56,13 +69,13 @@ public class ModelsApiController implements ModelApi {
   }
   
   /**
-   * Converts GCP AI Unified request to REST module request.
+   * Converts GCP Vertex AI request to REST module request.
    *
-   * @param gcpRequest {@link ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest} GCP
-   *     unified request to be converted
+   * @param gcpRequest {@link ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest} GCP
+   *     Vertex AI request to be converted
    */
   public static ScoreRequest getRestScoreRequest(
-      ai.h2o.mojos.deploy.common.rest.unified.model.ScoreRequest gcpRequest
+      ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest gcpRequest
   ) {
     ScoreRequest request = new ScoreRequest();
     
@@ -74,8 +87,47 @@ public class ModelsApiController implements ModelApi {
     request.setIdField(gcpRequest.getParameters().getIdField());
     request.setFields(gcpRequest.getParameters().getFields());
     
+    // Check if a pre-processing script was provided, if so, use it first
+    Map<String, String> env = System.getenv();
+    String preProccessingScript = env.getOrDefault("PREPROCESSING_SCRIPT_PATH", "");
+    
+    if (!preProccessingScript.isEmpty()) {
+      // Write data to file to be injested by preprocessing script
+      String fileName = UUID.randomUUID().toString() + ".json";
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+        mapper.writeValue(new File("/tmp/" + fileName), gcpRequest);
+      } catch (IOException e) {
+        log.error("Failed writing JSON file: {}", e.getMessage());
+      }
+      
+      // Run preprocessing script on request data
+      try (FileReader fileReader = new FileReader("/tmp/" + fileName);
+          JsonReader reader = new JsonReader(fileReader)) {
+        ProcessBuilder processBuilder;
+        processBuilder = new ProcessBuilder("python", "/tmp/preprocessing_script.py", fileName);
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+        process.waitFor();
+        
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        gcpRequest = gson.fromJson(reader,
+            ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest.class);
+      } catch (JsonSyntaxException e) {
+        log.error("Malformed JSON when reading from file: {}", e.getMessage());
+      } catch (Exception e) {
+        log.error("Unexpected error during data preprocessing step: {}", e.getMessage());
+      } finally {
+        try {
+          Files.deleteIfExists(Paths.get("/tmp" + fileName));
+        } catch (IOException e) {
+          log.error("Failed deleting JSON file: {}", e.getMessage());
+        }
+      }
+    }
+    
     Row row;
-    for (ai.h2o.mojos.deploy.common.rest.unified.model.Row gcpRow: 
+    for (ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row gcpRow: 
         gcpRequest.getInstances()
     ) {
       row = new Row();
@@ -90,7 +142,7 @@ public class ModelsApiController implements ModelApi {
   }
   
   /**
-   * Converts REST module response to GCP AI Unified response.
+   * Converts REST module response to GCP Vertex AI response.
    *
    * @param restResponse {@link ai.h2o.mojos.deploy.common.rest.model.ScoreResponse} REST
    *     module response to convert
@@ -103,9 +155,9 @@ public class ModelsApiController implements ModelApi {
     response.setId(restResponse.getId());
     response.setFields(restResponse.getFields());
     
-    ai.h2o.mojos.deploy.common.rest.unified.model.Row row;
+    ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row row;
     for (Row restRow: restResponse.getScore()) {
-      row = new ai.h2o.mojos.deploy.common.rest.unified.model.Row();
+      row = new ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row();
       for (int i = 0; i < restRow.size(); i++) {
         row.add(restRow.get(i));
       }

@@ -1,0 +1,7 @@
+{
+  "basePackage":"ai.h2o.mojos.deploy.common.rest.vertex.ai",
+  "configPackage":"ai.h2o.mojos.deploy.common.rest.vertex.ai.config",
+  "modelPackage": "ai.h2o.mojos.deploy.common.rest.vertex.ai.model",
+  "apiPackage" : "ai.h2o.mojos.deploy.common.rest.vertex.ai.api",
+  "interfaceOnly" : true
+}
