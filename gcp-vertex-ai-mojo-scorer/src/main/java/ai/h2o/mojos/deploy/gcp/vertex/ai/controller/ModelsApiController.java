@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -91,35 +92,37 @@ public class ModelsApiController implements ModelApi {
     String preProccessingScript = env.getOrDefault("PREPROCESSING_SCRIPT_PATH", "");
     
     if (!preProccessingScript.isEmpty()) {
-      // Write request body to JSON file to be consumed by Python script
+      // Write data to file to be injested by preprocessing script
+      String fileName = UUID.randomUUID().toString() + ".json";
       ObjectMapper mapper = new ObjectMapper();
-      
-      String fileName = UUID.randomUUID().toString();
-      
       try {
         mapper.writeValue(new File("/tmp/" + fileName), gcpRequest);
-        
-        // Run Python pre processing script and reload request body with updated data
+      } catch (IOException e) {
+        log.error("Failed writing JSON file: {}", e.getMessage());
+      }
+      
+      // Run preprocessing script on request data
+      try (FileReader fileReader = new FileReader("/tmp/" + fileName);
+          JsonReader reader = new JsonReader(fileReader)) {
         ProcessBuilder processBuilder;
         processBuilder = new ProcessBuilder("python", "/tmp/preprocessing_script.py", fileName);
         processBuilder.redirectErrorStream(true);
-        log.info("Waiting for script to run");
         Process process = processBuilder.start();
         process.waitFor();
         
-        // Read preprocessed data
-        JsonReader reader = new JsonReader(new FileReader("/tmp/" + fileName));
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         gcpRequest = gson.fromJson(reader,
             ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest.class);
-        
-        Files.deleteIfExists(Paths.get("/tmp" + fileName));
       } catch (JsonSyntaxException e) {
         log.error("Malformed JSON when reading from file: {}", e.getMessage());
-      } catch (IOException e) {
-        log.error("JSON File not found: {}", e.getMessage());
       } catch (Exception e) {
         log.error("Unexpected error during data preprocessing step: {}", e.getMessage());
+      } finally {
+        try {
+          Files.deleteIfExists(Paths.get("/tmp" + fileName));
+        } catch (IOException e) {
+          log.error("Failed deleting JSON file: {}", e.getMessage());
+        }
       }
     }
     

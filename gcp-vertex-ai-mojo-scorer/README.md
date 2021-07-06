@@ -59,7 +59,7 @@ You can then deploy an endpoint once the model has been imported.
 
 ## Preprocessing Script
 
-If you are including a Python data preprocessing script, you can find an example in the exampels folder here: [preprocessing_script_example.py](examples/preprocessing_script_example.py)
+If you are including a Python data preprocessing script, you can find an example in the examples folder here: [preprocessing_script_example.py](examples/preprocessing_script_example.py)
 
 The deployed Docker image will pass the original request and data through a JSON file to the provided Python preprocessing script. The name of the JSON file is passed to the preprocessing script as a command line argument. The JSON file is located at `/tmp`. The preprocessing script will have to overwrite the original JSON (just like in the example above) with the modified data. Therefor, there is some disk IO that is required when using a preprocessing script.
 
