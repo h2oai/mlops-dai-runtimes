@@ -208,7 +208,7 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Row'
-      input_shapley_contributions:
+      inputShapleyContributions:
         type: object
         items:
           $ref: '#/definitions/ShapleyResponse'

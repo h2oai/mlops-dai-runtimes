@@ -34,6 +34,12 @@ public class MojoScorer {
   private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
   private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
 
+  // note the mojo pipeline need to be reloaded here as we have a constrain from java mojo
+  // both SHAP values and predictions cannot be provided with the same pipeline
+  // Link: https://github.com/h2oai/mojo2/blob/7a1ab76b09f056334842a5b442ff89859aabf518/doc/shap.md
+  private static final MojoPipeline pipelineShapley = loadMojoPipelineFromFile();
+
+
   private final RequestToMojoFrameConverter requestConverter;
   private final MojoFrameToResponseConverter responseConverter;
   private final MojoPipelineToModelInfoConverter modelInfoConverter;
@@ -95,10 +101,6 @@ public class MojoScorer {
    * @return response {@link ShapleyResponse}
    */
   private ShapleyResponse getShapleyResponse(ScoreRequest request) {
-    // note the mojo pipeline need to be reloaded here as we have a constrain from java mojo
-    // both SHAP values and predictions cannot be provided with the same pipeline
-    // Link: https://github.com/h2oai/mojo2/blob/7a1ab76b09f056334842a5b442ff89859aabf518/doc/shap.md
-    MojoPipeline pipelineShapley = loadMojoPipelineFromFile();
     pipelineShapley.setShapPredictContrib(true);
     MojoFrame requestFrame = requestConverter
             .apply(request, pipelineShapley.getInputFrameBuilder());
