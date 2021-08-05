@@ -3,8 +3,10 @@ package ai.h2o.mojos.deploy.common.transform;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.model.ShapleyResponse;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
+import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.lic.LicenseException;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -63,11 +65,45 @@ public class MojoScorer {
    * @return response {@link ScoreResponse}
    */
   public ScoreResponse score(ScoreRequest request) {
+    return getScoreResponse(request, false);
+  }
+
+  /**
+   * Method to score an incoming request of type {@link ScoreRequest}
+   * with shapley contributions if needed.
+   *
+   * @param request {@link ScoreRequest}
+   * @return response {@link ScoreResponse}
+   */
+  public ScoreResponse getScoreResponse(ScoreRequest request, Boolean shapleyResults) {
     MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
     MojoFrame responseFrame = doScore(requestFrame);
     ScoreResponse response = responseConverter.apply(responseFrame, request);
     response.id(pipeline.getUuid());
+
+    // set shapley contributions if requested
+    if (Boolean.TRUE.equals(shapleyResults)) {
+      response.setInputShapleyContributions(getShapleyResponse(request));
+    }
     return response;
+  }
+
+  /**
+   * Method to get shapley values for an incoming request of type {@link ScoreRequest}.
+   *
+   * @param request {@link ScoreRequest}
+   * @return response {@link ShapleyResponse}
+   */
+  private ShapleyResponse getShapleyResponse(ScoreRequest request) {
+    // note the mojo pipeline need to be reloaded here as we have a constrain from java mojo
+    // both SHAP values and predictions cannot be provided with the same pipeline
+    // Link: https://github.com/h2oai/mojo2/blob/7a1ab76b09f056334842a5b442ff89859aabf518/doc/shap.md
+    MojoPipeline pipelineShapley = loadMojoPipelineFromFile();
+    pipelineShapley.setShapPredictContrib(true);
+    MojoFrame requestFrame = requestConverter
+            .apply(request, pipelineShapley.getInputFrameBuilder());
+    MojoFrame shapleyResponseFrame = doScore(requestFrame, pipelineShapley);
+    return responseConverter.getShapleyResponse(shapleyResponseFrame);
   }
 
   /**
@@ -82,7 +118,7 @@ public class MojoScorer {
     try (InputStream csvStream = getInputStream(csvFilePath)) {
       requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
     }
-    MojoFrame responseFrame = doScore(requestFrame);
+    MojoFrame responseFrame = doScore(requestFrame, pipeline);
     ScoreResponse response = responseConverter.apply(responseFrame, new ScoreRequest());
     response.id(pipeline.getUuid());
     return response;
@@ -98,12 +134,16 @@ public class MojoScorer {
   }
 
   private static MojoFrame doScore(MojoFrame requestFrame) {
+    return doScore(requestFrame, pipeline);
+  }
+
+  private static MojoFrame doScore(MojoFrame requestFrame, MojoPipeline invokedPipeline) {
     log.debug(
         "Input has {} rows, {} columns: {}",
         requestFrame.getNrows(),
         requestFrame.getNcols(),
         Arrays.toString(requestFrame.getColumnNames()));
-    MojoFrame responseFrame = pipeline.transform(requestFrame);
+    MojoFrame responseFrame = invokedPipeline.transform(requestFrame);
     log.debug(
         "Response has {} rows, {} columns: {}",
         responseFrame.getNrows(),

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ModelsApiController implements ModelApi {
@@ -48,10 +49,11 @@ public class ModelsApiController implements ModelApi {
   }
 
   @Override
-  public ResponseEntity<ScoreResponse> getScore(ScoreRequest request) {
+  public ResponseEntity<ScoreResponse> getScore(ScoreRequest request, Boolean shapleyResults) {
     try {
       log.info("Got scoring request");
-      return ResponseEntity.ok(scorer.score(request));
+      ScoreResponse scoreResponse = scorer.getScoreResponse(request, shapleyResults);
+      return ResponseEntity.ok(scoreResponse);
     } catch (Exception e) {
       log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
       log.debug(" - failure cause: ", e);
