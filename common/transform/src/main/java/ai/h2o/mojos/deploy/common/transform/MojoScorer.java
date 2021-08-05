@@ -62,6 +62,7 @@ public class MojoScorer {
     this.responseConverter = responseConverter;
     this.modelInfoConverter = modelInfoConverter;
     this.csvConverter = csvConverter;
+    pipelineShapley.setShapPredictContrib(true);
   }
 
   /**
@@ -101,7 +102,6 @@ public class MojoScorer {
    * @return response {@link ShapleyResponse}
    */
   private ShapleyResponse getShapleyResponse(ScoreRequest request) {
-    pipelineShapley.setShapPredictContrib(true);
     MojoFrame requestFrame = requestConverter
             .apply(request, pipelineShapley.getInputFrameBuilder());
     MojoFrame shapleyResponseFrame = doScore(requestFrame, pipelineShapley);
@@ -120,7 +120,7 @@ public class MojoScorer {
     try (InputStream csvStream = getInputStream(csvFilePath)) {
       requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
     }
-    MojoFrame responseFrame = doScore(requestFrame, pipeline);
+    MojoFrame responseFrame = doScore(requestFrame);
     ScoreResponse response = responseConverter.apply(responseFrame, new ScoreRequest());
     response.id(pipeline.getUuid());
     return response;
