@@ -6,7 +6,6 @@ import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.rest.model.ShapleyResponse;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
-import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.lic.LicenseException;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -84,7 +83,7 @@ public class MojoScorer {
    */
   public ScoreResponse getScoreResponse(ScoreRequest request, Boolean shapleyResults) {
     MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
-    MojoFrame responseFrame = doScore(requestFrame);
+    MojoFrame responseFrame = doScore(requestFrame, false);
     ScoreResponse response = responseConverter.apply(responseFrame, request);
     response.id(pipeline.getUuid());
 
@@ -104,7 +103,7 @@ public class MojoScorer {
   private ShapleyResponse getShapleyResponse(ScoreRequest request) {
     MojoFrame requestFrame = requestConverter
             .apply(request, pipelineShapley.getInputFrameBuilder());
-    MojoFrame shapleyResponseFrame = doScore(requestFrame, pipelineShapley);
+    MojoFrame shapleyResponseFrame = doScore(requestFrame, true);
     return responseConverter.getShapleyResponse(shapleyResponseFrame);
   }
 
@@ -120,7 +119,7 @@ public class MojoScorer {
     try (InputStream csvStream = getInputStream(csvFilePath)) {
       requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
     }
-    MojoFrame responseFrame = doScore(requestFrame);
+    MojoFrame responseFrame = doScore(requestFrame, false);
     ScoreResponse response = responseConverter.apply(responseFrame, new ScoreRequest());
     response.id(pipeline.getUuid());
     return response;
@@ -135,22 +134,23 @@ public class MojoScorer {
     return new FileInputStream(filePath);
   }
 
-  private static MojoFrame doScore(MojoFrame requestFrame) {
-    return doScore(requestFrame, pipeline);
-  }
-
-  private static MojoFrame doScore(MojoFrame requestFrame, MojoPipeline invokedPipeline) {
+  private static MojoFrame doScore(MojoFrame requestFrame, boolean isShapleyContribution) {
     log.debug(
-        "Input has {} rows, {} columns: {}",
-        requestFrame.getNrows(),
-        requestFrame.getNcols(),
-        Arrays.toString(requestFrame.getColumnNames()));
-    MojoFrame responseFrame = invokedPipeline.transform(requestFrame);
+            "Input has {} rows, {} columns: {}",
+            requestFrame.getNrows(),
+            requestFrame.getNcols(),
+            Arrays.toString(requestFrame.getColumnNames()));
+    MojoFrame responseFrame;
+    if (isShapleyContribution) {
+      responseFrame = pipelineShapley.transform(requestFrame);
+    } else {
+      responseFrame = pipeline.transform(requestFrame);
+    }
     log.debug(
-        "Response has {} rows, {} columns: {}",
-        responseFrame.getNrows(),
-        responseFrame.getNcols(),
-        Arrays.toString(responseFrame.getColumnNames()));
+            "Response has {} rows, {} columns: {}",
+            responseFrame.getNrows(),
+            responseFrame.getNcols(),
+            Arrays.toString(responseFrame.getColumnNames()));
     return responseFrame;
   }
 
