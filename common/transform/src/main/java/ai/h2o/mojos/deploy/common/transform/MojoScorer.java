@@ -71,26 +71,18 @@ public class MojoScorer {
    * @return response {@link ScoreResponse}
    */
   public ScoreResponse score(ScoreRequest request) {
-    return getScoreResponse(request, false);
-  }
-
-  /**
-   * Method to score an incoming request of type {@link ScoreRequest}
-   * with shapley contributions if needed.
-   *
-   * @param request {@link ScoreRequest}
-   * @return response {@link ScoreResponse}
-   */
-  public ScoreResponse getScoreResponse(ScoreRequest request, Boolean shapleyResults) {
-    MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
-    MojoFrame responseFrame = doScore(requestFrame, false);
-    ScoreResponse response = responseConverter.apply(responseFrame, request);
-    response.id(pipeline.getUuid());
-
-    // set shapley contributions if requested
-    if (Boolean.TRUE.equals(shapleyResults)) {
+    ScoreResponse response = getScoreResponse(request);
+    if (Boolean.TRUE.equals(request.isShapleyResults())) {
       response.setInputShapleyContributions(getShapleyResponse(request));
     }
+    return response;
+  }
+
+  private ScoreResponse getScoreResponse(ScoreRequest request) {
+    MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
+    MojoFrame responseFrame = doScore(requestFrame);
+    ScoreResponse response = responseConverter.apply(responseFrame, request);
+    response.id(pipeline.getUuid());
     return response;
   }
 
@@ -103,7 +95,7 @@ public class MojoScorer {
   private ShapleyResponse getShapleyResponse(ScoreRequest request) {
     MojoFrame requestFrame = requestConverter
             .apply(request, pipelineShapley.getInputFrameBuilder());
-    MojoFrame shapleyResponseFrame = doScore(requestFrame, true);
+    MojoFrame shapleyResponseFrame = doShapleyContrib(requestFrame);
     return responseConverter.getShapleyResponse(shapleyResponseFrame);
   }
 
@@ -119,7 +111,7 @@ public class MojoScorer {
     try (InputStream csvStream = getInputStream(csvFilePath)) {
       requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
     }
-    MojoFrame responseFrame = doScore(requestFrame, false);
+    MojoFrame responseFrame = doScore(requestFrame);
     ScoreResponse response = responseConverter.apply(responseFrame, new ScoreRequest());
     response.id(pipeline.getUuid());
     return response;
@@ -134,18 +126,28 @@ public class MojoScorer {
     return new FileInputStream(filePath);
   }
 
-  private static MojoFrame doScore(MojoFrame requestFrame, boolean isShapleyContribution) {
+  private static MojoFrame doScore(MojoFrame requestFrame) {
+    log.debug(
+        "Input has {} rows, {} columns: {}",
+        requestFrame.getNrows(),
+        requestFrame.getNcols(),
+        Arrays.toString(requestFrame.getColumnNames()));
+    MojoFrame responseFrame = pipeline.transform(requestFrame);
+    log.debug(
+        "Response has {} rows, {} columns: {}",
+        responseFrame.getNrows(),
+        responseFrame.getNcols(),
+        Arrays.toString(responseFrame.getColumnNames()));
+    return responseFrame;
+  }
+
+  private static MojoFrame doShapleyContrib(MojoFrame requestFrame) {
     log.debug(
             "Input has {} rows, {} columns: {}",
             requestFrame.getNrows(),
             requestFrame.getNcols(),
             Arrays.toString(requestFrame.getColumnNames()));
-    MojoFrame responseFrame;
-    if (isShapleyContribution) {
-      responseFrame = pipelineShapley.transform(requestFrame);
-    } else {
-      responseFrame = pipeline.transform(requestFrame);
-    }
+    MojoFrame responseFrame = pipelineShapley.transform(requestFrame);
     log.debug(
             "Response has {} rows, {} columns: {}",
             responseFrame.getNrows(),

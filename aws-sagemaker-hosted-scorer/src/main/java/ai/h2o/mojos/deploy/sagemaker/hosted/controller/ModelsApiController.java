@@ -53,7 +53,7 @@ public class ModelsApiController implements ModelApi {
 
   @Override
   @RequestMapping("/invocations")
-  public ResponseEntity<ScoreResponse> getScore(ScoreRequest request, Boolean shapleyResults) {
+  public ResponseEntity<ScoreResponse> getScore(ScoreRequest request) {
     try {
       log.info("Got scoring request");
       return ResponseEntity.ok(scorer.score(request));

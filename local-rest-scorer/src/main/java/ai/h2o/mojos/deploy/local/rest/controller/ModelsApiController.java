@@ -48,10 +48,10 @@ public class ModelsApiController implements ModelApi {
   }
 
   @Override
-  public ResponseEntity<ScoreResponse> getScore(ScoreRequest request, Boolean shapleyResults) {
+  public ResponseEntity<ScoreResponse> getScore(ScoreRequest request) {
     try {
       log.info("Got scoring request");
-      ScoreResponse scoreResponse = scorer.getScoreResponse(request, shapleyResults);
+      ScoreResponse scoreResponse = scorer.score(request);
       return ResponseEntity.ok(scoreResponse);
     } catch (Exception e) {
       log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());

@@ -76,11 +76,6 @@ paths:
       produces:
         - application/json
       parameters:
-        - in: query
-          name: shapley_results
-          type: boolean
-          required: false
-          description: The boolean to say if Shap values are needed.
         - name: payload
           in: body
           required: true
@@ -149,6 +144,9 @@ definitions:
   ScoreRequest:
     type: object
     properties:
+      shapleyResults:
+        description: The boolean to say if Shap values are needed.
+        type: boolean
       includeFieldsInOutput:
         description: >
           An array holding the list of field names to be copied from the input request row to the corresponding scoring
