@@ -4,6 +4,7 @@ import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.runtime.MojoPipeline;
+import ai.h2o.mojos.runtime.api.MojoPipelineService;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;
 import com.google.common.base.Preconditions;
@@ -139,14 +140,14 @@ public class MojoScorer {
       }
     }
     if (!mojoFile.isFile()) {
-      throw new RuntimeException("Could not load mojo");
+      throw new RuntimeException("Could not load mojo from file: " + mojoFile);
     }
     try {
-      MojoPipeline mojoPipeline = MojoPipeline.loadFrom(mojoFile.getPath());
+      MojoPipeline mojoPipeline = MojoPipelineService.loadPipeline(mojoFile);
       log.info("Mojo pipeline successfully loaded ({}).", mojoPipeline.getUuid());
       return mojoPipeline;
     } catch (IOException e) {
-      throw new RuntimeException("Unable to load mojo", e);
+      throw new RuntimeException("Unable to load mojo from " + mojoFile, e);
     } catch (LicenseException e) {
       throw new RuntimeException("License file not found", e);
     }
