@@ -27,8 +27,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class MojoFrameToResponseConverterTest {
-  private final MojoFrameToResponseConverter converter = new MojoFrameToResponseConverter();
+class MojoFrameToScoreResponseConverterTest {
+  private final MojoFrameToScoreResponseConverter converter
+          = new MojoFrameToScoreResponseConverter();
 
   @Test
   void convertEmptyRowsResponse_succeeds() {
@@ -180,7 +181,8 @@ class MojoFrameToResponseConverterTest {
 
     // Then
     assertThat(result.getScore())
-        .containsExactly(Stream.of(values).map(MojoFrameToResponseConverterTest::asRow).toArray())
+        .containsExactly(Stream.of(values)
+                .map(MojoFrameToScoreResponseConverterTest::asRow).toArray())
         .inOrder();
     assertThat(result.getFields()).containsExactly("field");
   }
@@ -201,7 +203,8 @@ class MojoFrameToResponseConverterTest {
 
     // Then
     assertThat(result.getScore())
-        .containsExactly(Stream.of(values).map(MojoFrameToResponseConverterTest::asRow).toArray());
+        .containsExactly(Stream.of(values)
+                .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
     assertThat(result.getFields())
         .containsExactly("Str", "Float32", "Float64", "Bool", "Int32", "Int64")
         .inOrder();
@@ -234,7 +237,7 @@ class MojoFrameToResponseConverterTest {
     // Then
     assertThat(result.getScore())
         .containsExactly(
-            Stream.of(expValues).map(MojoFrameToResponseConverterTest::asRow).toArray());
+            Stream.of(expValues).map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
     assertThat(result.getFields())
         .containsExactly("Str", "Float32", "Float64", "Bool", "Int32", "Int64")
         .inOrder();

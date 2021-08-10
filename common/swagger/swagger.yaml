@@ -107,6 +107,30 @@ paths:
             $ref: '#/definitions/ScoreResponse'
         '400':
           description: Invalid payload
+  '/model/contrib':
+    post:
+      tags:
+        - Contribution
+      summary: Contribution score or Shapley values on given rows
+      description: Computes contribution score with the rows sent in the body of the post request
+      operationId: getContribution
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: payload
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ContributionRequest'
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ContributionResponse'
+        '400':
+          description: Invalid payload
 securityDefinitions:
   api_key:
     type: apiKey
@@ -141,12 +165,57 @@ definitions:
     type: array
     items:
       type: string
+
+  ContributionRequest:
+    type: object
+    properties:
+      shapleyResults:
+        description: >
+          The string to say what type of Shap values are needed.
+          `ORIGINAL` implies Shap values of original features are needed,
+          `TRANSFORMED` implies that Shap values of transformed features are requested.
+        type: string
+        items:
+          $ref: '#/definitions/ShapleyResults'
+      fields:
+        description: >
+          An array holding the names of fields in the order of appearance in the `rows` property. The length of `fields`
+          has to match length of each row in `rows`. No duplicates are allowed.
+        type: array
+        items:
+          type: string
+      rows:
+        description: >
+          An array of rows consisting the actual input data for scoring, one scoring request per row.
+        type: array
+        items:
+          $ref: '#/definitions/Row'
+  ContributionResponse:
+    type: object
+    properties:
+      fields:
+        description: >
+          An array holding the names of fields in the order of appearance in the rows of the  `contributions` property.
+        type: array
+        items:
+          type: string
+      contributions:
+        description: >
+          An array of rows consisting of the shapley contributions output corresponding to columns in the fields
+        type: array
+        items:
+          $ref: '#/definitions/Row'
   ScoreRequest:
     type: object
     properties:
       shapleyResults:
-        description: The boolean to say if Shap values are needed.
-        type: boolean
+        description: >
+          The string to say what type of Shap values are needed. `NONE` implies the shap values are not needed,
+          `ORIGINAL` implies Shap values of original features are needed,
+          `TRANSFORMED` implies that Shap values of transformed features are requested.
+        type: string
+        items:
+          $ref: '#/definitions/ShapleyResults'
       includeFieldsInOutput:
         description: >
           An array holding the list of field names to be copied from the input request row to the corresponding scoring
@@ -209,24 +278,7 @@ definitions:
       inputShapleyContributions:
         type: object
         items:
-          $ref: '#/definitions/ShapleyResponse'
-  ShapleyResponse:
-    description: >
-      An Object that contains list of columns along with their shap values
-    type: object
-    properties:
-      fields:
-        description: >
-              An array holding the names of fields in the order of appearance in the rows of the  `contributions` property.
-        type: array
-        items:
-          type: string
-      contributions:
-        description: >
-              An array of rows consisting of the shapley contributions output corresponding to columns in the fields
-        type: array
-        items:
-              $ref: '#/definitions/Row'
+          $ref: '#/definitions/ContributionResponse'
   DataField:
     type: object
     properties:
@@ -259,3 +311,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/DataField'
+  ShapleyResults:
+    type: string
+    enum: &SHAPLEY [ ORIGINAL, TRANSFORMED ]

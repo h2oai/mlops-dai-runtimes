@@ -1,6 +1,8 @@
 package ai.h2o.mojos.deploy.local.rest.controller;
 
 import ai.h2o.mojos.deploy.common.rest.api.ModelApi;
+import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
+import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
@@ -51,7 +53,7 @@ public class ModelsApiController implements ModelApi {
   public ResponseEntity<ScoreResponse> getScore(ScoreRequest request) {
     try {
       log.info("Got scoring request");
-      ScoreResponse scoreResponse = scorer.score(request);
+      ScoreResponse scoreResponse = scorer.scoreResponse(request);
       return ResponseEntity.ok(scoreResponse);
     } catch (Exception e) {
       log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
@@ -75,6 +77,21 @@ public class ModelsApiController implements ModelApi {
       return ResponseEntity.badRequest().build();
     } catch (Exception e) {
       log.info("Failed scoring CSV file: {}, due to: {}", file, e.getMessage());
+      log.debug(" - failure cause: ", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  @Override
+  public ResponseEntity<ContributionResponse> getContribution(
+          ContributionRequest request) {
+    try {
+      log.info("Got scoring request");
+      ContributionResponse contributionResponse
+              = scorer.contributionResponse(request);
+      return ResponseEntity.ok(contributionResponse);
+    } catch (Exception e) {
+      log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
       log.debug(" - failure cause: ", e);
       return ResponseEntity.badRequest().build();
     }

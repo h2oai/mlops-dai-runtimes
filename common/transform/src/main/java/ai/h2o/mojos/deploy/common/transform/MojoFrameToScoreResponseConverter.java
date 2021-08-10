@@ -4,10 +4,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 
+import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
-import ai.h2o.mojos.deploy.common.rest.model.ShapleyResponse;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import java.util.stream.Stream;
  * Converts the resulting predicted {@link MojoFrame} into the API response object {@link
  * ScoreResponse}.
  */
-public class MojoFrameToResponseConverter
+public class MojoFrameToScoreResponseConverter
     implements BiFunction<MojoFrame, ScoreRequest, ScoreResponse> {
 
   @Override
@@ -33,7 +33,7 @@ public class MojoFrameToResponseConverter
     List<Row> outputRows =
         Stream.generate(Row::new).limit(mojoFrame.getNrows()).collect(Collectors.toList());
     copyFilteredInputFields(scoreRequest, includedFields, outputRows);
-    copyResultFields(mojoFrame, outputRows);
+    Utils.copyResultFields(mojoFrame, outputRows);
 
     ScoreResponse response = new ScoreResponse();
     response.setScore(outputRows);
@@ -45,24 +45,6 @@ public class MojoFrameToResponseConverter
     }
 
     return response;
-  }
-
-  /**
-   * Converts the resulting shap values {@link MojoFrame} into the API response object {@link
-   * ShapleyResponse}.
-   */
-  public ShapleyResponse getShapleyResponse(MojoFrame shapleyMojoFrame) {
-    List<Row> outputRows = Stream.generate(Row::new).limit(shapleyMojoFrame.getNrows())
-            .collect(Collectors.toList());
-    copyResultFields(shapleyMojoFrame, outputRows);
-
-    ShapleyResponse contributions = new ShapleyResponse();
-    contributions.setContributions(outputRows);
-
-    List<String> outputFieldNames = new ArrayList<>(asList(shapleyMojoFrame.getColumnNames()));
-    contributions.setFields(outputFieldNames);
-
-    return contributions;
   }
 
   private static void copyFilteredInputFields(
@@ -119,18 +101,5 @@ public class MojoFrameToResponseConverter
       outputFields.add(scoreRequest.getIdField());
     }
     return outputFields;
-  }
-
-  private static void copyResultFields(MojoFrame mojoFrame, List<Row> outputRows) {
-    String[][] outputColumns = new String[mojoFrame.getNcols()][];
-    for (int col = 0; col < mojoFrame.getNcols(); col++) {
-      outputColumns[col] = mojoFrame.getColumn(col).getDataAsStrings();
-    }
-    for (int row = 0; row < mojoFrame.getNrows(); row++) {
-      Row outputRow = outputRows.get(row);
-      for (String[] resultColumn : outputColumns) {
-        outputRow.add(resultColumn[row]);
-      }
-    }
   }
 }

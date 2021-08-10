@@ -1,6 +1,8 @@
 package ai.h2o.mojos.deploy.sagemaker.hosted.controller;
 
 import ai.h2o.mojos.deploy.common.rest.api.ModelApi;
+import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
+import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
@@ -56,7 +58,7 @@ public class ModelsApiController implements ModelApi {
   public ResponseEntity<ScoreResponse> getScore(ScoreRequest request) {
     try {
       log.info("Got scoring request");
-      return ResponseEntity.ok(scorer.score(request));
+      return ResponseEntity.ok(scorer.scoreResponse(request));
     } catch (Exception e) {
       log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
       log.debug(" - failure cause: ", e);
@@ -82,6 +84,13 @@ public class ModelsApiController implements ModelApi {
       log.debug(" - failure cause: ", e);
       return ResponseEntity.badRequest().build();
     }
+  }
+
+  @Override
+  public ResponseEntity<ContributionResponse> getContribution(
+          ContributionRequest request) {
+    // todo to be implemented in the future
+    return null;
   }
 
   @Override

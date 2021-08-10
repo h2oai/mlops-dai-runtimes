@@ -1,9 +1,11 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
+import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
-import ai.h2o.mojos.deploy.common.rest.model.ShapleyResponse;
+import ai.h2o.mojos.deploy.common.rest.model.ShapleyResults;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;
@@ -39,26 +41,32 @@ public class MojoScorer {
   private static final MojoPipeline pipelineShapley = loadMojoPipelineFromFile();
 
 
-  private final RequestToMojoFrameConverter requestConverter;
-  private final MojoFrameToResponseConverter responseConverter;
+  private final ScoreRequestToMojoFrameConverter scoreRequestConverter;
+  private final MojoFrameToScoreResponseConverter scoreResponseConverter;
+  private final MojoFrameToContributionResponseConverter contributionResponseConverter;
+  private final ContributionRequestToMojoFrameConverter contributionRequestConverter;
   private final MojoPipelineToModelInfoConverter modelInfoConverter;
   private final CsvToMojoFrameConverter csvConverter;
 
   /**
    * MojoScorer class initializer, requires below parameters.
    *
-   * @param requestConverter {@link RequestToMojoFrameConverter}
-   * @param responseConverter {@link MojoFrameToResponseConverter}
+   * @param scoreRequestConverter {@link ScoreRequestToMojoFrameConverter}
+   * @param scoreResponseConverter {@link MojoFrameToScoreResponseConverter}
    * @param modelInfoConverter {@link MojoPipelineToModelInfoConverter}
    * @param csvConverter {@link CsvToMojoFrameConverter}
    */
   public MojoScorer(
-      RequestToMojoFrameConverter requestConverter,
-      MojoFrameToResponseConverter responseConverter,
+      ScoreRequestToMojoFrameConverter scoreRequestConverter,
+      MojoFrameToScoreResponseConverter scoreResponseConverter,
+      ContributionRequestToMojoFrameConverter contributionRequestConverter,
+      MojoFrameToContributionResponseConverter contributionResponseConverter,
       MojoPipelineToModelInfoConverter modelInfoConverter,
       CsvToMojoFrameConverter csvConverter) {
-    this.requestConverter = requestConverter;
-    this.responseConverter = responseConverter;
+    this.scoreRequestConverter = scoreRequestConverter;
+    this.scoreResponseConverter = scoreResponseConverter;
+    this.contributionRequestConverter = contributionRequestConverter;
+    this.contributionResponseConverter = contributionResponseConverter;
     this.modelInfoConverter = modelInfoConverter;
     this.csvConverter = csvConverter;
     pipelineShapley.setShapPredictContrib(true);
@@ -70,18 +78,22 @@ public class MojoScorer {
    * @param request {@link ScoreRequest}
    * @return response {@link ScoreResponse}
    */
-  public ScoreResponse score(ScoreRequest request) {
-    ScoreResponse response = getScoreResponse(request);
-    if (Boolean.TRUE.equals(request.isShapleyResults())) {
-      response.setInputShapleyContributions(getShapleyResponse(request));
+  public ScoreResponse scoreResponse(ScoreRequest request) {
+    ScoreResponse response = score(request);
+    if (ShapleyResults.TRANSFORMED.toString().equals(request.getShapleyResults())) {
+      response.setInputShapleyContributions(contributionResponse(request));
+    } else if (ShapleyResults.ORIGINAL.toString().equals(request.getShapleyResults())) {
+      throw new UnsupportedOperationException(
+              "Shapley values for original features are not implemented yet");
     }
     return response;
   }
 
-  private ScoreResponse getScoreResponse(ScoreRequest request) {
-    MojoFrame requestFrame = requestConverter.apply(request, pipeline.getInputFrameBuilder());
+  private ScoreResponse score(ScoreRequest request) {
+    MojoFrame requestFrame = scoreRequestConverter
+            .apply(request, pipeline.getInputFrameBuilder());
     MojoFrame responseFrame = doScore(requestFrame);
-    ScoreResponse response = responseConverter.apply(responseFrame, request);
+    ScoreResponse response = scoreResponseConverter.apply(responseFrame, request);
     response.id(pipeline.getUuid());
     return response;
   }
@@ -90,13 +102,30 @@ public class MojoScorer {
    * Method to get shapley values for an incoming request of type {@link ScoreRequest}.
    *
    * @param request {@link ScoreRequest}
-   * @return response {@link ShapleyResponse}
+   * @return response {@link ContributionResponse}
    */
-  private ShapleyResponse getShapleyResponse(ScoreRequest request) {
-    MojoFrame requestFrame = requestConverter
+  private ContributionResponse contributionResponse(ScoreRequest request) {
+    MojoFrame requestFrame = scoreRequestConverter
             .apply(request, pipelineShapley.getInputFrameBuilder());
-    MojoFrame shapleyResponseFrame = doShapleyContrib(requestFrame);
-    return responseConverter.getShapleyResponse(shapleyResponseFrame);
+    return contribution(requestFrame);
+  }
+
+  /**
+   * Method to get shapley values for an incoming request of type {@link ContributionRequest}.
+   *
+   * @param request {@link ContributionRequest}
+   * @return response {@link ContributionResponse}
+   */
+  public ContributionResponse contributionResponse(ContributionRequest request) {
+    MojoFrame requestFrame = contributionRequestConverter
+            .apply(request, pipelineShapley.getInputFrameBuilder());
+    return contribution(requestFrame);
+
+  }
+
+  private ContributionResponse contribution(MojoFrame requestFrame) {
+    MojoFrame contributionFrame = doShapleyContrib(requestFrame);
+    return contributionResponseConverter.apply(contributionFrame);
   }
 
   /**
@@ -112,7 +141,7 @@ public class MojoScorer {
       requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
     }
     MojoFrame responseFrame = doScore(requestFrame);
-    ScoreResponse response = responseConverter.apply(responseFrame, new ScoreRequest());
+    ScoreResponse response = scoreResponseConverter.apply(responseFrame, new ScoreRequest());
     response.id(pipeline.getUuid());
     return response;
   }

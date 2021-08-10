@@ -2,11 +2,11 @@ package ai.h2o.mojos.deploy.aws.lambda;
 
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
-import ai.h2o.mojos.deploy.common.transform.MojoFrameToResponseConverter;
+import ai.h2o.mojos.deploy.common.transform.MojoFrameToScoreResponseConverter;
 import ai.h2o.mojos.deploy.common.transform.RequestChecker;
-import ai.h2o.mojos.deploy.common.transform.RequestToMojoFrameConverter;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ScoreRequestFormatException;
+import ai.h2o.mojos.deploy.common.transform.ScoreRequestToMojoFrameConverter;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;
@@ -35,8 +35,10 @@ public final class MojoScorer {
   private static final Object pipelineLock = new Object();
   private static MojoPipeline pipeline;
 
-  private final RequestToMojoFrameConverter requestConverter = new RequestToMojoFrameConverter();
-  private final MojoFrameToResponseConverter responseConverter = new MojoFrameToResponseConverter();
+  private final ScoreRequestToMojoFrameConverter requestConverter
+          = new ScoreRequestToMojoFrameConverter();
+  private final MojoFrameToScoreResponseConverter responseConverter
+          = new MojoFrameToScoreResponseConverter();
   private final RequestChecker requestChecker = new RequestChecker(new SampleRequestBuilder());
 
   /** Processes a single {@link ScoreRequest} in the given AWS Lambda {@link Context}. */
