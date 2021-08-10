@@ -5,7 +5,7 @@ import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
-import ai.h2o.mojos.deploy.common.rest.model.ShapleyResults;
+import ai.h2o.mojos.deploy.common.rest.model.ShapleyType;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.lic.LicenseException;
@@ -80,9 +80,9 @@ public class MojoScorer {
    */
   public ScoreResponse scoreResponse(ScoreRequest request) {
     ScoreResponse response = score(request);
-    if (ShapleyResults.TRANSFORMED.toString().equals(request.getShapleyResults())) {
+    if (ShapleyType.TRANSFORMED.toString().equals(request.getShapleyResults())) {
       response.setInputShapleyContributions(contributionResponse(request));
-    } else if (ShapleyResults.ORIGINAL.toString().equals(request.getShapleyResults())) {
+    } else if (ShapleyType.ORIGINAL.toString().equals(request.getShapleyResults())) {
       throw new UnsupportedOperationException(
               "Shapley values for original features are not implemented yet");
     }
@@ -117,10 +117,18 @@ public class MojoScorer {
    * @return response {@link ContributionResponse}
    */
   public ContributionResponse contributionResponse(ContributionRequest request) {
-    MojoFrame requestFrame = contributionRequestConverter
-            .apply(request, pipelineShapley.getInputFrameBuilder());
-    return contribution(requestFrame);
-
+    if (ShapleyType.TRANSFORMED.toString().equals(request.getShapleyResults())) {
+      MojoFrame requestFrame = contributionRequestConverter
+              .apply(request, pipelineShapley.getInputFrameBuilder());
+      return contribution(requestFrame);
+    } else if (ShapleyType.ORIGINAL.toString().equals(request.getShapleyResults())) {
+      throw new UnsupportedOperationException(
+              "Shapley values for original features are not implemented yet");
+    } else {
+      throw new UnsupportedOperationException(
+              "Only ORIGINAL or TRANSFORMED are accepted enums values for Shapley results property"
+      );
+    }
   }
 
   private ContributionResponse contribution(MojoFrame requestFrame) {
