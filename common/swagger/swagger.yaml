@@ -151,10 +151,8 @@ definitions:
         properties:
           scoringType:
             type: string
-            enum:
-              - REGRESSION
-              - CLASSIFICATION
-              - BINOMIAL
+            items:
+              $ref: '#/definitions/ScoringType'
           scoringResponLabels:
             type: array
             items:
@@ -193,8 +191,16 @@ definitions:
         items:
           $ref: '#/definitions/Row'
   ContributionResponse:
+    type: array
+    items:
+      $ref: '#/definitions/ContributionOutputGroup'
+  ContributionOutputGroup:
     type: object
     properties:
+      outputClass:
+        description: >
+          Name of the output class.
+        type: string
       fields:
         description: >
           An array holding the names of fields in the order of appearance in the rows of the  `contributions` property.
@@ -315,4 +321,7 @@ definitions:
           $ref: '#/definitions/DataField'
   ShapleyType:
     type: string
-    enum: &SHAPLEY [ ORIGINAL, TRANSFORMED ]
+    enum: &SHAPLEY [ ORIGINAL, TRANSFORMED, NONE ]
+  ScoringType:
+    type: string
+    enum: &SCORING_TYPE [ REGRESSION, CLASSIFICATION, BINOMIAL ]

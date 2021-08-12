@@ -5,9 +5,11 @@ import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.model.ScoringType;
 import ai.h2o.mojos.deploy.common.rest.model.ShapleyType;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
+import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.lic.LicenseException;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -17,7 +19,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +33,8 @@ import org.slf4j.LoggerFactory;
  * {@code mojo.path} property to define the mojo to use.
  */
 public class MojoScorer {
+  private static final String UNIMPLEMENTED_MESSAGE
+          = "Shapley values for original features are not implemented yet";
 
   private static final Logger log = LoggerFactory.getLogger(MojoScorer.class);
 
@@ -80,13 +87,16 @@ public class MojoScorer {
    */
   public ScoreResponse scoreResponse(ScoreRequest request) {
     ScoreResponse response = score(request);
-    if (ShapleyType.TRANSFORMED.toString().equals(request.getShapleyResults())) {
-      response.setInputShapleyContributions(contributionResponse(request));
-    } else if (ShapleyType.ORIGINAL.toString().equals(request.getShapleyResults())) {
-      throw new UnsupportedOperationException(
-              "Shapley values for original features are not implemented yet");
+    ShapleyType requestedShapleyType = shapleyType(request.getShapleyResults());
+    switch (requestedShapleyType) {
+      case TRANSFORMED:
+        response.setInputShapleyContributions(contributionResponse(request));
+        return response;
+      case ORIGINAL:
+        throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
+      default:
+        return response;
     }
-    return response;
   }
 
   private ScoreResponse score(ScoreRequest request) {
@@ -117,23 +127,58 @@ public class MojoScorer {
    * @return response {@link ContributionResponse}
    */
   public ContributionResponse contributionResponse(ContributionRequest request) {
-    if (ShapleyType.TRANSFORMED.toString().equals(request.getShapleyResults())) {
-      MojoFrame requestFrame = contributionRequestConverter
-              .apply(request, pipelineShapley.getInputFrameBuilder());
-      return contribution(requestFrame);
-    } else if (ShapleyType.ORIGINAL.toString().equals(request.getShapleyResults())) {
-      throw new UnsupportedOperationException(
-              "Shapley values for original features are not implemented yet");
-    } else {
-      throw new UnsupportedOperationException(
-              "Only ORIGINAL or TRANSFORMED are accepted enums values for Shapley results property"
-      );
+    ShapleyType requestedShapleyType = shapleyType(request.getShapleyResults());
+    switch (requestedShapleyType) {
+      case TRANSFORMED:
+        MojoFrame requestFrame = contributionRequestConverter
+                .apply(request, pipelineShapley.getInputFrameBuilder());
+        return contribution(requestFrame);
+      case ORIGINAL:
+        throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
+      default:
+        throw new IllegalArgumentException(
+                "Only ORIGINAL or TRANSFORMED are accepted enums values "
+                        + "for Shapley results property");
     }
   }
 
   private ContributionResponse contribution(MojoFrame requestFrame) {
     MojoFrame contributionFrame = doShapleyContrib(requestFrame);
-    return contributionResponseConverter.apply(contributionFrame);
+
+    MojoFrameMeta outputMeta = pipeline.getOutputMeta();
+    ScoringType scoringType = scoringType(outputMeta.getColumns().size());
+    List<String> outputGroupNames = getOutputGroups(outputMeta);
+
+    if (ScoringType.CLASSIFICATION.equals(scoringType)) {
+      return contributionResponseConverter.apply(contributionFrame, outputGroupNames);
+    } else {
+      return contributionResponseConverter.apply(contributionFrame);
+    }
+  }
+
+  private List<String> getOutputGroups(MojoFrameMeta outputMeta) {
+    int numberOutputColumns = outputMeta.getColumns().size();
+    List<String> outputClass =  new ArrayList<>();
+    for (int i = 0; i < numberOutputColumns; i++) {
+      String outputClassName = outputMeta.getColumnName(i);
+      String[] outputClassNameSplit = outputClassName.split("\\.");
+      String refinedOutputClass = outputClassNameSplit[outputClassNameSplit.length - 1 ];
+      outputClass.add(refinedOutputClass);
+    }
+    return outputClass;
+  }
+
+  // note this will be provided by mojo pipeline in the future
+  private ScoringType scoringType(int outputColumnSize) {
+    ScoringType scoringType = null;
+    if (outputColumnSize > 2) {
+      scoringType = ScoringType.CLASSIFICATION;
+    } else if (outputColumnSize == 2) {
+      scoringType = ScoringType.BINOMIAL;
+    } else if (outputColumnSize == 1) {
+      scoringType = ScoringType.REGRESSION;
+    }
+    return scoringType;
   }
 
   /**
@@ -184,13 +229,13 @@ public class MojoScorer {
             requestFrame.getNrows(),
             requestFrame.getNcols(),
             Arrays.toString(requestFrame.getColumnNames()));
-    MojoFrame responseFrame = pipelineShapley.transform(requestFrame);
+    MojoFrame shapleyResponseFrame = pipelineShapley.transform(requestFrame);
     log.debug(
             "Response has {} rows, {} columns: {}",
-            responseFrame.getNrows(),
-            responseFrame.getNcols(),
-            Arrays.toString(responseFrame.getColumnNames()));
-    return responseFrame;
+            shapleyResponseFrame.getNrows(),
+            shapleyResponseFrame.getNcols(),
+            Arrays.toString(shapleyResponseFrame.getColumnNames()));
+    return shapleyResponseFrame;
   }
 
   public String getModelId() {
@@ -231,5 +276,14 @@ public class MojoScorer {
     } catch (LicenseException e) {
       throw new RuntimeException("License file not found", e);
     }
+  }
+
+  private ShapleyType shapleyType(String requestedType) {
+    if (ShapleyType.TRANSFORMED.toString().equalsIgnoreCase(requestedType)) {
+      return ShapleyType.TRANSFORMED;
+    } else if (ShapleyType.ORIGINAL.toString().equalsIgnoreCase(requestedType)) {
+      return ShapleyType.ORIGINAL;
+    }
+    return ShapleyType.NONE;
   }
 }
