@@ -55,26 +55,28 @@ public class MojoFrameToContributionResponseConverter
 
     ContributionResponse contributionResponse = new ContributionResponse();
     for (String outputClassName : outputGroupNames) {
-      ContributionOutputGroup contribution = new ContributionOutputGroup();
-      contribution.setOutputClass(outputClassName);
-      contribution.setContributions(new ArrayList<>());
-      contribution.setFields(new ArrayList<>());
+      ContributionOutputGroup contributionOutputGroup = new ContributionOutputGroup();
+      contributionOutputGroup.setOutputClass(outputClassName);
+      // make empty arrays = output rows and add them
+      contributionOutputGroup.setContributions(new ArrayList<>());
+      for (Row outputRow: outputRows) {
+        contributionOutputGroup.getContributions().add(new Row());
+      }
+      contributionOutputGroup.setFields(new ArrayList<>());
 
       for (int i = 0; i < outputFieldNames.size(); i++) {
         String outputFieldName = outputFieldNames.get(i);
-        Row row = new Row();
-        for (Row outputRow: outputRows) {
-          row.add(outputRow.get(i));
-        }
 
         Matcher m = Pattern.compile("\\." + outputClassName).matcher(outputFieldName);
         if (m.find()) {
           String columnName = outputFieldName.substring(0, m.start());
-          contribution.getFields().add(columnName);
-          contribution.getContributions().add(row);
+          contributionOutputGroup.getFields().add(columnName);
+          for (int k = 0; k < outputRows.size(); k++) {
+            contributionOutputGroup.getContributions().get(k).add(outputRows.get(k).get(i));
+          }
         }
       }
-      contributionResponse.add(contribution);
+      contributionResponse.add(contributionOutputGroup);
     }
     return contributionResponse;
   }
