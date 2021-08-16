@@ -191,22 +191,27 @@ definitions:
         items:
           $ref: '#/definitions/Row'
   ContributionResponse:
-    type: array
-    items:
-      $ref: '#/definitions/ContributionOutputGroup'
-  ContributionOutputGroup:
     type: object
     properties:
-      outputClass:
-        description: >
-          Name of the output class.
-        type: string
-      fields:
+      features:
         description: >
           An array holding the names of fields in the order of appearance in the rows of the  `contributions` property.
         type: array
         items:
           type: string
+      ContributionOutputGroup:
+        description: >
+          An array of rows consisting of the shapley contributions output corresponding to an output group.
+        type: array
+        items:
+          $ref: '#/definitions/ContributionOutputGroup'
+  ContributionOutputGroup:
+    type: object
+    properties:
+      outputGroup:
+        description: >
+          Name of the output group.
+        type: string
       contributions:
         description: >
           An array of rows consisting of the shapley contributions output corresponding to columns in the fields
@@ -283,7 +288,7 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Row'
-      inputShapleyContributions:
+      featureShapleyContributions:
         type: object
         items:
           $ref: '#/definitions/ContributionResponse'

@@ -27,15 +27,18 @@ public class MojoFrameToContributionResponseConverter
             .collect(Collectors.toList());
     Utils.copyResultFields(shapleyMojoFrame, outputRows);
 
-    List<String> outputFieldNames = new ArrayList<>(
+    List<String> outputFeatureNames = new ArrayList<>(
             Arrays.asList(shapleyMojoFrame.getColumnNames()));
+
+    ContributionResponse contributionResponse = new ContributionResponse();
+    contributionResponse.setFeatures(outputFeatureNames);
+    contributionResponse.setContributionOutputGroup(new ArrayList<>());
 
     ContributionOutputGroup contribution = new ContributionOutputGroup();
     contribution.setContributions(outputRows);
-    contribution.setFields(outputFieldNames);
-
-    ContributionResponse contributionResponse = new ContributionResponse();
-    contributionResponse.add(contribution);
+    // for REGRESSION and BINOMIAL models the contribution response
+    // contains only one ContributionOutputGroup object
+    contributionResponse.getContributionOutputGroup().add(contribution);
 
     return contributionResponse;
   }
@@ -54,30 +57,34 @@ public class MojoFrameToContributionResponseConverter
             Arrays.asList(shapleyMojoFrame.getColumnNames()));
 
     ContributionResponse contributionResponse = new ContributionResponse();
-    for (String outputClassName : outputGroupNames) {
+    contributionResponse.setContributionOutputGroup(new ArrayList<>());
+    List<String> featureNames = new ArrayList<>();
+    boolean isFirstOutputGroup = true;
+
+    for (String outputGroupName : outputGroupNames) {
       ContributionOutputGroup contributionOutputGroup = new ContributionOutputGroup();
-      contributionOutputGroup.setOutputClass(outputClassName);
-      // make empty arrays = output rows and add them
-      contributionOutputGroup.setContributions(new ArrayList<>());
-      for (Row outputRow: outputRows) {
-        contributionOutputGroup.getContributions().add(new Row());
-      }
-      contributionOutputGroup.setFields(new ArrayList<>());
+      contributionOutputGroup.setOutputGroup(outputGroupName);
+      contributionOutputGroup.setContributions(Stream.generate(Row::new)
+              .limit(outputRows.size()).collect(Collectors.toList()));
 
       for (int i = 0; i < outputFieldNames.size(); i++) {
         String outputFieldName = outputFieldNames.get(i);
-
-        Matcher m = Pattern.compile("\\." + outputClassName).matcher(outputFieldName);
+        Matcher m = Pattern.compile("\\." + outputGroupName).matcher(outputFieldName);
         if (m.find()) {
-          String columnName = outputFieldName.substring(0, m.start());
-          contributionOutputGroup.getFields().add(columnName);
+          if (isFirstOutputGroup) {
+            String columnName = outputFieldName.substring(0, m.start());
+            featureNames.add(columnName);
+          }
           for (int k = 0; k < outputRows.size(); k++) {
-            contributionOutputGroup.getContributions().get(k).add(outputRows.get(k).get(i));
+            Row row = contributionOutputGroup.getContributions().get(k);
+            row.add(outputRows.get(k).get(i));
           }
         }
       }
-      contributionResponse.add(contributionOutputGroup);
+      contributionResponse.getContributionOutputGroup().add(contributionOutputGroup);
+      isFirstOutputGroup = false;
     }
+    contributionResponse.setFeatures(featureNames);
     return contributionResponse;
   }
 }

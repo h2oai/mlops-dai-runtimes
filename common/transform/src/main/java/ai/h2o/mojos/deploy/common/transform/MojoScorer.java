@@ -90,7 +90,7 @@ public class MojoScorer {
     ShapleyType requestedShapleyType = shapleyType(request.getShapleyResults());
     switch (requestedShapleyType) {
       case TRANSFORMED:
-        response.setInputShapleyContributions(contributionResponse(request));
+        response.setFeatureShapleyContributions(contributionResponse(request));
         return response;
       case ORIGINAL:
         throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
