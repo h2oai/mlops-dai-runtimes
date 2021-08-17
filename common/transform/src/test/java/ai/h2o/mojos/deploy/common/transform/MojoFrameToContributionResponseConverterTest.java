@@ -39,7 +39,7 @@ class MojoFrameToContributionResponseConverterTest {
                         .toMojoFrame();
 
     // When
-    ContributionResponse result = converter.apply(mojoFrame);
+    ContributionResponse result = converter.contributionResponseWithoutOutputGroup(mojoFrame);
 
     // Then
     assertThat(result.getContributionOutputGroup().size()).isEqualTo(1);
@@ -55,7 +55,7 @@ class MojoFrameToContributionResponseConverterTest {
     MojoColumn.Type[] types = {Str, Float32, Float64, Bool, Int32, Int64};
 
     // When
-    ContributionResponse result = converter.apply(buildMojoFrame(
+    ContributionResponse result = converter.contributionResponseWithoutOutputGroup(buildMojoFrame(
         Stream.of(types).map(Object::toString).toArray(String[]::new), types, contributions));
 
     // Then
@@ -68,6 +68,7 @@ class MojoFrameToContributionResponseConverterTest {
         .inOrder();
   }
 
+  @SuppressWarnings("unused")
   private static Stream<Arguments> provideValues_convertMoreTypesResponse_succeeds() {
     return Stream.of(
        Arguments.of((Object) new String[][] {{"str", "1.1", "2.2", "1", "123", "123456789"}}),
@@ -84,7 +85,8 @@ class MojoFrameToContributionResponseConverterTest {
     List<String> outputGroupNames = new ArrayList<>();
 
     // When
-    ContributionResponse result = converter.apply(mojoFrame, outputGroupNames);
+    ContributionResponse result = converter
+            .contributionResponseWithOutputGroup(mojoFrame, outputGroupNames);
 
     // Then
     assertThat(result.getContributionOutputGroup().size()).isEqualTo(0);
@@ -99,7 +101,8 @@ class MojoFrameToContributionResponseConverterTest {
     String[][] contributions = {{"23.6"}};
 
     // When
-    ContributionResponse result = converter.apply(buildMojoFrame(features, types, contributions));
+    ContributionResponse result = converter
+            .contributionResponseWithoutOutputGroup(buildMojoFrame(features, types, contributions));
 
     // Then
     assertThat(result.getContributionOutputGroup().size()).isEqualTo(1);
@@ -121,7 +124,8 @@ class MojoFrameToContributionResponseConverterTest {
 
     // When
     ContributionResponse result = converter
-            .apply(buildMojoFrame(features, types, contributions), outputGroupNames);
+            .contributionResponseWithOutputGroup(
+                    buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
     assertThat(result.getContributionOutputGroup().size()).isEqualTo(1);
@@ -141,7 +145,7 @@ class MojoFrameToContributionResponseConverterTest {
     List<String> outputGroupNames = Arrays.asList("test1", "test2");
 
     // When
-    ContributionResponse result = converter.apply(
+    ContributionResponse result = converter.contributionResponseWithOutputGroup(
             buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
@@ -170,7 +174,7 @@ class MojoFrameToContributionResponseConverterTest {
     List<String> outputGroupNames = Arrays.asList("test1", "test2");
 
     // When
-    ContributionResponse result = converter.apply(
+    ContributionResponse result = converter.contributionResponseWithOutputGroup(
             buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
@@ -202,7 +206,8 @@ class MojoFrameToContributionResponseConverterTest {
 
     // When
     ContributionResponse result = converter
-            .apply(buildMojoFrame(features, types, contributions), outputGroupNames);
+            .contributionResponseWithOutputGroup(
+                    buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
     assertThat(result.getContributionOutputGroup().size()).isEqualTo(2);

@@ -110,7 +110,7 @@ paths:
   '/model/contrib':
     post:
       tags:
-        - Contribution
+        - contribution
       summary: Contribution score or Shapley values on given rows
       description: Computes contribution score with the rows sent in the body of the post request
       operationId: getContribution
@@ -129,6 +129,8 @@ paths:
           description: Successful operation
           schema:
             $ref: '#/definitions/ContributionResponse'
+        '405':
+          description: Invalid input, implementation not supported
         '400':
           description: Invalid payload
 securityDefinitions:
@@ -167,9 +169,9 @@ definitions:
   ContributionRequest:
     type: object
     required:
-      - shapleyResults
+      - shapleyValuesRequested
     properties:
-      shapleyResults:
+      shapleyValuesRequested:
         description: >
           The string to say what type of Shap values are needed.
           `ORIGINAL` implies Shap values of original features are requested,
@@ -221,7 +223,7 @@ definitions:
   ScoreRequest:
     type: object
     properties:
-      shapleyResults:
+      shapleyValuesRequested:
         description: >
           The string to say what type of Shap values are needed.
           `ORIGINAL` implies Shap values of original features are requested,
@@ -326,7 +328,7 @@ definitions:
           $ref: '#/definitions/DataField'
   ShapleyType:
     type: string
-    enum: &SHAPLEY [ ORIGINAL, TRANSFORMED, NONE ]
+    enum: &SHAPLEY_TYPE [ ORIGINAL, TRANSFORMED, NONE ]
   ScoringType:
     type: string
     enum: &SCORING_TYPE [ REGRESSION, CLASSIFICATION, BINOMIAL ]

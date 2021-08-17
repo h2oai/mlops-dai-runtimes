@@ -8,46 +8,42 @@ import ai.h2o.mojos.runtime.frame.MojoFrame;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Converts the resulting predicted {@link MojoFrame} into the API response object {@link
- * ContributionResponse}.
- */
-public class MojoFrameToContributionResponseConverter
-        implements Function<MojoFrame, ContributionResponse> {
-  @Override
-  public ContributionResponse apply(
+public class MojoFrameToContributionResponseConverter {
+
+  /**
+   * Converts the resulting predicted {@link MojoFrame} into the API response object {@link
+   * ContributionResponse}.
+   */
+  public ContributionResponse contributionResponseWithoutOutputGroup(
           MojoFrame shapleyMojoFrame) {
     List<Row> outputRows = Stream.generate(Row::new).limit(shapleyMojoFrame.getNrows())
             .collect(Collectors.toList());
     Utils.copyResultFields(shapleyMojoFrame, outputRows);
 
-    List<String> outputFeatureNames = new ArrayList<>(
-            Arrays.asList(shapleyMojoFrame.getColumnNames()));
+    List<String> outputFeatureNames = Arrays.asList(shapleyMojoFrame.getColumnNames());
 
     ContributionResponse contributionResponse = new ContributionResponse();
     contributionResponse.setFeatures(outputFeatureNames);
-    contributionResponse.setContributionOutputGroup(new ArrayList<>());
 
     ContributionOutputGroup contribution = new ContributionOutputGroup();
     contribution.setContributions(outputRows);
     // for REGRESSION and BINOMIAL models the contribution response
     // contains only one ContributionOutputGroup object
-    contributionResponse.getContributionOutputGroup().add(contribution);
+    contributionResponse.addContributionOutputGroupItem(contribution);
 
     return contributionResponse;
   }
 
   /**
    * Converts the resulting predicted {@link MojoFrame} into the API response object {@link
-   * ContributionResponse}.
+   * ContributionResponse grouped by the strings called as outputgroupNames}.
    */
-  public ContributionResponse apply(
+  public ContributionResponse contributionResponseWithOutputGroup(
           MojoFrame shapleyMojoFrame, List<String> outputGroupNames) {
     List<Row> outputRows = Stream.generate(Row::new).limit(shapleyMojoFrame.getNrows())
             .collect(Collectors.toList());
@@ -66,10 +62,11 @@ public class MojoFrameToContributionResponseConverter
       contributionOutputGroup.setOutputGroup(outputGroupName);
       contributionOutputGroup.setContributions(Stream.generate(Row::new)
               .limit(outputRows.size()).collect(Collectors.toList()));
+      Pattern pattern = Pattern.compile("\\." + outputGroupName);
 
       for (int i = 0; i < outputFieldNames.size(); i++) {
         String outputFieldName = outputFieldNames.get(i);
-        Matcher m = Pattern.compile("\\." + outputGroupName).matcher(outputFieldName);
+        Matcher m = pattern.matcher(outputFieldName);
         if (m.find()) {
           if (isFirstOutputGroup) {
             String columnName = outputFieldName.substring(0, m.start());

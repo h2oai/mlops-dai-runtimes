@@ -88,7 +88,7 @@ public class MojoScorer {
    */
   public ScoreResponse scoreResponse(ScoreRequest request) {
     ScoreResponse response = score(request);
-    ShapleyType requestedShapleyType = shapleyType(request.getShapleyResults());
+    ShapleyType requestedShapleyType = shapleyType(request.getShapleyValuesRequested());
     switch (requestedShapleyType) {
       case TRANSFORMED:
         response.setFeatureShapleyContributions(contributionResponse(request));
@@ -128,7 +128,7 @@ public class MojoScorer {
    * @return response {@link ContributionResponse}
    */
   public ContributionResponse contributionResponse(ContributionRequest request) {
-    ShapleyType requestedShapleyType = shapleyType(request.getShapleyResults());
+    ShapleyType requestedShapleyType = shapleyType(request.getShapleyValuesRequested());
     switch (requestedShapleyType) {
       case TRANSFORMED:
         MojoFrame requestFrame = contributionRequestConverter
@@ -138,8 +138,7 @@ public class MojoScorer {
         throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
       default:
         throw new IllegalArgumentException(
-                "Only ORIGINAL or TRANSFORMED are accepted enums values "
-                        + "for Shapley results property");
+                "Only ORIGINAL or TRANSFORMED are accepted enums values of Shapley values");
     }
   }
 
@@ -151,9 +150,11 @@ public class MojoScorer {
     List<String> outputGroupNames = getOutputGroups(outputMeta);
 
     if (ScoringType.CLASSIFICATION.equals(scoringType)) {
-      return contributionResponseConverter.apply(contributionFrame, outputGroupNames);
+      return contributionResponseConverter
+              .contributionResponseWithOutputGroup(contributionFrame, outputGroupNames);
     } else {
-      return contributionResponseConverter.apply(contributionFrame);
+      return contributionResponseConverter
+              .contributionResponseWithoutOutputGroup(contributionFrame);
     }
   }
 
@@ -171,15 +172,14 @@ public class MojoScorer {
 
   // note this will be provided by mojo pipeline in the future
   private ScoringType scoringType(int outputColumnSize) {
-    ScoringType scoringType = null;
     if (outputColumnSize > 2) {
-      scoringType = ScoringType.CLASSIFICATION;
+      return ScoringType.CLASSIFICATION;
     } else if (outputColumnSize == 2) {
-      scoringType = ScoringType.BINOMIAL;
+      return ScoringType.BINOMIAL;
     } else if (outputColumnSize == 1) {
-      scoringType = ScoringType.REGRESSION;
+      return ScoringType.REGRESSION;
     }
-    return scoringType;
+    return null;
   }
 
   /**
