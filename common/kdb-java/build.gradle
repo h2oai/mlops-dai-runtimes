@@ -5,7 +5,7 @@ dependencies {
 
     testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
-    testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
 }
 
 test {
