@@ -54,7 +54,7 @@ public class ModelsApiController implements ModelApi {
       log.info("Got scoring request");
       // Convert GCP request to REST request
       ScoreRequest request = getRestScoreRequest(gcpRequest);
-      ScoreResponse response = getGcpScoreResponse(scorer.scoreResponse(request));
+      ScoreResponse response = getGcpScoreResponse(scorer.score(request));
       // return ResponseEntity.ok(scorer.score(request));
       return ResponseEntity.ok(response);
     } catch (Exception e) {

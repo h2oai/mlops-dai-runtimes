@@ -86,12 +86,16 @@ public class MojoScorer {
    * @param request {@link ScoreRequest}
    * @return response {@link ScoreResponse}
    */
-  public ScoreResponse scoreResponse(ScoreRequest request) {
-    ScoreResponse response = score(request);
+  public ScoreResponse score(ScoreRequest request) {
+    MojoFrame requestFrame = scoreRequestConverter
+            .apply(request, pipeline.getInputFrameBuilder());
+    MojoFrame responseFrame = doScore(requestFrame);
+    ScoreResponse response = scoreResponseConverter.apply(responseFrame, request);
+    response.id(pipeline.getUuid());
     ShapleyType requestedShapleyType = shapleyType(request.getShapleyValuesRequested());
     switch (requestedShapleyType) {
       case TRANSFORMED:
-        response.setFeatureShapleyContributions(contributionResponse(request));
+        response.setFeatureShapleyContributions(computeContribution(request));
         return response;
       case ORIGINAL:
         throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
@@ -100,22 +104,13 @@ public class MojoScorer {
     }
   }
 
-  private ScoreResponse score(ScoreRequest request) {
-    MojoFrame requestFrame = scoreRequestConverter
-            .apply(request, pipeline.getInputFrameBuilder());
-    MojoFrame responseFrame = doScore(requestFrame);
-    ScoreResponse response = scoreResponseConverter.apply(responseFrame, request);
-    response.id(pipeline.getUuid());
-    return response;
-  }
-
   /**
    * Method to get shapley values for an incoming request of type {@link ScoreRequest}.
    *
    * @param request {@link ScoreRequest}
    * @return response {@link ContributionResponse}
    */
-  private ContributionResponse contributionResponse(ScoreRequest request) {
+  private ContributionResponse computeContribution(ScoreRequest request) {
     MojoFrame requestFrame = scoreRequestConverter
             .apply(request, pipelineShapley.getInputFrameBuilder());
     return contribution(requestFrame);
@@ -127,7 +122,7 @@ public class MojoScorer {
    * @param request {@link ContributionRequest}
    * @return response {@link ContributionResponse}
    */
-  public ContributionResponse contributionResponse(ContributionRequest request) {
+  public ContributionResponse computeContribution(ContributionRequest request) {
     ShapleyType requestedShapleyType = shapleyType(request.getShapleyValuesRequested());
     switch (requestedShapleyType) {
       case TRANSFORMED:

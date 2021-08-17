@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class ModelsApiController implements ModelApi {
 
+  private static final String UNIMPLEMENTED_MESSAGE
+          = "Shapley values are not implemented yet";
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
   private final MojoScorer scorer;
@@ -58,7 +60,7 @@ public class ModelsApiController implements ModelApi {
   public ResponseEntity<ScoreResponse> getScore(ScoreRequest request) {
     try {
       log.info("Got scoring request");
-      return ResponseEntity.ok(scorer.scoreResponse(request));
+      return ResponseEntity.ok(scorer.score(request));
     } catch (Exception e) {
       log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
       log.debug(" - failure cause: ", e);
@@ -90,7 +92,7 @@ public class ModelsApiController implements ModelApi {
   public ResponseEntity<ContributionResponse> getContribution(
           ContributionRequest request) {
     // todo to be implemented in the future
-    return null;
+    throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
   }
 
   @Override

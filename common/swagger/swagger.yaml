@@ -107,7 +107,7 @@ paths:
             $ref: '#/definitions/ScoreResponse'
         '400':
           description: Invalid payload
-  '/model/contrib':
+  '/model/contribution':
     post:
       tags:
         - contribution

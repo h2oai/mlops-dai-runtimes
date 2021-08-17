@@ -53,7 +53,7 @@ public class ModelsApiController implements ModelApi {
   public ResponseEntity<ScoreResponse> getScore(ScoreRequest request) {
     try {
       log.info("Got scoring request");
-      ScoreResponse scoreResponse = scorer.scoreResponse(request);
+      ScoreResponse scoreResponse = scorer.score(request);
       return ResponseEntity.ok(scoreResponse);
     } catch (Exception e) {
       log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
@@ -88,7 +88,7 @@ public class ModelsApiController implements ModelApi {
     try {
       log.info("Got scoring request");
       ContributionResponse contributionResponse
-              = scorer.contributionResponse(request);
+              = scorer.computeContribution(request);
       return ResponseEntity.ok(contributionResponse);
     } catch (Exception e) {
       log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
