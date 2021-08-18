@@ -13,6 +13,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,7 +93,9 @@ public class ModelsApiController implements ModelApi {
   public ResponseEntity<ContributionResponse> getContribution(
           ContributionRequest request) {
     // todo to be implemented in the future
-    throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
+    log.info(UNIMPLEMENTED_MESSAGE);
+    log.debug(" Unsupported operation: " + UNIMPLEMENTED_MESSAGE);
+    return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
   }
 
   @Override

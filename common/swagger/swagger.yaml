@@ -201,13 +201,13 @@ definitions:
         type: array
         items:
           type: string
-      ContributionOutputGroup:
+      ContributionByOutputGroup:
         description: >
           An array of rows consisting of the shapley contributions output corresponding to an output group.
         type: array
         items:
-          $ref: '#/definitions/ContributionOutputGroup'
-  ContributionOutputGroup:
+          $ref: '#/definitions/ContributionByOutputGroup'
+  ContributionByOutputGroup:
     type: object
     properties:
       outputGroup:

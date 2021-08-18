@@ -96,12 +96,14 @@ public class MojoScorer {
     switch (requestedShapleyType) {
       case TRANSFORMED:
         response.setFeatureShapleyContributions(computeContribution(request));
-        return response;
+        break;
       case ORIGINAL:
-        throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
+        log.info(UNIMPLEMENTED_MESSAGE);
+        break;
       default:
-        return response;
+        break;
     }
+    return response;
   }
 
   /**

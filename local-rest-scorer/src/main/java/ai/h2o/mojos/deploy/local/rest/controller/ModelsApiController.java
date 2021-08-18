@@ -13,6 +13,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -86,12 +87,15 @@ public class ModelsApiController implements ModelApi {
   public ResponseEntity<ContributionResponse> getContribution(
           ContributionRequest request) {
     try {
-      log.info("Got scoring request");
+      log.info("Got shapley contribution request");
       ContributionResponse contributionResponse
               = scorer.computeContribution(request);
       return ResponseEntity.ok(contributionResponse);
+    } catch (UnsupportedOperationException e) {
+      log.info("Unsupported operation: {}, due to: {}", request, e.getMessage());
+      return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     } catch (Exception e) {
-      log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
+      log.info("Failed shapley contribution request: {}, due to: {}", request, e.getMessage());
       log.debug(" - failure cause: ", e);
       return ResponseEntity.badRequest().build();
     }

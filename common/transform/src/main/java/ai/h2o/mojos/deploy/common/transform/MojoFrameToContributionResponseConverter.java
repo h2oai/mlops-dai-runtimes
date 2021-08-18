@@ -1,6 +1,6 @@
 package ai.h2o.mojos.deploy.common.transform;
 
-import ai.h2o.mojos.deploy.common.rest.model.ContributionOutputGroup;
+import ai.h2o.mojos.deploy.common.rest.model.ContributionByOutputGroup;
 import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
@@ -30,11 +30,11 @@ public class MojoFrameToContributionResponseConverter {
     ContributionResponse contributionResponse = new ContributionResponse();
     contributionResponse.setFeatures(outputFeatureNames);
 
-    ContributionOutputGroup contribution = new ContributionOutputGroup();
+    ContributionByOutputGroup contribution = new ContributionByOutputGroup();
     contribution.setContributions(outputRows);
     // for REGRESSION and BINOMIAL models the contribution response
-    // contains only one ContributionOutputGroup object
-    contributionResponse.addContributionOutputGroupItem(contribution);
+    // contains only one ContributionByOutputGroup object
+    contributionResponse.addContributionByOutputGroupItem(contribution);
 
     return contributionResponse;
   }
@@ -53,14 +53,14 @@ public class MojoFrameToContributionResponseConverter {
             Arrays.asList(shapleyMojoFrame.getColumnNames()));
 
     ContributionResponse contributionResponse = new ContributionResponse();
-    contributionResponse.setContributionOutputGroup(new ArrayList<>());
+    contributionResponse.setContributionByOutputGroup(new ArrayList<>());
     List<String> featureNames = new ArrayList<>();
     boolean isFirstOutputGroup = true;
 
     for (String outputGroupName : outputGroupNames) {
-      ContributionOutputGroup contributionOutputGroup = new ContributionOutputGroup();
-      contributionOutputGroup.setOutputGroup(outputGroupName);
-      contributionOutputGroup.setContributions(Stream.generate(Row::new)
+      ContributionByOutputGroup contributionByOutputGroup = new ContributionByOutputGroup();
+      contributionByOutputGroup.setOutputGroup(outputGroupName);
+      contributionByOutputGroup.setContributions(Stream.generate(Row::new)
               .limit(outputRows.size()).collect(Collectors.toList()));
       Pattern pattern = Pattern.compile("\\." + outputGroupName);
 
@@ -73,12 +73,12 @@ public class MojoFrameToContributionResponseConverter {
             featureNames.add(columnName);
           }
           for (int k = 0; k < outputRows.size(); k++) {
-            Row row = contributionOutputGroup.getContributions().get(k);
+            Row row = contributionByOutputGroup.getContributions().get(k);
             row.add(outputRows.get(k).get(i));
           }
         }
       }
-      contributionResponse.getContributionOutputGroup().add(contributionOutputGroup);
+      contributionResponse.getContributionByOutputGroup().add(contributionByOutputGroup);
       isFirstOutputGroup = false;
     }
     contributionResponse.setFeatures(featureNames);
