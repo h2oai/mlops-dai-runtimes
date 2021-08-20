@@ -177,6 +177,16 @@ class MojoPipelineToModelInfoConverterTest {
     }
 
     @Override
+    public void setShapPredictContrib(boolean enable) {
+      throw new AssertionError("Not supported by test DummyPipeline.");
+    }
+
+    @Override
+    public void setShapPredictContribOriginal(boolean enable) {
+      throw new AssertionError("Not supported by test DummyPipeline.");
+    }
+
+    @Override
     public void setListener(BasePipelineListener listener) {
       throw new AssertionError("Not supported by test DummyPipeline.");
     }
