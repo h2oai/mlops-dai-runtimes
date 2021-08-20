@@ -92,16 +92,21 @@ public class MojoScorer {
     MojoFrame responseFrame = doScore(requestFrame);
     ScoreResponse response = scoreResponseConverter.apply(responseFrame, request);
     response.id(pipeline.getUuid());
-    ShapleyType requestedShapleyType = shapleyType(request.getShapleyValuesRequested());
-    switch (requestedShapleyType) {
-      case TRANSFORMED:
-        response.setFeatureShapleyContributions(computeContribution(request));
-        break;
-      case ORIGINAL:
-        log.info(UNIMPLEMENTED_MESSAGE);
-        break;
-      default:
-        break;
+    try {
+      ShapleyType requestedShapleyType = shapleyType(request.getShapleyValuesRequested());
+      switch (requestedShapleyType) {
+        case TRANSFORMED:
+          response.setFeatureShapleyContributions(computeContribution(request));
+          break;
+        case ORIGINAL:
+          log.info(UNIMPLEMENTED_MESSAGE);
+          break;
+        default:
+          break;
+      }
+    } catch (Exception e) {
+      log.info("Failed shapley values: {}, due to: {}", request, e.getMessage());
+      log.debug(" - failure cause: ", e);
     }
     return response;
   }
@@ -151,7 +156,7 @@ public class MojoScorer {
               .contributionResponseWithOutputGroup(contributionFrame, outputGroupNames);
     } else {
       return contributionResponseConverter
-              .contributionResponseWithoutOutputGroup(contributionFrame);
+              .contributionResponseWithNoOutputGroup(contributionFrame);
     }
   }
 

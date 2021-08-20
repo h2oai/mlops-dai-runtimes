@@ -39,7 +39,7 @@ class MojoFrameToContributionResponseConverterTest {
                         .toMojoFrame();
 
     // When
-    ContributionResponse result = converter.contributionResponseWithoutOutputGroup(mojoFrame);
+    ContributionResponse result = converter.contributionResponseWithNoOutputGroup(mojoFrame);
 
     // Then
     assertThat(result.getContributionByOutputGroup().size()).isEqualTo(1);
@@ -55,7 +55,7 @@ class MojoFrameToContributionResponseConverterTest {
     MojoColumn.Type[] types = {Str, Float32, Float64, Bool, Int32, Int64};
 
     // When
-    ContributionResponse result = converter.contributionResponseWithoutOutputGroup(buildMojoFrame(
+    ContributionResponse result = converter.contributionResponseWithNoOutputGroup(buildMojoFrame(
         Stream.of(types).map(Object::toString).toArray(String[]::new), types, contributions));
 
     // Then
@@ -102,7 +102,7 @@ class MojoFrameToContributionResponseConverterTest {
 
     // When
     ContributionResponse result = converter
-            .contributionResponseWithoutOutputGroup(buildMojoFrame(features, types, contributions));
+            .contributionResponseWithNoOutputGroup(buildMojoFrame(features, types, contributions));
 
     // Then
     assertThat(result.getContributionByOutputGroup().size()).isEqualTo(1);

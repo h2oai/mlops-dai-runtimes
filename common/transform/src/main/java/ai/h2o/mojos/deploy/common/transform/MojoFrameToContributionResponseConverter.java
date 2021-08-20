@@ -3,6 +3,7 @@ package ai.h2o.mojos.deploy.common.transform;
 import ai.h2o.mojos.deploy.common.rest.model.ContributionByOutputGroup;
 import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
 import ai.h2o.mojos.deploy.common.rest.model.Row;
+import ai.h2o.mojos.runtime.frame.MojoColumn;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class MojoFrameToContributionResponseConverter {
    * Converts the resulting predicted {@link MojoFrame} into the API response object {@link
    * ContributionResponse}.
    */
-  public ContributionResponse contributionResponseWithoutOutputGroup(
+  public ContributionResponse contributionResponseWithNoOutputGroup(
           MojoFrame shapleyMojoFrame) {
     List<Row> outputRows = Stream.generate(Row::new).limit(shapleyMojoFrame.getNrows())
             .collect(Collectors.toList());
@@ -45,12 +46,8 @@ public class MojoFrameToContributionResponseConverter {
    */
   public ContributionResponse contributionResponseWithOutputGroup(
           MojoFrame shapleyMojoFrame, List<String> outputGroupNames) {
-    List<Row> outputRows = Stream.generate(Row::new).limit(shapleyMojoFrame.getNrows())
-            .collect(Collectors.toList());
-    Utils.copyResultFields(shapleyMojoFrame, outputRows);
-
-    List<String> outputFieldNames = new ArrayList<>(
-            Arrays.asList(shapleyMojoFrame.getColumnNames()));
+    int rowCount = shapleyMojoFrame.getNrows();
+    List<String> columnNames = Arrays.asList(shapleyMojoFrame.getColumnNames());
 
     ContributionResponse contributionResponse = new ContributionResponse();
     contributionResponse.setContributionByOutputGroup(new ArrayList<>());
@@ -58,30 +55,39 @@ public class MojoFrameToContributionResponseConverter {
     boolean isFirstOutputGroup = true;
 
     for (String outputGroupName : outputGroupNames) {
-      ContributionByOutputGroup contributionByOutputGroup = new ContributionByOutputGroup();
-      contributionByOutputGroup.setOutputGroup(outputGroupName);
-      contributionByOutputGroup.setContributions(Stream.generate(Row::new)
-              .limit(outputRows.size()).collect(Collectors.toList()));
+      ContributionByOutputGroup contributionByOutputGroup
+              = createContributionGroup(rowCount, outputGroupName);
       Pattern pattern = Pattern.compile("\\." + outputGroupName);
 
-      for (int i = 0; i < outputFieldNames.size(); i++) {
-        String outputFieldName = outputFieldNames.get(i);
-        Matcher m = pattern.matcher(outputFieldName);
-        if (m.find()) {
+      // note: columnNames from mojo contains a combination of featureName and outputGroupName
+      // columnNames are expected to have pattern featureName.outputGroupName
+
+      for (int i = 0; i < columnNames.size(); i++) {
+        Matcher matcher = pattern.matcher(columnNames.get(i));
+        if (matcher.find()) {
           if (isFirstOutputGroup) {
-            String columnName = outputFieldName.substring(0, m.start());
-            featureNames.add(columnName);
+            String featureName = columnNames.get(i).substring(0, matcher.start());
+            featureNames.add(featureName);
           }
-          for (int k = 0; k < outputRows.size(); k++) {
-            Row row = contributionByOutputGroup.getContributions().get(k);
-            row.add(outputRows.get(k).get(i));
+          String[] columnDataFromMojo = shapleyMojoFrame.getColumn(i).getDataAsStrings();
+          for (int k = 0; k < rowCount; k++) {
+            Row existingRow = contributionByOutputGroup.getContributions().get(k);
+            existingRow.add(columnDataFromMojo[k]);
           }
         }
       }
-      contributionResponse.getContributionByOutputGroup().add(contributionByOutputGroup);
+      contributionResponse.addContributionByOutputGroupItem(contributionByOutputGroup);
       isFirstOutputGroup = false;
     }
     contributionResponse.setFeatures(featureNames);
     return contributionResponse;
+  }
+
+  private ContributionByOutputGroup createContributionGroup(int rowCount, String outputGroupName) {
+    ContributionByOutputGroup contributionByOutputGroup = new ContributionByOutputGroup();
+    contributionByOutputGroup.setOutputGroup(outputGroupName);
+    contributionByOutputGroup.setContributions(Stream.generate(Row::new)
+            .limit(rowCount).collect(Collectors.toList()));
+    return contributionByOutputGroup;
   }
 }

@@ -201,7 +201,7 @@ definitions:
         type: array
         items:
           type: string
-      ContributionByOutputGroup:
+      contributionByOutputGroup:
         description: >
           An array of rows consisting of the shapley contributions output corresponding to an output group.
         type: array

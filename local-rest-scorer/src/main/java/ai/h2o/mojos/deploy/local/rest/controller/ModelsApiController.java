@@ -91,7 +91,7 @@ public class ModelsApiController implements ModelApi {
       ContributionResponse contributionResponse
               = scorer.computeContribution(request);
       return ResponseEntity.ok(contributionResponse);
-    } catch (UnsupportedOperationException e) {
+    } catch (UnsupportedOperationException | IllegalArgumentException e) {
       log.info("Unsupported operation: {}, due to: {}", request, e.getMessage());
       return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     } catch (Exception e) {
