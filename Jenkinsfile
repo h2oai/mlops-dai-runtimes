@@ -6,6 +6,7 @@ import ai.h2o.ci.Utils
 
 JAVA_IMAGE = 'openjdk:8u222-jdk-slim'
 NODE_LABEL = 'docker'
+DOCKERHUB_CREDS = 'dockerhub'
 
 def versionText = null
 def utilsLib = new Utils()
@@ -143,6 +144,7 @@ pipeline {
             }
             agent {
                 docker {
+                    registryCredentialsId DOCKERHUB_CREDS
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
