@@ -129,8 +129,8 @@ paths:
           description: Successful operation
           schema:
             $ref: '#/definitions/ContributionResponse'
-        '405':
-          description: Invalid input, implementation not supported
+        '501':
+          description: Implementation not supported
         '400':
           description: Invalid payload
 securityDefinitions:
@@ -169,16 +169,15 @@ definitions:
   ContributionRequest:
     type: object
     required:
-      - shapleyValuesRequested
+      - requestShapleyValueType
     properties:
-      shapleyValuesRequested:
+      requestShapleyValueType:
+        $ref: '#/definitions/ShapleyType'
         description: >
           The string to say what type of Shap values are needed.
           `ORIGINAL` implies Shap values of original features are requested,
           `TRANSFORMED` implies that Shap values of transformed features are requested.
         type: string
-        items:
-          $ref: '#/definitions/ShapleyType'
       fields:
         description: >
           An array holding the names of fields in the order of appearance in the `rows` property. The length of `fields`
@@ -223,14 +222,13 @@ definitions:
   ScoreRequest:
     type: object
     properties:
-      shapleyValuesRequested:
+      requestShapleyValueType:
         description: >
           The string to say what type of Shap values are needed.
           `ORIGINAL` implies Shap values of original features are requested,
           `TRANSFORMED` implies that Shap values of transformed features are requested.
         type: string
-        items:
-          $ref: '#/definitions/ShapleyType'
+        $ref: '#/definitions/ShapleyType'
       includeFieldsInOutput:
         description: >
           An array holding the list of field names to be copied from the input request row to the corresponding scoring
@@ -328,7 +326,7 @@ definitions:
           $ref: '#/definitions/DataField'
   ShapleyType:
     type: string
-    enum: &SHAPLEY_TYPE [ ORIGINAL, TRANSFORMED, NONE ]
+    enum: [ ORIGINAL, TRANSFORMED, NONE ]
   ScoringType:
     type: string
-    enum: &SCORING_TYPE [ REGRESSION, CLASSIFICATION, BINOMIAL ]
+    enum: [ REGRESSION, CLASSIFICATION, BINOMIAL ]

@@ -93,10 +93,10 @@ public class MojoScorer {
     ScoreResponse response = scoreResponseConverter.apply(responseFrame, request);
     response.id(pipeline.getUuid());
     try {
-      ShapleyType requestedShapleyType = shapleyType(request.getShapleyValuesRequested());
+      ShapleyType requestedShapleyType = shapleyType(request.getRequestShapleyValueType());
       switch (requestedShapleyType) {
         case TRANSFORMED:
-          response.setFeatureShapleyContributions(computeContribution(request));
+          response.setFeatureShapleyContributions(transformedFeatureContribution(request));
           break;
         case ORIGINAL:
           log.info(UNIMPLEMENTED_MESSAGE);
@@ -105,7 +105,7 @@ public class MojoScorer {
           break;
       }
     } catch (Exception e) {
-      log.info("Failed shapley values: {}, due to: {}", request, e.getMessage());
+      log.info("Failed shapley contribution due to: {}", e.getMessage());
       log.debug(" - failure cause: ", e);
     }
     return response;
@@ -117,7 +117,7 @@ public class MojoScorer {
    * @param request {@link ScoreRequest}
    * @return response {@link ContributionResponse}
    */
-  private ContributionResponse computeContribution(ScoreRequest request) {
+  private ContributionResponse transformedFeatureContribution(ScoreRequest request) {
     MojoFrame requestFrame = scoreRequestConverter
             .apply(request, pipelineShapley.getInputFrameBuilder());
     return contribution(requestFrame);
@@ -130,7 +130,7 @@ public class MojoScorer {
    * @return response {@link ContributionResponse}
    */
   public ContributionResponse computeContribution(ContributionRequest request) {
-    ShapleyType requestedShapleyType = shapleyType(request.getShapleyValuesRequested());
+    ShapleyType requestedShapleyType = shapleyType(request.getRequestShapleyValueType());
     switch (requestedShapleyType) {
       case TRANSFORMED:
         MojoFrame requestFrame = contributionRequestConverter
@@ -281,10 +281,10 @@ public class MojoScorer {
     }
   }
 
-  private ShapleyType shapleyType(String requestedType) {
-    if (ShapleyType.TRANSFORMED.toString().equalsIgnoreCase(requestedType)) {
+  private ShapleyType shapleyType(ShapleyType requestedType) {
+    if (ShapleyType.TRANSFORMED.equals(requestedType)) {
       return ShapleyType.TRANSFORMED;
-    } else if (ShapleyType.ORIGINAL.toString().equalsIgnoreCase(requestedType)) {
+    } else if (ShapleyType.ORIGINAL.equals(requestedType)) {
       return ShapleyType.ORIGINAL;
     }
     return ShapleyType.NONE;

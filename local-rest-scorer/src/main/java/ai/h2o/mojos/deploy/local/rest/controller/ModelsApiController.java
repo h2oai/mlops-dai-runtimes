@@ -91,11 +91,11 @@ public class ModelsApiController implements ModelApi {
       ContributionResponse contributionResponse
               = scorer.computeContribution(request);
       return ResponseEntity.ok(contributionResponse);
-    } catch (UnsupportedOperationException | IllegalArgumentException e) {
-      log.info("Unsupported operation: {}, due to: {}", request, e.getMessage());
-      return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+    } catch (UnsupportedOperationException e) {
+      log.info("Unsupported operation due to: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     } catch (Exception e) {
-      log.info("Failed shapley contribution request: {}, due to: {}", request, e.getMessage());
+      log.info("Failed shapley contribution request due to: {}", e.getMessage());
       log.debug(" - failure cause: ", e);
       return ResponseEntity.badRequest().build();
     }

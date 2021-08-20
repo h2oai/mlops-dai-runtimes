@@ -92,10 +92,10 @@ public class ModelsApiController implements ModelApi {
   @Override
   public ResponseEntity<ContributionResponse> getContribution(
           ContributionRequest request) {
-    // todo to be implemented in the future
+    // TODO: to be implemented in the future
     log.info(UNIMPLEMENTED_MESSAGE);
     log.debug(" Unsupported operation: " + UNIMPLEMENTED_MESSAGE);
-    return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
   }
 
   @Override
