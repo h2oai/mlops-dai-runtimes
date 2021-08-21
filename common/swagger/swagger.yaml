@@ -153,8 +153,7 @@ definitions:
         properties:
           scoringType:
             type: string
-            items:
-              $ref: '#/definitions/ScoringType'
+            $ref: '#/definitions/ScoringType'
           scoringResponLabels:
             type: array
             items:
