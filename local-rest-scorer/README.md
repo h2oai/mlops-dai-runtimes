@@ -27,6 +27,20 @@ Springboot [documentation](https://docs.spring.io/spring-boot/docs/current/refer
 
 #### Simple Configuration
 
+You can create an SSL Certificate with java built in tool `keytool` or via `openssl`
+
+Example using `keytool`:
+
+```
+keytool -genkey \
+        -alias selfsigned_localhost_sslserver \
+        -keyalg RSA -keysize 2048 \
+        -validity 700 \
+        -keypass changeit \
+        -storepass changeit \
+        -keystore ssl-server.jks
+```
+
 Configuration of SSL requires several parameters to be set for the application:
 ```
 # Required
