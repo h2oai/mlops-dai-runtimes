@@ -20,6 +20,46 @@ java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR
 
 > Tip: If you run into an error loading the MOJO, ensure you specify its full path and are not triggering shell expansion (e.g. avoid the `~` character).
 
+### Enable Https
+
+Springboot application come with built-in support for HTTPS. You can get more information from the
+Springboot [documentation](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto.webserver.configure-ssl)
+
+#### Simple Configuration
+
+Configuration of SSL requires several parameters to be set for the application:
+```
+# Required
+server.ssl.enabled=true
+server.ssl.key-store=/path/to/keystore.jks
+server.ssl.key-password=<enter password>
+
+# Optional
+server.port=<default port is 8080>
+server.ssl.key-alias=<alias associated with keystore provided>
+server.ssl.key-store-provider=SUN  # can be SUN for example
+server.ssl.key-store-type=JKS  # JKS, PKCS12
+```
+
+These can be set in an application.properties file or via the command line. 
+
+* Deploy via command line:
+
+```
+java -Dmojo.path=/path/to/pipeline.mojo \
+     -jar /path/to/local-rest-scorer.jar \
+     --server.ssl.enabled=true \
+     --server.ssl.key-store=/path/to/keystore.jks \
+     --server.ssl.key-password=mypassword
+```
+* Deploy with `application.properties` file. See [here](./examples/application.properties) for example `application.properties` file.
+
+```
+java -Dmojo.path=/path/to/pipeline.mojo \
+     -Dspring.config.location=/path/to/application.properties
+     -jar /path/to/local-rest-scorer.jar
+```
+
 ### Score JSON Request
 
 To test the endpoint, send a request to http://localhost:8080 as follows:
