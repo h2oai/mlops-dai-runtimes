@@ -25,21 +25,12 @@ java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR
 Springboot application come with built-in support for HTTPS. You can get more information from the
 Springboot [documentation](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto.webserver.configure-ssl)
 
-#### Simple Configuration
-
+The servers support using either JKS or PKSC12 type certificates to secure network traffic. 
 If you do not have certificates, you can create a self-signed SSL Certificate
-with java built in tool `keytool` or via `openssl`.
+with java built in tool `keytool` or via `openssl`. See some examples [below](#using-or-creating-self-signed-certificates).
 
-```shell
-# Example: using keytool
-keytool -genkey \
-        -alias selfsigned_localhost_sslserver \
-        -keyalg RSA -keysize 2048 \
-        -validity 700 \
-        -keypass <changeit> \
-        -storepass <changeit> \
-        -keystore ssl-server.jks
-```
+
+#### Simple Configuration
 
 Configuration of SSL requires several parameters to be set for the application:
 
@@ -75,25 +66,37 @@ java -Dmojo.path=/path/to/pipeline.mojo \
      -jar /path/to/local-rest-scorer.jar
 ```
 
-#### Using PEM based Certificates
+#### Using or Creating Self-Signed Certificates
 
-If you already have a PEM based certificate, you can convert it to PKCS12 and use it with the 
+Below are some examples of how to create a self-signed certificate using `keytool` and 
+how to convert a preexisting `PEM` based certificate into a useable `PKSC12` certificate.
+
+```shell
+# Example: using keytool to create a JKS certificate
+keytool -genkey \
+        -alias selfsigned_localhost_sslserver \
+        -keyalg RSA -keysize 2048 \
+        -validity 700 \
+        -keypass <changeit> \
+        -storepass <changeit> \
+        -keystore ssl-server.jks
+```
+
+If you already have a PEM based certificate pair, you can convert it to PKCS12 and use it with the 
 server using the following:
 
 ```shell
+# Example: using openssl to convert a preexisting .pem certificate pair into a usable PKCS12 certificate 
 # NOTE: This will ask for a password that will you will need to provide in server configurations
-openssl pkcs12 \
-    -export -in /path/to/server-certificate.pem \
+openssl pkcs12 -export \
+    -in /path/to/server-certificate.pem \
     -inkey /path/to/server-key.pem \
     -name scorer \
     -out /path/to/scorer.p12
 ```
 
-You will NEED to configure the following in server configurations to use PKCS12 keystore:
-
-```shell
-server.ssl.key-store-type=PKCS12
-```
+NOTE: remember to set `server.ssl.key-store-type=PKSC12` in the server configurations if you want to
+use PKSC12 type certificates
 
 ### Score JSON Request
 
