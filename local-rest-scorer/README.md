@@ -27,21 +27,22 @@ Springboot [documentation](https://docs.spring.io/spring-boot/docs/current/refer
 
 #### Simple Configuration
 
-You can create an SSL Certificate with java built in tool `keytool` or via `openssl`
+If you do not have certificates, you can create a self-signed SSL Certificate
+with java built in tool `keytool` or via `openssl`.
 
-Example using `keytool`:
-
-```
+```shell
+# Example: using keytool
 keytool -genkey \
         -alias selfsigned_localhost_sslserver \
         -keyalg RSA -keysize 2048 \
         -validity 700 \
-        -keypass changeit \
-        -storepass changeit \
+        -keypass <changeit> \
+        -storepass <changeit> \
         -keystore ssl-server.jks
 ```
 
 Configuration of SSL requires several parameters to be set for the application:
+
 ```
 # Required
 server.ssl.enabled=true
@@ -59,7 +60,7 @@ These can be set in an application.properties file or via the command line.
 
 * Deploy via command line:
 
-```
+```shell
 java -Dmojo.path=/path/to/pipeline.mojo \
      -jar /path/to/local-rest-scorer.jar \
      --server.ssl.enabled=true \
@@ -68,10 +69,30 @@ java -Dmojo.path=/path/to/pipeline.mojo \
 ```
 * Deploy with `application.properties` file. See [here](./examples/application.properties) for example `application.properties` file.
 
-```
+```shell
 java -Dmojo.path=/path/to/pipeline.mojo \
      -Dspring.config.location=/path/to/application.properties
      -jar /path/to/local-rest-scorer.jar
+```
+
+#### Using PEM based Certificates
+
+If you already have a PEM based certificate, you can convert it to PKCS12 and use it with the 
+server using the following:
+
+```shell
+# NOTE: This will ask for a password that will you will need to provide in server configurations
+openssl pkcs12 \
+    -export -in /path/to/server-certificate.pem \
+    -inkey /path/to/server-key.pem \
+    -name scorer \
+    -out /path/to/scorer.p12
+```
+
+You will NEED to configure the following in server configurations to use PKCS12 keystore:
+
+```shell
+server.ssl.key-store-type=PKCS12
 ```
 
 ### Score JSON Request
