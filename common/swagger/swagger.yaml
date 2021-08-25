@@ -199,18 +199,19 @@ definitions:
         type: array
         items:
           type: string
-      contributionByOutputGroup:
+      contributionGroups:
         description: >
           An array of rows consisting of the shapley contributions output corresponding to an output group.
         type: array
         items:
-          $ref: '#/definitions/ContributionByOutputGroup'
-  ContributionByOutputGroup:
+          $ref: '#/definitions/ContributionGroup'
+  ContributionGroup:
     type: object
     properties:
       outputGroup:
         description: >
-          Name of the output group.
+          Name of the output group. It will be populated only for multinomial models of mojo2.
+          Shapley values are not supported for third party models yet, hence this field will not be populated.
         type: string
       contributions:
         description: >
@@ -289,6 +290,10 @@ definitions:
           $ref: '#/definitions/Row'
       featureShapleyContributions:
         type: object
+        description: >
+          An object with features and shapley values that was requested by the client.
+          It is currently available for transformed features of binomial, regression and multinomial models of mojo2.
+          This field will not be populated if the Shapley values are not available for a model.
         items:
           $ref: '#/definitions/ContributionResponse'
   DataField:

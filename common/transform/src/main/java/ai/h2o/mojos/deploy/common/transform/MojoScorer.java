@@ -101,7 +101,10 @@ public class MojoScorer {
         case ORIGINAL:
           log.info(UNIMPLEMENTED_MESSAGE);
           break;
+        case NONE:
+          break;
         default:
+          log.info("Only ORIGINAL or TRANSFORMED are accepted enums values of Shapley values");
           break;
       }
     } catch (Exception e) {
@@ -178,10 +181,9 @@ public class MojoScorer {
       return ScoringType.CLASSIFICATION;
     } else if (outputColumnSize == 2) {
       return ScoringType.BINOMIAL;
-    } else if (outputColumnSize == 1) {
+    } else {
       return ScoringType.REGRESSION;
     }
-    return null;
   }
 
   /**
@@ -282,11 +284,9 @@ public class MojoScorer {
   }
 
   private ShapleyType shapleyType(ShapleyType requestedType) {
-    if (ShapleyType.TRANSFORMED.equals(requestedType)) {
-      return ShapleyType.TRANSFORMED;
-    } else if (ShapleyType.ORIGINAL.equals(requestedType)) {
-      return ShapleyType.ORIGINAL;
+    if (requestedType == null) {
+      return ShapleyType.NONE;
     }
-    return ShapleyType.NONE;
+    return requestedType;
   }
 }

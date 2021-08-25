@@ -93,8 +93,7 @@ public class ModelsApiController implements ModelApi {
   public ResponseEntity<ContributionResponse> getContribution(
           ContributionRequest request) {
     // TODO: to be implemented in the future
-    log.info(UNIMPLEMENTED_MESSAGE);
-    log.debug(" Unsupported operation: " + UNIMPLEMENTED_MESSAGE);
+    log.info(" Unsupported operation: " + UNIMPLEMENTED_MESSAGE);
     return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
   }
 

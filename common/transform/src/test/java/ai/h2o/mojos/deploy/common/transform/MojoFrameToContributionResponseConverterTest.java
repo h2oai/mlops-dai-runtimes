@@ -42,9 +42,9 @@ class MojoFrameToContributionResponseConverterTest {
     ContributionResponse result = converter.contributionResponseWithNoOutputGroup(mojoFrame);
 
     // Then
-    assertThat(result.getContributionByOutputGroup().size()).isEqualTo(1);
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions()).isEmpty();
-    assertThat(result.getContributionByOutputGroup().get(0).getOutputGroup()).isNull();
+    assertThat(result.getContributionGroups().size()).isEqualTo(1);
+    assertThat(result.getContributionGroups().get(0).getContributions()).isEmpty();
+    assertThat(result.getContributionGroups().get(0).getOutputGroup()).isNull();
     assertThat(result.getFeatures()).isEmpty();
   }
 
@@ -59,8 +59,8 @@ class MojoFrameToContributionResponseConverterTest {
         Stream.of(types).map(Object::toString).toArray(String[]::new), types, contributions));
 
     // Then
-    assertThat(result.getContributionByOutputGroup().size()).isEqualTo(1);
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions())
+    assertThat(result.getContributionGroups().size()).isEqualTo(1);
+    assertThat(result.getContributionGroups().get(0).getContributions())
         .containsExactly(Stream.of(contributions)
         .map(MojoFrameToContributionResponseConverterTest::asRow).toArray());
     assertThat(result.getFeatures())
@@ -89,7 +89,7 @@ class MojoFrameToContributionResponseConverterTest {
             .contributionResponseWithOutputGroup(mojoFrame, outputGroupNames);
 
     // Then
-    assertThat(result.getContributionByOutputGroup().size()).isEqualTo(0);
+    assertThat(result.getContributionGroups().size()).isEqualTo(0);
     assertThat(result.getFeatures()).isEmpty();
   }
 
@@ -105,11 +105,11 @@ class MojoFrameToContributionResponseConverterTest {
             .contributionResponseWithNoOutputGroup(buildMojoFrame(features, types, contributions));
 
     // Then
-    assertThat(result.getContributionByOutputGroup().size()).isEqualTo(1);
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions().size()).isEqualTo(1);
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions())
+    assertThat(result.getContributionGroups().size()).isEqualTo(1);
+    assertThat(result.getContributionGroups().get(0).getContributions().size()).isEqualTo(1);
+    assertThat(result.getContributionGroups().get(0).getContributions())
             .containsExactly(asRow("23.6"));
-    assertThat(result.getContributionByOutputGroup().get(0).getOutputGroup()).isNull();
+    assertThat(result.getContributionGroups().get(0).getOutputGroup()).isNull();
     assertThat(result.getFeatures()).containsExactly("feature");
   }
 
@@ -128,11 +128,11 @@ class MojoFrameToContributionResponseConverterTest {
                     buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
-    assertThat(result.getContributionByOutputGroup().size()).isEqualTo(1);
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions().size()).isEqualTo(1);
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions())
+    assertThat(result.getContributionGroups().size()).isEqualTo(1);
+    assertThat(result.getContributionGroups().get(0).getContributions().size()).isEqualTo(1);
+    assertThat(result.getContributionGroups().get(0).getContributions())
             .containsExactly(asRow("122.2"));
-    assertThat(result.getContributionByOutputGroup().get(0).getOutputGroup()).isEqualTo("test");
+    assertThat(result.getContributionGroups().get(0).getOutputGroup()).isEqualTo("test");
     assertThat(result.getFeatures()).containsExactly("feature");
   }
 
@@ -149,17 +149,17 @@ class MojoFrameToContributionResponseConverterTest {
             buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
-    assertThat(result.getContributionByOutputGroup().size()).isEqualTo(2);
+    assertThat(result.getContributionGroups().size()).isEqualTo(2);
 
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions().size()).isEqualTo(1);
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions())
+    assertThat(result.getContributionGroups().get(0).getContributions().size()).isEqualTo(1);
+    assertThat(result.getContributionGroups().get(0).getContributions())
             .containsExactly(asRow("122.2"));
-    assertThat(result.getContributionByOutputGroup().get(0).getOutputGroup()).isEqualTo("test1");
+    assertThat(result.getContributionGroups().get(0).getOutputGroup()).isEqualTo("test1");
 
-    assertThat(result.getContributionByOutputGroup().get(1).getContributions().size()).isEqualTo(1);
-    assertThat(result.getContributionByOutputGroup().get(1).getContributions())
+    assertThat(result.getContributionGroups().get(1).getContributions().size()).isEqualTo(1);
+    assertThat(result.getContributionGroups().get(1).getContributions())
             .containsExactly(asRow("34.6"));
-    assertThat(result.getContributionByOutputGroup().get(1).getOutputGroup()).isEqualTo("test2");
+    assertThat(result.getContributionGroups().get(1).getOutputGroup()).isEqualTo("test2");
 
     assertThat(result.getFeatures()).containsExactly("feature");
   }
@@ -178,17 +178,17 @@ class MojoFrameToContributionResponseConverterTest {
             buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
-    assertThat(result.getContributionByOutputGroup().size()).isEqualTo(2);
+    assertThat(result.getContributionGroups().size()).isEqualTo(2);
 
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions().size()).isEqualTo(2);
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions())
+    assertThat(result.getContributionGroups().get(0).getContributions().size()).isEqualTo(2);
+    assertThat(result.getContributionGroups().get(0).getContributions())
             .containsExactly(asRow("122.2"), asRow("90.2"));
-    assertThat(result.getContributionByOutputGroup().get(0).getOutputGroup()).isEqualTo("test1");
+    assertThat(result.getContributionGroups().get(0).getOutputGroup()).isEqualTo("test1");
 
-    assertThat(result.getContributionByOutputGroup().get(1).getContributions().size()).isEqualTo(2);
-    assertThat(result.getContributionByOutputGroup().get(1).getContributions())
+    assertThat(result.getContributionGroups().get(1).getContributions().size()).isEqualTo(2);
+    assertThat(result.getContributionGroups().get(1).getContributions())
             .containsExactly(asRow("34.6"), asRow("45.6"));
-    assertThat(result.getContributionByOutputGroup().get(1).getOutputGroup()).isEqualTo("test2");
+    assertThat(result.getContributionGroups().get(1).getOutputGroup()).isEqualTo("test2");
 
     assertThat(result.getFeatures()).containsExactly("feature");
   }
@@ -210,17 +210,17 @@ class MojoFrameToContributionResponseConverterTest {
                     buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
-    assertThat(result.getContributionByOutputGroup().size()).isEqualTo(2);
+    assertThat(result.getContributionGroups().size()).isEqualTo(2);
 
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions().size()).isEqualTo(2);
-    assertThat(result.getContributionByOutputGroup().get(0).getContributions())
+    assertThat(result.getContributionGroups().get(0).getContributions().size()).isEqualTo(2);
+    assertThat(result.getContributionGroups().get(0).getContributions())
             .containsExactly(asRow("122.2", "90.9"), asRow("90.2", "56.9"));
-    assertThat(result.getContributionByOutputGroup().get(0).getOutputGroup()).isEqualTo("test1");
+    assertThat(result.getContributionGroups().get(0).getOutputGroup()).isEqualTo("test1");
 
-    assertThat(result.getContributionByOutputGroup().get(1).getContributions().size()).isEqualTo(2);
-    assertThat(result.getContributionByOutputGroup().get(1).getContributions())
+    assertThat(result.getContributionGroups().get(1).getContributions().size()).isEqualTo(2);
+    assertThat(result.getContributionGroups().get(1).getContributions())
             .containsExactly(asRow("34.6", "78.0"), asRow("45.6", "56.0"));
-    assertThat(result.getContributionByOutputGroup().get(1).getOutputGroup()).isEqualTo("test2");
+    assertThat(result.getContributionGroups().get(1).getOutputGroup()).isEqualTo("test2");
 
     assertThat(result.getFeatures()).containsExactly("feature1", "feature2");
   }
