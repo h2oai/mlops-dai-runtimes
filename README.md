@@ -9,6 +9,7 @@ The structure is as follows:
   * `transform`: Shared transformers between mojo and API classes.
 * `{target}-scorer`: One module per deployment target.
 
+Note: Please look to each subproject for additional deployment information.
 
 ## Build
 
