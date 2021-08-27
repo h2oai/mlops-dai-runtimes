@@ -3,7 +3,7 @@ info:
   description: >-
     This is a definition of the REST API for scoring from H2O. This API is
     intended to be used within DAI and eventually across all H2O scoring systems
-  version: 1.0.0
+  version: 1.1.0
   title: Scoring API - v1
   termsOfService: ''
   contact:
@@ -209,7 +209,7 @@ definitions:
     properties:
       outputGroup:
         description: >
-          Name of the output group. It will be populated only for multinomial models of mojo2.
+          Name of the output group. It will be populated only for multinomial models.
           Shapley values are not supported for third party models yet, hence this field will not be populated.
         type: string
       contributions:

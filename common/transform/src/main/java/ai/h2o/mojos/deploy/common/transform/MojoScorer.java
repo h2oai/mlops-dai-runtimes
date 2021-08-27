@@ -168,6 +168,8 @@ public class MojoScorer {
     List<String> outputClass =  new ArrayList<>();
     for (int i = 0; i < numberOutputColumns; i++) {
       String outputClassName = outputMeta.getColumnName(i);
+      // the MOJO API will provide list of target labels in the future
+      // Link: https://github.com/h2oai/mojo2/issues/1366
       String[] outputClassNameSplit = outputClassName.split("\\.");
       String refinedOutputClass = outputClassNameSplit[outputClassNameSplit.length - 1 ];
       outputClass.add(refinedOutputClass);
