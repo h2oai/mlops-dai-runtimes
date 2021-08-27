@@ -3,7 +3,7 @@ info:
   description: >-
     This is a definition of the REST API for scoring from H2O. This API is
     intended to be used within DAI and eventually across all H2O scoring systems
-  version: 1.0.0
+  version: 1.1.0
   title: Scoring API - v1
   termsOfService: ''
   contact:
@@ -107,6 +107,32 @@ paths:
             $ref: '#/definitions/ScoreResponse'
         '400':
           description: Invalid payload
+  '/model/contribution':
+    post:
+      tags:
+        - contribution
+      summary: Contribution score or Shapley values on given rows
+      description: Computes contribution score with the rows sent in the body of the post request
+      operationId: getContribution
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: payload
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ContributionRequest'
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ContributionResponse'
+        '501':
+          description: Implementation not supported
+        '400':
+          description: Invalid payload
 securityDefinitions:
   api_key:
     type: apiKey
@@ -127,10 +153,7 @@ definitions:
         properties:
           scoringType:
             type: string
-            enum:
-              - REGRESSION
-              - CLASSIFICATION
-              - BINOMIAL
+            $ref: '#/definitions/ScoringType'
           scoringResponLabels:
             type: array
             items:
@@ -141,9 +164,69 @@ definitions:
     type: array
     items:
       type: string
+
+  ContributionRequest:
+    type: object
+    required:
+      - requestShapleyValueType
+    properties:
+      requestShapleyValueType:
+        description: >
+          The string to say what type of Shap values are needed.
+          `ORIGINAL` implies Shap values of original features are requested,
+          `TRANSFORMED` implies that Shap values of transformed features are requested.
+        $ref: '#/definitions/ShapleyType'
+      fields:
+        description: >
+          An array holding the names of fields in the order of appearance in the `rows` property. The length of `fields`
+          has to match length of each row in `rows`. No duplicates are allowed.
+        type: array
+        items:
+          type: string
+      rows:
+        description: >
+          An array of rows consisting the actual input data for scoring, one scoring request per row.
+        type: array
+        items:
+          $ref: '#/definitions/Row'
+  ContributionResponse:
+    type: object
+    properties:
+      features:
+        description: >
+          An array holding the names of fields in the order of appearance in the rows of the  `contributions` property.
+        type: array
+        items:
+          type: string
+      contributionGroups:
+        description: >
+          An array of rows consisting of the shapley contributions output corresponding to an output group.
+        type: array
+        items:
+          $ref: '#/definitions/ContributionGroup'
+  ContributionGroup:
+    type: object
+    properties:
+      outputGroup:
+        description: >
+          Name of the output group. It will be populated only for multinomial models.
+          Shapley values are not supported for third party models yet, hence this field will not be populated.
+        type: string
+      contributions:
+        description: >
+          An array of rows consisting of the shapley contributions output corresponding to columns in the fields
+        type: array
+        items:
+          $ref: '#/definitions/Row'
   ScoreRequest:
     type: object
     properties:
+      requestShapleyValueType:
+        description: >
+          The string to say what type of Shap values are needed.
+          `ORIGINAL` implies Shap values of original features are requested,
+          `TRANSFORMED` implies that Shap values of transformed features are requested.
+        $ref: '#/definitions/ShapleyType'
       includeFieldsInOutput:
         description: >
           An array holding the list of field names to be copied from the input request row to the corresponding scoring
@@ -203,6 +286,13 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Row'
+      featureShapleyContributions:
+        type: object
+        description: >
+          An object with features and shapley values that was requested by the client.
+          It is currently available for transformed features of binomial, regression and multinomial models of mojo2.
+          This field will not be populated if the Shapley values are not available for a model.
+        $ref: '#/definitions/ContributionResponse'
   DataField:
     type: object
     properties:
@@ -235,3 +325,9 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/DataField'
+  ShapleyType:
+    type: string
+    enum: [ ORIGINAL, TRANSFORMED, NONE ]
+  ScoringType:
+    type: string
+    enum: [ REGRESSION, CLASSIFICATION, BINOMIAL ]

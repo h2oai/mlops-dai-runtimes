@@ -1,6 +1,8 @@
 package ai.h2o.mojos.deploy.sagemaker.hosted.controller;
 
 import ai.h2o.mojos.deploy.common.rest.api.ModelApi;
+import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
+import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
@@ -11,6 +13,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class ModelsApiController implements ModelApi {
 
+  private static final String UNIMPLEMENTED_MESSAGE
+          = "Shapley values are not implemented yet";
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
   private final MojoScorer scorer;
@@ -82,6 +87,14 @@ public class ModelsApiController implements ModelApi {
       log.debug(" - failure cause: ", e);
       return ResponseEntity.badRequest().build();
     }
+  }
+
+  @Override
+  public ResponseEntity<ContributionResponse> getContribution(
+          ContributionRequest request) {
+    // TODO: to be implemented in the future
+    log.info(" Unsupported operation: " + UNIMPLEMENTED_MESSAGE);
+    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
   }
 
   @Override

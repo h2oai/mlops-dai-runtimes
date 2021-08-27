@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-class RequestToMojoFrameConverterTest {
+class ScoreRequestToMojoFrameConverterTest {
   private static final String[] SINGLE_NULL = {null};
-  private final RequestToMojoFrameConverter converter = new RequestToMojoFrameConverter();
+  private final ScoreRequestToMojoFrameConverter converter = new ScoreRequestToMojoFrameConverter();
 
   @Test
   void convertEmptyRowsRequest_succeeds() {
@@ -119,7 +119,8 @@ class RequestToMojoFrameConverterTest {
     String[] values = {"value1", "value2", "value3"};
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
-    request.rows(Stream.of(values).map(RequestToMojoFrameConverterTest::asRow).collect(toList()));
+    request.rows(Stream.of(values)
+            .map(ScoreRequestToMojoFrameConverterTest::asRow).collect(toList()));
 
     // When
     MojoFrame result =
