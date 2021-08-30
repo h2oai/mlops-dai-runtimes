@@ -307,7 +307,7 @@ definitions:
         type: object
         description: >
           An object with features and shapley values that was requested by the client.
-          It is currently available for transformed features of binomial, regression and multinomial models of mojo2.
+          It is currently available for original/transformed features of binomial, regression and multinomial models of mojo2.
           This field will not be populated if the Shapley values are not available for a model.
         $ref: '#/definitions/ContributionResponse'
   DataField:

@@ -39,9 +39,6 @@ public class MojoScorer {
           = "shapley.enable property has to be set to true in the runtime configuration "
           + "to obtain Shapley contribution";
 
-  private static final String UNIMPLEMENTED_MESSAGE
-          = "Shapley values for original features are not implemented yet";
-
   private static final Logger log = LoggerFactory.getLogger(MojoScorer.class);
 
   private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
