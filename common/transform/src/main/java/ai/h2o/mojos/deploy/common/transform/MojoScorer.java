@@ -51,6 +51,7 @@ public class MojoScorer {
   private static final boolean ENABLE_SHAPLEY_CONTRIBUTION =
           Boolean.getBoolean(SHAPLEY_ENABLE_PROPERTY);
   private static MojoPipeline pipelineTransformedShapley;
+  private static MojoPipeline pipelineOriginalShapley;
 
   private final ScoreRequestToMojoFrameConverter scoreRequestConverter;
   private final MojoFrameToScoreResponseConverter scoreResponseConverter;
@@ -88,6 +89,9 @@ public class MojoScorer {
 
       pipelineTransformedShapley = loadMojoPipelineFromFile();
       pipelineTransformedShapley.setShapPredictContrib(true);
+
+      pipelineOriginalShapley = loadMojoPipelineFromFile();
+      pipelineOriginalShapley.setShapPredictContribOriginal(true);
     }
   }
 
@@ -117,10 +121,10 @@ public class MojoScorer {
       ShapleyType requestedShapleyType = request.getRequestShapleyValueType();
       switch (requestedShapleyType) {
         case TRANSFORMED:
-          response.setFeatureShapleyContributions(transformedFeatureContribution(request));
+          response.setFeatureShapleyContributions(featureContribution(request, false));
           break;
         case ORIGINAL:
-          log.info(UNIMPLEMENTED_MESSAGE);
+          response.setFeatureShapleyContributions(featureContribution(request, true));
           break;
         default:
           log.info("Only ORIGINAL or TRANSFORMED are accepted enums values of Shapley values");
@@ -139,10 +143,16 @@ public class MojoScorer {
    * @param request {@link ScoreRequest}
    * @return response {@link ContributionResponse}
    */
-  private ContributionResponse transformedFeatureContribution(ScoreRequest request) {
-    MojoFrame requestFrame = scoreRequestConverter
-            .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
-    return contribution(requestFrame);
+  private ContributionResponse featureContribution(ScoreRequest request, boolean isOriginal) {
+    if (isOriginal) {
+      MojoFrame requestFrame = scoreRequestConverter
+              .apply(request, pipelineOriginalShapley.getInputFrameBuilder());
+      return contribution(doShapleyContrib(requestFrame, true));
+    } else {
+      MojoFrame requestFrame = scoreRequestConverter
+              .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
+      return contribution(doShapleyContrib(requestFrame, false));
+    }
   }
 
   /**
@@ -160,19 +170,20 @@ public class MojoScorer {
     ShapleyType requestedShapleyType = request.getRequestShapleyValueType();
     switch (requestedShapleyType) {
       case TRANSFORMED:
-        MojoFrame requestFrame = contributionRequestConverter
+        MojoFrame requestFrame1 = contributionRequestConverter
                 .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
-        return contribution(requestFrame);
+        return contribution(doShapleyContrib(requestFrame1, false));
       case ORIGINAL:
-        throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
+        MojoFrame requestFrame2 = contributionRequestConverter
+                .apply(request, pipelineOriginalShapley.getInputFrameBuilder());
+        return contribution(doShapleyContrib(requestFrame2, true));
       default:
         throw new IllegalArgumentException(
                 "Only ORIGINAL or TRANSFORMED are accepted enums values of Shapley values");
     }
   }
 
-  private ContributionResponse contribution(MojoFrame requestFrame) {
-    MojoFrame contributionFrame = doShapleyContrib(requestFrame);
+  private ContributionResponse contribution(MojoFrame contributionFrame) {
 
     MojoFrameMeta outputMeta = pipeline.getOutputMeta();
     ScoringType scoringType = scoringType(outputMeta.getColumns().size());
@@ -254,13 +265,18 @@ public class MojoScorer {
     return responseFrame;
   }
 
-  private static MojoFrame doShapleyContrib(MojoFrame requestFrame) {
+  private static MojoFrame doShapleyContrib(MojoFrame requestFrame, boolean isOriginal) {
     log.debug(
             "Input has {} rows, {} columns: {}",
             requestFrame.getNrows(),
             requestFrame.getNcols(),
             Arrays.toString(requestFrame.getColumnNames()));
-    MojoFrame shapleyResponseFrame = pipelineTransformedShapley.transform(requestFrame);
+    MojoFrame shapleyResponseFrame;
+    if (isOriginal) {
+      shapleyResponseFrame = pipelineOriginalShapley.transform(requestFrame);
+    } else {
+      shapleyResponseFrame = pipelineTransformedShapley.transform(requestFrame);
+    }
     log.debug(
             "Response has {} rows, {} columns: {}",
             shapleyResponseFrame.getNrows(),
