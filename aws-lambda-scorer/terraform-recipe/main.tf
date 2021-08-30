@@ -59,7 +59,7 @@ resource "aws_lambda_function" "scorer" {
 
   // Increase resource constraints from the defaults of 3s and 128MB.
   timeout = 900
-  memory_size = ${var.lambda_memory_size}
+  memory_size = var.lambda_memory_size
 
   environment {
     variables = {
