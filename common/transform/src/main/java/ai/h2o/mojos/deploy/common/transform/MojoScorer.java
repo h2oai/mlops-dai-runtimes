@@ -118,10 +118,10 @@ public class MojoScorer {
       ShapleyType requestedShapleyType = request.getRequestShapleyValueType();
       switch (requestedShapleyType) {
         case TRANSFORMED:
-          response.setFeatureShapleyContributions(featureContribution(request, false));
+          response.setFeatureShapleyContributions(transformedFeatureContribution(request));
           break;
         case ORIGINAL:
-          response.setFeatureShapleyContributions(featureContribution(request, true));
+          response.setFeatureShapleyContributions(originalFeatureContribution(request));
           break;
         default:
           log.info("Only ORIGINAL or TRANSFORMED are accepted enums values of Shapley values");
@@ -134,22 +134,16 @@ public class MojoScorer {
     return response;
   }
 
-  /**
-   * Method to get shapley values for an incoming request of type {@link ScoreRequest}.
-   *
-   * @param request {@link ScoreRequest}
-   * @return response {@link ContributionResponse}
-   */
-  private ContributionResponse featureContribution(ScoreRequest request, boolean isOriginal) {
-    if (isOriginal) {
-      MojoFrame requestFrame = scoreRequestConverter
-              .apply(request, pipelineOriginalShapley.getInputFrameBuilder());
-      return contribution(doShapleyContrib(requestFrame, true));
-    } else {
-      MojoFrame requestFrame = scoreRequestConverter
-              .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
-      return contribution(doShapleyContrib(requestFrame, false));
-    }
+  private ContributionResponse originalFeatureContribution(ScoreRequest request) {
+    MojoFrame requestFrame = scoreRequestConverter
+            .apply(request, pipelineOriginalShapley.getInputFrameBuilder());
+    return contribution(doShapleyContrib(requestFrame, true));
+  }
+
+  private ContributionResponse transformedFeatureContribution(ScoreRequest request) {
+    MojoFrame requestFrame = scoreRequestConverter
+            .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
+    return contribution(doShapleyContrib(requestFrame, false));
   }
 
   /**
@@ -165,15 +159,17 @@ public class MojoScorer {
     }
 
     ShapleyType requestedShapleyType = request.getRequestShapleyValueType();
+    MojoFrame requestFrame;
+
     switch (requestedShapleyType) {
       case TRANSFORMED:
-        MojoFrame requestFrame1 = contributionRequestConverter
+        requestFrame = contributionRequestConverter
                 .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
-        return contribution(doShapleyContrib(requestFrame1, false));
+        return contribution(doShapleyContrib(requestFrame, false));
       case ORIGINAL:
-        MojoFrame requestFrame2 = contributionRequestConverter
+        requestFrame = contributionRequestConverter
                 .apply(request, pipelineOriginalShapley.getInputFrameBuilder());
-        return contribution(doShapleyContrib(requestFrame2, true));
+        return contribution(doShapleyContrib(requestFrame, true));
       default:
         throw new IllegalArgumentException(
                 "Only ORIGINAL or TRANSFORMED are accepted enums values of Shapley values");
@@ -262,6 +258,15 @@ public class MojoScorer {
     return responseFrame;
   }
 
+  /**
+   * Method to get shapley contribution for an incoming request of type {@link ScoreRequest}.
+   *
+   * @param requestFrame {@link MojoFrame}
+   * @param isOriginal {@link boolean} Simple boolean to specify if the shapley contribution
+   *                                  has to be performed for original features
+   *                                  or transformed features
+   * @return response {@link MojoFrame}
+   */
   private static MojoFrame doShapleyContrib(MojoFrame requestFrame, boolean isOriginal) {
     log.debug(
             "Input has {} rows, {} columns: {}",
