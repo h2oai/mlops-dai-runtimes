@@ -20,7 +20,7 @@ java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR
 
 To run the local scorer with shapley contribution enabled
 ```bash
-java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -Dh2oai.scorer.enable.shapley=true -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}-boot.jar
+java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -Dshapley.enable=true -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}-boot.jar
 ``` 
 
 > Tip: If you run into an error loading the MOJO, ensure you specify its full path and are not triggering shell expansion (e.g. avoid the `~` character).
@@ -68,7 +68,7 @@ java -Dmojo.path=/path/to/pipeline.mojo \
 
 ```shell
 java -Dmojo.path=/path/to/pipeline.mojo \
-     -Dh2oai.scorer.enable.shapley=true \
+     -Dshapley.enable=true \
      -jar /path/to/local-rest-scorer.jar \
      --server.ssl.enabled=true \
      --server.ssl.key-store=/path/to/keystore.jks \
@@ -87,7 +87,7 @@ java -Dmojo.path=/path/to/pipeline.mojo \
 
 ```shell
 java -Dmojo.path=/path/to/pipeline.mojo \
-     -Dh2oai.scorer.enable.shapley=true \
+     -Dshapley.enable=true \
      -Dspring.config.location=/path/to/application.properties
      -jar /path/to/local-rest-scorer.jar
 ```
