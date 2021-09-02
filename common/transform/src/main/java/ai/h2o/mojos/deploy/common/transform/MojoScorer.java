@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>The scorer code is shared for all mojo deployments and is only parameterized by the
  * {@code mojo.path} property to define the mojo to use.
+ * {@code h2oai.scorer.enable.shapley} property to enable shapley contribution.
  */
 public class MojoScorer {
   private static final String UNIMPLEMENTED_MESSAGE
@@ -42,12 +43,10 @@ public class MojoScorer {
   private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
   private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
   private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
-
-  // note the mojo pipeline need to be reloaded here as we have a constrain from java mojo
-  // both SHAP values and predictions cannot be provided with the same pipeline
-  // Link: https://github.com/h2oai/mojo2/blob/7a1ab76b09f056334842a5b442ff89859aabf518/doc/shap.md
-  private static final MojoPipeline pipelineShapley = loadMojoPipelineFromFile();
-
+  private static final String H2OAI_SCORER_ENABLE_SHAPLEY_PROPERTY = "h2oai.scorer.enable.shapley";
+  private static final boolean H2OAI_SCORER_ENABLE_SHAPLEY =
+          Boolean.getBoolean(H2OAI_SCORER_ENABLE_SHAPLEY_PROPERTY);
+  private static MojoPipeline pipelineTransformedShapley;
 
   private final ScoreRequestToMojoFrameConverter scoreRequestConverter;
   private final MojoFrameToScoreResponseConverter scoreResponseConverter;
@@ -77,7 +76,15 @@ public class MojoScorer {
     this.contributionResponseConverter = contributionResponseConverter;
     this.modelInfoConverter = modelInfoConverter;
     this.csvConverter = csvConverter;
-    pipelineShapley.setShapPredictContrib(true);
+
+    if (H2OAI_SCORER_ENABLE_SHAPLEY) {
+      // note the mojo pipeline need to be reloaded here as we have a constrain from java mojo
+      // both SHAP values and predictions cannot be provided with the same pipeline
+      // Link: https://github.com/h2oai/mojo2/blob/7a1ab76b09f056334842a5b442ff89859aabf518/doc/shap.md
+
+      pipelineTransformedShapley = loadMojoPipelineFromFile();
+      pipelineTransformedShapley.setShapPredictContrib(true);
+    }
   }
 
   /**
@@ -92,6 +99,16 @@ public class MojoScorer {
     MojoFrame responseFrame = doScore(requestFrame);
     ScoreResponse response = scoreResponseConverter.apply(responseFrame, request);
     response.id(pipeline.getUuid());
+
+    if (request.getRequestShapleyValueType() == null) {
+      return response;
+    }
+
+    if (!H2OAI_SCORER_ENABLE_SHAPLEY) {
+      // throw exception
+      throw new IllegalArgumentException("Shapley values needs to be enabled");
+    }
+
     try {
       ShapleyType requestedShapleyType = shapleyType(request.getRequestShapleyValueType());
       switch (requestedShapleyType) {
@@ -122,7 +139,7 @@ public class MojoScorer {
    */
   private ContributionResponse transformedFeatureContribution(ScoreRequest request) {
     MojoFrame requestFrame = scoreRequestConverter
-            .apply(request, pipelineShapley.getInputFrameBuilder());
+            .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
     return contribution(requestFrame);
   }
 
@@ -133,11 +150,16 @@ public class MojoScorer {
    * @return response {@link ContributionResponse}
    */
   public ContributionResponse computeContribution(ContributionRequest request) {
+
+    if (!H2OAI_SCORER_ENABLE_SHAPLEY) {
+      throw new IllegalArgumentException("Shapley values needs to be enabled");
+    }
+
     ShapleyType requestedShapleyType = shapleyType(request.getRequestShapleyValueType());
     switch (requestedShapleyType) {
       case TRANSFORMED:
         MojoFrame requestFrame = contributionRequestConverter
-                .apply(request, pipelineShapley.getInputFrameBuilder());
+                .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
         return contribution(requestFrame);
       case ORIGINAL:
         throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
@@ -236,7 +258,7 @@ public class MojoScorer {
             requestFrame.getNrows(),
             requestFrame.getNcols(),
             Arrays.toString(requestFrame.getColumnNames()));
-    MojoFrame shapleyResponseFrame = pipelineShapley.transform(requestFrame);
+    MojoFrame shapleyResponseFrame = pipelineTransformedShapley.transform(requestFrame);
     log.debug(
             "Response has {} rows, {} columns: {}",
             shapleyResponseFrame.getNrows(),
