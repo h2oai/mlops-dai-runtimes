@@ -36,7 +36,8 @@ import org.slf4j.LoggerFactory;
  */
 public class MojoScorer {
   private static final String ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE
-          = "shapley.enable property has to be set to true to obtain Shapley contribution";
+          = "shapley.enable property has to be set to true in the runtime configuration "
+          + "to obtain Shapley contribution";
 
   private static final String UNIMPLEMENTED_MESSAGE
           = "Shapley values for original features are not implemented yet";
