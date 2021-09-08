@@ -1,6 +1,5 @@
 package ai.h2o.mojos.deploy.common.transform;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -23,15 +22,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoSession;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,32 +36,13 @@ class MojoScorerTest {
   private MojoScorer scorer;
   @Mock private ScoreRequestToMojoFrameConverter scoreRequestConverter;
   @Mock private MojoFrameToScoreResponseConverter scoreResponseConverter;
-  @Mock private MojoFrameToContributionResponseConverter contributionResponseConverter;
-  @Mock private ContributionRequestToMojoFrameConverter contributionRequestConverter;
-  @Mock private MojoPipelineToModelInfoConverter modelInfoConverter;
-  @Mock private CsvToMojoFrameConverter csvConverter;
-  private static String oldValue;
-  MockitoSession mockito;
-
-  @BeforeEach
-  public void beforeEach() {
-    MockitoAnnotations.initMocks(this);
-  }
+  private static final String MOJO_PIPELINE_PATH = "src/test/resources/multinomial-pipeline.mojo";
 
   @BeforeAll
-  static void setup2() {
-    System.setProperty("mojo.path", "src/test/resources/multinomial-pipeline.mojo");
-    // enable shapley
-    oldValue = System.setProperty("shapley.enable", "false");
-  }
-
-  @AfterAll
-  static void clear2() {
-    if (oldValue == null) {
-      System.clearProperty("shapley.enable");
-    } else {
-      System.setProperty("shapley.enable", oldValue);
-    }
+  static void setup() {
+    System.setProperty("mojo.path", MOJO_PIPELINE_PATH);
+    // disable shapley
+    System.setProperty("shapley.enable", "false");
   }
 
   @Test
@@ -87,7 +63,23 @@ class MojoScorerTest {
   }
 
   @Test
-  void verifyScoreRequestWithShapley_fails() {
+  void verifyScoreRequestWithTransformedShapley_fails() {
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
+    given(scoreRequestConverter.apply(any(), any()))
+            .willReturn(generateDummyTransformedMojoFrame());
+    given(scoreResponseConverter.apply(any(), any()))
+            .willReturn(generateDummyResponse());
+
+    // When & Then
+    assertThrows(
+            IllegalArgumentException.class, () -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithOriginalShapley_fails() {
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
