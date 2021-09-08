@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,12 +32,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class MojoScorerTest {
+  private static final String MOJO_PIPELINE_PATH = "src/test/resources/multinomial-pipeline.mojo";
 
   @InjectMocks
   private MojoScorer scorer;
   @Mock private ScoreRequestToMojoFrameConverter scoreRequestConverter;
   @Mock private MojoFrameToScoreResponseConverter scoreResponseConverter;
-  private static final String MOJO_PIPELINE_PATH = "src/test/resources/multinomial-pipeline.mojo";
 
   @BeforeAll
   static void setup() {
@@ -45,16 +46,25 @@ class MojoScorerTest {
     System.setProperty("shapley.enable", "false");
   }
 
+  @AfterAll
+  static void clear() {
+    System.clearProperty("mojo.path");
+    // disable shapley
+    System.clearProperty("shapley.enable");
+  }
+
   @Test
   void verifyScoreRequestWithoutShapley_succeeds() {
     // Given
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
     given(scoreRequestConverter.apply(any(), any()))
-            .willReturn(generateDummyTransformedMojoFrame());
+            .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
     given(scoreResponseConverter.apply(any(), any()))
-            .willReturn(generateDummyResponse());
+            .willReturn(dummyResponse);
 
     // When
     scorer.score(request);
@@ -68,10 +78,12 @@ class MojoScorerTest {
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
     given(scoreRequestConverter.apply(any(), any()))
-            .willReturn(generateDummyTransformedMojoFrame());
+            .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
     given(scoreResponseConverter.apply(any(), any()))
-            .willReturn(generateDummyResponse());
+            .willReturn(dummyResponse);
 
     // When & Then
     assertThrows(
@@ -84,10 +96,12 @@ class MojoScorerTest {
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
     given(scoreRequestConverter.apply(any(), any()))
-            .willReturn(generateDummyTransformedMojoFrame());
+            .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
     given(scoreResponseConverter.apply(any(), any()))
-            .willReturn(generateDummyResponse());
+            .willReturn(dummyResponse);
 
     // When & Then
     assertThrows(
