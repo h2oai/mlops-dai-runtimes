@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,8 +30,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 class MojoScorerTest {
@@ -45,9 +49,20 @@ class MojoScorerTest {
 
   @InjectMocks private MojoScorer scorer;
 
+  MockitoSession mockito;
+
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
+    Mockito.mockitoSession()
+            .initMocks(this)
+            .strictness(Strictness.STRICT_STUBS)
+            .startMocking();
+  }
+
+  @After
+  public void tearDown() {
+    mockito.finishMocking();
   }
 
   @BeforeAll

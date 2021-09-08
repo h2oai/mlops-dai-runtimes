@@ -15,13 +15,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 class RequestCheckerTest {
@@ -29,9 +33,20 @@ class RequestCheckerTest {
   @Mock private SampleRequestBuilder sampleRequestBuilder;
   @InjectMocks private RequestChecker checker;
 
+  MockitoSession mockito;
+
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
+    Mockito.mockitoSession()
+            .initMocks(this)
+            .strictness(Strictness.STRICT_STUBS)
+            .startMocking();
+  }
+
+  @After
+  public void tearDown() {
+    mockito.finishMocking();
   }
 
   @Test
