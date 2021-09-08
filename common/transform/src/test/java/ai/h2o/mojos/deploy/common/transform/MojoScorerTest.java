@@ -22,12 +22,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.Before;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,8 +42,14 @@ class MojoScorerTest {
   @Mock private ContributionRequestToMojoFrameConverter contributionRequestConverter;
   @Mock private MojoPipelineToModelInfoConverter modelInfoConverter;
   @Mock private CsvToMojoFrameConverter csvConverter;
+
   @InjectMocks
   private MojoScorer scorer;
+
+  @Before
+  public void initMocks() {
+    MockitoAnnotations.initMocks(this);
+  }
 
   @BeforeAll
   static void setup() {
