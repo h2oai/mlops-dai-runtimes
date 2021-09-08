@@ -43,8 +43,7 @@ class MojoScorerTest {
   @Mock private MojoPipelineToModelInfoConverter modelInfoConverter;
   @Mock private CsvToMojoFrameConverter csvConverter;
 
-  @InjectMocks
-  private MojoScorer scorer;
+  @InjectMocks private MojoScorer scorer;
 
   @Before
   public void initMocks() {

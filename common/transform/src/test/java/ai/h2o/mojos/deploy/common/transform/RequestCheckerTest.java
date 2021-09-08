@@ -14,10 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +28,11 @@ class RequestCheckerTest {
   private final ScoreRequest exampleRequest = new ScoreRequest();
   @Mock private SampleRequestBuilder sampleRequestBuilder;
   @InjectMocks private RequestChecker checker;
+
+  @Before
+  public void initMocks() {
+    MockitoAnnotations.initMocks(this);
+  }
 
   @Test
   void verifyValidRequest_succeeds() throws ScoreRequestFormatException {
