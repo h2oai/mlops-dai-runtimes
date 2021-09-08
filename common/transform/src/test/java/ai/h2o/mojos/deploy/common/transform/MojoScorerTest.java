@@ -36,6 +36,10 @@ class MojoScorerTest {
 
   @Mock private ScoreRequestToMojoFrameConverter scoreRequestConverter;
   @Mock private MojoFrameToScoreResponseConverter scoreResponseConverter;
+  @Mock private MojoFrameToContributionResponseConverter contributionResponseConverter;
+  @Mock private ContributionRequestToMojoFrameConverter contributionRequestConverter;
+  @Mock private MojoPipelineToModelInfoConverter modelInfoConverter;
+  @Mock private CsvToMojoFrameConverter csvConverter;
   @InjectMocks
   private MojoScorer scorer;
 
