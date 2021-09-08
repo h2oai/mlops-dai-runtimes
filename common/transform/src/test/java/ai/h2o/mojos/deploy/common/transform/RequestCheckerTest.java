@@ -38,7 +38,7 @@ class RequestCheckerTest {
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
-    Mockito.mockitoSession()
+    mockito = Mockito.mockitoSession()
             .initMocks(this)
             .strictness(Strictness.STRICT_STUBS)
             .startMocking();
