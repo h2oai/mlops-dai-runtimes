@@ -34,10 +34,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class MojoScorerTest {
   private static final String MOJO_PIPELINE_PATH = "src/test/resources/multinomial-pipeline.mojo";
 
-  @InjectMocks
-  private MojoScorer scorer;
   @Mock private ScoreRequestToMojoFrameConverter scoreRequestConverter;
   @Mock private MojoFrameToScoreResponseConverter scoreResponseConverter;
+  @InjectMocks
+  private MojoScorer scorer;
 
   @BeforeAll
   static void setup() {
@@ -48,8 +48,8 @@ class MojoScorerTest {
 
   @AfterAll
   static void clear() {
+    // reset properties
     System.clearProperty("mojo.path");
-    // disable shapley
     System.clearProperty("shapley.enable");
   }
 
