@@ -195,7 +195,7 @@ class MojoScorerTest {
     return response;
   }
 
-  /** Dummy test {@link MojoPipeline} just to be able to test the transformation. */
+  /** Dummy pipeline {@link MojoPipeline} just to mock the static methods used inside scoring. */
   private static class DummyPipeline extends MojoPipeline {
     private final MojoFrameMeta inputMeta;
     private final MojoFrameMeta outputMeta;
