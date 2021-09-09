@@ -9,12 +9,17 @@ import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.rest.model.ShapleyType;
+import ai.h2o.mojos.runtime.MojoPipeline;
+import ai.h2o.mojos.runtime.api.BasePipelineListener;
 import ai.h2o.mojos.runtime.api.MojoColumnMeta;
+import ai.h2o.mojos.runtime.api.MojoPipelineService;
 import ai.h2o.mojos.runtime.frame.MojoColumn;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,11 +33,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class MojoScorerTest {
   private static final String MOJO_PIPELINE_PATH = "src/test/resources/multinomial-pipeline.mojo";
+  private static final String TEST_UUID = "TEST_UUID";
 
   @Mock private ScoreRequestToMojoFrameConverter scoreRequestConverter;
   @Mock private MojoFrameToScoreResponseConverter scoreResponseConverter;
@@ -44,7 +52,7 @@ class MojoScorerTest {
   private MojoScorer scorer;
 
   @BeforeEach
-  public void initMocks() {
+  public void init() {
     scorer = new MojoScorer(
             scoreRequestConverter,
             scoreResponseConverter,
@@ -52,6 +60,7 @@ class MojoScorerTest {
             contributionResponseConverter,
             modelInfoConverter,
             csvConverter);
+
   }
 
   @BeforeAll
@@ -59,6 +68,15 @@ class MojoScorerTest {
     System.setProperty("mojo.path", MOJO_PIPELINE_PATH);
     // disable shapley
     System.setProperty("shapley.enable", "false");
+    mockDummyPipeline();
+  }
+
+  private static void mockDummyPipeline() {
+    MojoPipeline dummyPipeline =
+            new DummyPipeline(TEST_UUID, MojoFrameMeta.getEmpty(), MojoFrameMeta.getEmpty());
+    MockedStatic<MojoPipelineService> theMock = Mockito.mockStatic(MojoPipelineService.class);
+    theMock.when(() -> MojoPipelineService
+            .loadPipeline(new File(MOJO_PIPELINE_PATH))).thenReturn(dummyPipeline);
   }
 
   @AfterAll
@@ -175,5 +193,58 @@ class MojoScorerTest {
     response.setScore(outputRows);
     response.setFields(Arrays.asList("field1"));
     return response;
+  }
+
+  /** Dummy test {@link MojoPipeline} just to be able to test the transformation. */
+  private static class DummyPipeline extends MojoPipeline {
+    private final MojoFrameMeta inputMeta;
+    private final MojoFrameMeta outputMeta;
+
+    private DummyPipeline(String uuid, MojoFrameMeta inputMeta, MojoFrameMeta outputMeta) {
+      super(uuid, null, null);
+      this.inputMeta = inputMeta;
+      this.outputMeta = outputMeta;
+    }
+
+    static DummyPipeline ofMeta(MojoFrameMeta inputMeta, MojoFrameMeta outputMeta) {
+      return new DummyPipeline(TEST_UUID, inputMeta, outputMeta);
+    }
+
+    @Override
+    public MojoFrameMeta getInputMeta() {
+      return inputMeta;
+    }
+
+    @Override
+    public MojoFrameMeta getOutputMeta() {
+      return outputMeta;
+    }
+
+    @Override
+    protected MojoFrameBuilder getFrameBuilder(MojoColumn.Kind kind) {
+      return new MojoFrameBuilder(outputMeta);
+    }
+
+    @Override
+    protected MojoFrameMeta getMeta(MojoColumn.Kind kind) {
+      return outputMeta;
+    }
+
+    @Override
+    public MojoFrame transform(MojoFrame inputFrame, MojoFrame outputFrame) {
+      return outputFrame;
+    }
+
+    @Override
+    public void setShapPredictContrib(boolean enable) {
+    }
+
+    @Override
+    public void setShapPredictContribOriginal(boolean enable) {
+    }
+
+    @Override
+    public void setListener(BasePipelineListener listener) {
+    }
   }
 }
