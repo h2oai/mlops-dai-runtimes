@@ -32,8 +32,13 @@ import org.slf4j.LoggerFactory;
  *
  * <p>The scorer code is shared for all mojo deployments and is only parameterized by the
  * {@code mojo.path} property to define the mojo to use.
+ * {@code shapley.enable} property to enable shapley contribution.
  */
 public class MojoScorer {
+  private static final String ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE
+          = "shapley.enable property has to be set to true in the runtime configuration "
+          + "to obtain Shapley contribution";
+
   private static final String UNIMPLEMENTED_MESSAGE
           = "Shapley values for original features are not implemented yet";
 
@@ -42,12 +47,10 @@ public class MojoScorer {
   private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
   private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
   private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
-
-  // note the mojo pipeline need to be reloaded here as we have a constrain from java mojo
-  // both SHAP values and predictions cannot be provided with the same pipeline
-  // Link: https://github.com/h2oai/mojo2/blob/7a1ab76b09f056334842a5b442ff89859aabf518/doc/shap.md
-  private static final MojoPipeline pipelineShapley = loadMojoPipelineFromFile();
-
+  private static final String SHAPLEY_ENABLE_PROPERTY = "shapley.enable";
+  private static final boolean ENABLE_SHAPLEY_CONTRIBUTION =
+          Boolean.getBoolean(SHAPLEY_ENABLE_PROPERTY);
+  private static MojoPipeline pipelineTransformedShapley;
 
   private final ScoreRequestToMojoFrameConverter scoreRequestConverter;
   private final MojoFrameToScoreResponseConverter scoreResponseConverter;
@@ -77,7 +80,15 @@ public class MojoScorer {
     this.contributionResponseConverter = contributionResponseConverter;
     this.modelInfoConverter = modelInfoConverter;
     this.csvConverter = csvConverter;
-    pipelineShapley.setShapPredictContrib(true);
+
+    if (ENABLE_SHAPLEY_CONTRIBUTION) {
+      // note the mojo pipeline need to be reloaded here as we have a constrain from java mojo
+      // both SHAP values and predictions cannot be provided with the same pipeline
+      // Link: https://github.com/h2oai/mojo2/blob/7a1ab76b09f056334842a5b442ff89859aabf518/doc/shap.md
+
+      pipelineTransformedShapley = loadMojoPipelineFromFile();
+      pipelineTransformedShapley.setShapPredictContrib(true);
+    }
   }
 
   /**
@@ -92,16 +103,24 @@ public class MojoScorer {
     MojoFrame responseFrame = doScore(requestFrame);
     ScoreResponse response = scoreResponseConverter.apply(responseFrame, request);
     response.id(pipeline.getUuid());
+
+    if (request.getRequestShapleyValueType() == null
+            || request.getRequestShapleyValueType().equals(ShapleyType.NONE)) {
+      return response;
+    }
+
+    if (!ENABLE_SHAPLEY_CONTRIBUTION) {
+      throw new IllegalArgumentException(ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE);
+    }
+
     try {
-      ShapleyType requestedShapleyType = shapleyType(request.getRequestShapleyValueType());
+      ShapleyType requestedShapleyType = request.getRequestShapleyValueType();
       switch (requestedShapleyType) {
         case TRANSFORMED:
           response.setFeatureShapleyContributions(transformedFeatureContribution(request));
           break;
         case ORIGINAL:
           log.info(UNIMPLEMENTED_MESSAGE);
-          break;
-        case NONE:
           break;
         default:
           log.info("Only ORIGINAL or TRANSFORMED are accepted enums values of Shapley values");
@@ -122,7 +141,7 @@ public class MojoScorer {
    */
   private ContributionResponse transformedFeatureContribution(ScoreRequest request) {
     MojoFrame requestFrame = scoreRequestConverter
-            .apply(request, pipelineShapley.getInputFrameBuilder());
+            .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
     return contribution(requestFrame);
   }
 
@@ -133,11 +152,16 @@ public class MojoScorer {
    * @return response {@link ContributionResponse}
    */
   public ContributionResponse computeContribution(ContributionRequest request) {
-    ShapleyType requestedShapleyType = shapleyType(request.getRequestShapleyValueType());
+
+    if (!ENABLE_SHAPLEY_CONTRIBUTION) {
+      throw new IllegalArgumentException(ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE);
+    }
+
+    ShapleyType requestedShapleyType = request.getRequestShapleyValueType();
     switch (requestedShapleyType) {
       case TRANSFORMED:
         MojoFrame requestFrame = contributionRequestConverter
-                .apply(request, pipelineShapley.getInputFrameBuilder());
+                .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
         return contribution(requestFrame);
       case ORIGINAL:
         throw new UnsupportedOperationException(UNIMPLEMENTED_MESSAGE);
@@ -236,7 +260,7 @@ public class MojoScorer {
             requestFrame.getNrows(),
             requestFrame.getNcols(),
             Arrays.toString(requestFrame.getColumnNames()));
-    MojoFrame shapleyResponseFrame = pipelineShapley.transform(requestFrame);
+    MojoFrame shapleyResponseFrame = pipelineTransformedShapley.transform(requestFrame);
     log.debug(
             "Response has {} rows, {} columns: {}",
             shapleyResponseFrame.getNrows(),
@@ -283,12 +307,5 @@ public class MojoScorer {
     } catch (LicenseException e) {
       throw new RuntimeException("License file not found", e);
     }
-  }
-
-  private ShapleyType shapleyType(ShapleyType requestedType) {
-    if (requestedType == null) {
-      return ShapleyType.NONE;
-    }
-    return requestedType;
   }
 }

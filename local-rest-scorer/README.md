@@ -18,6 +18,11 @@ To run the local scorer, you can either use `bootRun` gradle task or run directl
 java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}-boot.jar
 ``` 
 
+To run the local scorer with shapley contribution enabled
+```bash
+java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -Dshapley.enable=true -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}-boot.jar
+``` 
+
 > Tip: If you run into an error loading the MOJO, ensure you specify its full path and are not triggering shell expansion (e.g. avoid the `~` character).
 
 ### Enable Https
@@ -58,10 +63,31 @@ java -Dmojo.path=/path/to/pipeline.mojo \
      --server.ssl.key-store=/path/to/keystore.jks \
      --server.ssl.key-password=mypassword
 ```
+
+* Deploy via command line with shapley contribution enabled:
+
+```shell
+java -Dmojo.path=/path/to/pipeline.mojo \
+     -Dshapley.enable=true \
+     -jar /path/to/local-rest-scorer.jar \
+     --server.ssl.enabled=true \
+     --server.ssl.key-store=/path/to/keystore.jks \
+     --server.ssl.key-password=mypassword
+```
+
 * Deploy with `application.properties` file. See [here](./examples/application.properties) for example `application.properties` file.
 
 ```shell
 java -Dmojo.path=/path/to/pipeline.mojo \
+     -Dspring.config.location=/path/to/application.properties
+     -jar /path/to/local-rest-scorer.jar
+```
+
+* Deploy with shapley contribution enabled
+
+```shell
+java -Dmojo.path=/path/to/pipeline.mojo \
+     -Dshapley.enable=true \
      -Dspring.config.location=/path/to/application.properties
      -jar /path/to/local-rest-scorer.jar
 ```
