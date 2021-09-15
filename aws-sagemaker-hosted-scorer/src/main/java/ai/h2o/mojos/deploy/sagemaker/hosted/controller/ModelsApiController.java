@@ -3,6 +3,7 @@ package ai.h2o.mojos.deploy.sagemaker.hosted.controller;
 import ai.h2o.mojos.deploy.common.rest.api.ModelApi;
 import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
+import ai.h2o.mojos.deploy.common.rest.model.FeatureType;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
@@ -10,6 +11,9 @@ import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import com.google.common.base.Strings;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +58,11 @@ public class ModelsApiController implements ModelApi {
   @Override
   public ResponseEntity<String> getModelId() {
     return ResponseEntity.ok(scorer.getModelId());
+  }
+
+  @Override
+  public ResponseEntity<List<FeatureType>> getFeatures() {
+    return ResponseEntity.ok(Arrays.asList(FeatureType.SCORE));
   }
 
   @Override
