@@ -68,26 +68,19 @@ paths:
     get:
       tags:
         - enabled features
-      summary: list of features enabled in a scorer
+      summary: List of features enabled in a scorer
       description: >
-        Returns unique list of feature types that are enabled in a scorer.
+        Returns an object with unique list of feature types that are enabled in a scorer.
         This list has to be manually populated for each new feature added to the scorer.
-        Enum FeatureType contains list of all features a scorer can currently contain.
       operationId: getFeatures
       produces:
-        - text/plain
-      parameters: [ ]
+        - application/json
+      parameters: []
       responses:
         '200':
           description: Successful operation
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/FeatureType'
-        '501':
-          description: Implementation not supported
-      security:
-        - api_key: [ ]
+            $ref: '#/definitions/FeatureResponse'
   '/model/score':
     post:
       tags:
@@ -317,6 +310,15 @@ definitions:
           It is currently available for transformed features of binomial, regression and multinomial models of mojo2.
           This field will not be populated if the Shapley values are not available for a model.
         $ref: '#/definitions/ContributionResponse'
+  FeatureResponse:
+    type: object
+    properties:
+      enabledFeatures:
+        description: >
+          An array holding the names of features enabled in a scorer.
+        type: array
+        items:
+          $ref: '#/definitions/FeatureType'
   DataField:
     type: object
     properties:

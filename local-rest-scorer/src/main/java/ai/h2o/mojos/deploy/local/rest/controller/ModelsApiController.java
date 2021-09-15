@@ -3,6 +3,7 @@ package ai.h2o.mojos.deploy.local.rest.controller;
 import ai.h2o.mojos.deploy.common.rest.api.ModelApi;
 import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
+import ai.h2o.mojos.deploy.common.rest.model.FeatureResponse;
 import ai.h2o.mojos.deploy.common.rest.model.FeatureType;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
@@ -57,8 +58,10 @@ public class ModelsApiController implements ModelApi {
   }
 
   @Override
-  public ResponseEntity<List<FeatureType>> getFeatures() {
-    return ResponseEntity.ok(ENABLED_FEATURE_LIST);
+  public ResponseEntity<FeatureResponse> getFeatures() {
+    FeatureResponse response = new FeatureResponse();
+    response.setEnabledFeatures(ENABLED_FEATURE_LIST);
+    return ResponseEntity.ok(response);
   }
 
   @Override
