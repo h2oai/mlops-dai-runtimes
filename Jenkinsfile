@@ -4,9 +4,11 @@
 
 import ai.h2o.ci.Utils
 
-JAVA_IMAGE = 'openjdk:8u222-jdk-slim'
+JAVA_IMAGE = 'harbor.h2o.ai/dockerhub-proxy/library/openjdk:8u222-jdk-slim'
 NODE_LABEL = 'docker'
 DOCKERHUB_CREDS = 'dockerhub'
+HARBOR_URL = "http://harbor.h2o.ai/"
+HARBOR_CREDS = 'harbor.h2o.ai'
 
 def versionText = null
 def utilsLib = new Utils()
@@ -57,6 +59,8 @@ pipeline {
             // Run inside JAVA_IMAGE container on NODE_LABEL host.
             agent {
                 docker {
+                    registryCredentialsId HARBOR_CREDS
+                    registryUrl HARBOR_URL
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
@@ -81,6 +85,8 @@ pipeline {
             // Run inside JAVA_IMAGE container on NODE_LABEL host.
             agent {
                 docker {
+                    registryCredentialsId HARBOR_CREDS
+                    registryUrl HARBOR_URL
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
@@ -144,7 +150,8 @@ pipeline {
             }
             agent {
                 docker {
-                    registryCredentialsId DOCKERHUB_CREDS
+                    registryCredentialsId HARBOR_CREDS
+                    registryUrl HARBOR_URL
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
@@ -179,7 +186,8 @@ pipeline {
             }
             agent {
                 docker {
-                    registryCredentialsId DOCKERHUB_CREDS
+                    registryCredentialsId HARBOR_CREDS
+                    registryUrl HARBOR_URL
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
