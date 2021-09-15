@@ -24,6 +24,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ModelsApiController implements ModelApi {
 
+  private static final List<FeatureType> ENABLED_FEATURE_LIST
+          = Arrays.asList(FeatureType.SCORE, FeatureType.TRANSFORMED_SHAPLEY_CONTRIBUTION);
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
   private final MojoScorer scorer;
@@ -56,7 +58,7 @@ public class ModelsApiController implements ModelApi {
 
   @Override
   public ResponseEntity<List<FeatureType>> getFeatures() {
-    return ResponseEntity.ok(Arrays.asList(FeatureType.SCORE, FeatureType.TRANSFORMED_SHAPLEY_CONTRIBUTION));
+    return ResponseEntity.ok(ENABLED_FEATURE_LIST);
   }
 
   @Override

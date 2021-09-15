@@ -70,7 +70,7 @@ paths:
         - enabled features
       summary: list of features enabled in a scorer
       description: >
-        Returns unique list of features enabled in a specific scorer.
+        Returns unique list of feature types that are enabled in a scorer.
         This list has to be manually populated for each new feature added to the scorer.
         Enum FeatureType contains list of all features a scorer can currently contain.
       operationId: getFeatures
@@ -357,4 +357,5 @@ definitions:
     enum: [ REGRESSION, CLASSIFICATION, BINOMIAL ]
   FeatureType:
     type: string
+    description: This contains list of all features a scorer can currently have.
     enum: [ SCORE, TRANSFORMED_SHAPLEY_CONTRIBUTION, ORIGINAL_SHAPLEY_CONTRIBUTION ]

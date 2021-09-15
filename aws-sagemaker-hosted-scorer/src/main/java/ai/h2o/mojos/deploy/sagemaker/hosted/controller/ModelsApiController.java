@@ -27,6 +27,8 @@ public class ModelsApiController implements ModelApi {
 
   private static final String UNIMPLEMENTED_MESSAGE
           = "Shapley values are not implemented yet";
+  private static final List<FeatureType> ENABLED_FEATURE_LIST
+          = Arrays.asList(FeatureType.SCORE);
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
   private final MojoScorer scorer;
@@ -62,7 +64,7 @@ public class ModelsApiController implements ModelApi {
 
   @Override
   public ResponseEntity<List<FeatureType>> getFeatures() {
-    return ResponseEntity.ok(Arrays.asList(FeatureType.SCORE));
+    return ResponseEntity.ok(ENABLED_FEATURE_LIST);
   }
 
   @Override
