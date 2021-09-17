@@ -28,7 +28,7 @@ public class ModelsApiController implements ModelApi {
 
   private static final String UNIMPLEMENTED_MESSAGE
           = "Shapley values are not implemented yet";
-  private static final List<FeatureType> ENABLED_FEATURE_LIST
+  private static final List<FeatureType> ENABLED_FEATURES
           = Arrays.asList(FeatureType.SCORE);
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
@@ -66,7 +66,7 @@ public class ModelsApiController implements ModelApi {
   @Override
   public ResponseEntity<FeatureResponse> getFeatures() {
     FeatureResponse response = new FeatureResponse();
-    response.setEnabledFeatures(ENABLED_FEATURE_LIST);
+    response.setEnabledFeatures(ENABLED_FEATURES);
     return ResponseEntity.ok(response);
   }
 

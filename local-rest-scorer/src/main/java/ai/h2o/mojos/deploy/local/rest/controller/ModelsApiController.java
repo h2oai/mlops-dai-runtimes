@@ -25,7 +25,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ModelsApiController implements ModelApi {
 
-  private static final List<FeatureType> ENABLED_FEATURE_LIST
+  private static final List<FeatureType> ENABLED_FEATURES
           = Arrays.asList(FeatureType.SCORE, FeatureType.TRANSFORMED_SHAPLEY_CONTRIBUTION);
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
@@ -60,7 +60,7 @@ public class ModelsApiController implements ModelApi {
   @Override
   public ResponseEntity<FeatureResponse> getFeatures() {
     FeatureResponse response = new FeatureResponse();
-    response.setEnabledFeatures(ENABLED_FEATURE_LIST);
+    response.setEnabledFeatures(ENABLED_FEATURES);
     return ResponseEntity.ok(response);
   }
 
