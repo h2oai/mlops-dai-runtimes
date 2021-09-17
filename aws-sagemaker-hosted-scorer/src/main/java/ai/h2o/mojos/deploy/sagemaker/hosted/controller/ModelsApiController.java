@@ -64,10 +64,8 @@ public class ModelsApiController implements ModelApi {
   }
 
   @Override
-  public ResponseEntity<FeatureResponse> getFeatures() {
-    FeatureResponse response = new FeatureResponse();
-    response.setEnabledFeatures(ENABLED_FEATURES);
-    return ResponseEntity.ok(response);
+  public ResponseEntity<List<FeatureType>> getFeatures() {
+    return ResponseEntity.ok(ENABLED_FEATURES);
   }
 
   @Override

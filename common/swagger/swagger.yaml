@@ -80,7 +80,9 @@ paths:
         '200':
           description: Successful operation
           schema:
-            $ref: '#/definitions/FeatureResponse'
+            type: array
+            items:
+              $ref: '#/definitions/FeatureType'
   '/model/score':
     post:
       tags:
