@@ -67,9 +67,9 @@ paths:
   '/model/capabilities':
     get:
       tags:
-        - enabled features
-      summary: List of capabilities supported by the scorer.
-      description: Returns a list of capabilities supported by the scorer.
+        - metadata
+      summary: List capabilities supported by the scorer.
+      description: Returns the capabilities supported by the scorer.
       operationId: getCapabilities
       produces:
         - application/json
