@@ -3,7 +3,7 @@ info:
   description: >-
     This is a definition of the REST API for scoring from H2O. This API is
     intended to be used within DAI and eventually across all H2O scoring systems
-  version: 1.1.0
+  version: 1.2.0
   title: Scoring API - v1
   termsOfService: ''
   contact:
