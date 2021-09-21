@@ -64,15 +64,13 @@ paths:
           description: Successful operation
           schema:
             $ref: '#/definitions/ScoreRequest'
-  '/model/features':
+  '/model/capabilities':
     get:
       tags:
         - enabled features
-      summary: List of features supported by the scorer
-      description: >
-        Returns an object with unique list of feature types that are supported by the scorer.
-        This has to be manually set by all implementing scorers.
-      operationId: getFeatures
+      summary: List of capabilities supported by the scorer.
+      description: Returns a list of capabilities supported by the scorer.
+      operationId: getCapabilities
       produces:
         - application/json
       parameters: []
@@ -82,7 +80,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/FeatureType'
+              $ref: '#/definitions/CapabilityType'
   '/model/score':
     post:
       tags:
@@ -312,15 +310,6 @@ definitions:
           It is currently available for transformed features of binomial, regression and multinomial models of mojo2.
           This field will not be populated if the Shapley values are not available for a model.
         $ref: '#/definitions/ContributionResponse'
-  FeatureResponse:
-    type: object
-    properties:
-      enabledFeatures:
-        description: >
-          An array holding the names of features supported by the scorer.
-        type: array
-        items:
-          $ref: '#/definitions/FeatureType'
   DataField:
     type: object
     properties:
@@ -359,7 +348,6 @@ definitions:
   ScoringType:
     type: string
     enum: [ REGRESSION, CLASSIFICATION, BINOMIAL ]
-  FeatureType:
+  CapabilityType:
     type: string
-    description: This contains list of all features a scorer can currently have.
-    enum: [ SCORE, TRANSFORMED_SHAPLEY_CONTRIBUTION, ORIGINAL_SHAPLEY_CONTRIBUTION ]
+    enum: [ SCORE, CONTRIBUTION_ORIGINAL, CONTRIBUTION_TRANSFORMED ]

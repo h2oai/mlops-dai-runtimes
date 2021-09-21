@@ -1,10 +1,9 @@
 package ai.h2o.mojos.deploy.local.rest.controller;
 
 import ai.h2o.mojos.deploy.common.rest.api.ModelApi;
+import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
 import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
-import ai.h2o.mojos.deploy.common.rest.model.FeatureResponse;
-import ai.h2o.mojos.deploy.common.rest.model.FeatureType;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
@@ -25,8 +24,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ModelsApiController implements ModelApi {
 
-  private static final List<FeatureType> ENABLED_FEATURES
-          = Arrays.asList(FeatureType.SCORE, FeatureType.TRANSFORMED_SHAPLEY_CONTRIBUTION);
+  private static final List<CapabilityType> SUPPORTED_CAPABILITIES
+      = Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_TRANSFORMED);
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
   private final MojoScorer scorer;
@@ -58,8 +57,8 @@ public class ModelsApiController implements ModelApi {
   }
 
   @Override
-  public ResponseEntity<List<FeatureType>> getFeatures() {
-    return ResponseEntity.ok(ENABLED_FEATURES);
+  public ResponseEntity<List<CapabilityType>> getCapabilities() {
+    return ResponseEntity.ok(SUPPORTED_CAPABILITIES);
   }
 
   @Override
