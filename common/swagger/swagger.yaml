@@ -3,7 +3,7 @@ info:
   description: >-
     This is a definition of the REST API for scoring from H2O. This API is
     intended to be used within DAI and eventually across all H2O scoring systems
-  version: 1.1.0
+  version: 1.2.0
   title: Scoring API - v1
   termsOfService: ''
   contact:
@@ -64,6 +64,23 @@ paths:
           description: Successful operation
           schema:
             $ref: '#/definitions/ScoreRequest'
+  '/model/capabilities':
+    get:
+      tags:
+        - metadata
+      summary: List capabilities supported by the scorer.
+      description: Returns the capabilities supported by the scorer.
+      operationId: getCapabilities
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CapabilityType'
   '/model/score':
     post:
       tags:
@@ -331,3 +348,6 @@ definitions:
   ScoringType:
     type: string
     enum: [ REGRESSION, CLASSIFICATION, BINOMIAL ]
+  CapabilityType:
+    type: string
+    enum: [ SCORE, CONTRIBUTION_ORIGINAL, CONTRIBUTION_TRANSFORMED ]
