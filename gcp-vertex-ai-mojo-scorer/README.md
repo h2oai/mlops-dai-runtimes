@@ -46,7 +46,7 @@ https://cloud.google.com/vertex-ai/docs/general/import-model
 
 There is one requirement for the container. You __MUST__ include the following environment variables:
 * MOJO_GCS_PATH = `gs://path/to/pipeline.mojo`
-* LICENSE_GCS_PATH = `gs://path/to/driverless/ai/license.sig`
+* LICENSE_GCS_PATH = `gs://path/to/driverless/ai/license.sig` or DRIVERLESS_AI_LICENSE_KEY = `license-key-string-value`
 
 If you built the Docker image with the preprocessing script option, you also should include the following environment variable:
 * PREPROCESSING_SCRIPT_PATH = `gs://path/to/preprocessing_script.py`
