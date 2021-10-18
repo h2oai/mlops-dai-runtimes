@@ -8,6 +8,8 @@ dependencies {
     implementation project(':local-rest-scorer')
     implementation group: 'org.slf4j', name: 'slf4j-api'
     implementation group: 'com.google.cloud', name: 'google-cloud-storage'
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.54'
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '9.0.54'
 }
 
 test {
