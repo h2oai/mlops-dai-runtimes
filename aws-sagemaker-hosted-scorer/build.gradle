@@ -12,6 +12,8 @@ dependencies {
     implementation group: 'io.springfox', name: 'springfox-swagger2'
     implementation group: 'io.springfox', name: 'springfox-swagger-ui'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.54'
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '9.0.54'
 }
 
 test {
