@@ -15,6 +15,10 @@ variable "lambda_zip_path" {
   description = "Local path to the actual lambda scorer distribution."
   default = "../lambda-template/build/distributions/lambda-template.zip"
 }
+variable "lambda_memory_size" {
+  description = "Amount of memory requested for AWS Lambda function."
+  default = 3008
+}
 variable "license_key" {
   description = "Driverless AI license key."
 }
@@ -54,7 +58,7 @@ resource "aws_lambda_function" "scorer" {
 
   // Increase resource constraints from the defaults of 3s and 128MB.
   timeout = 900
-  memory_size = 3008
+  memory_size = "${var.lambda_memory_size}"
 
   environment {
     variables = {

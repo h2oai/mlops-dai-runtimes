@@ -54,6 +54,8 @@ environmental variables (using the prefix `TF_VAR_`):
 * `bucket_name`: Name of AWS S3 bucket to store the mojo to so that the lambda
   can access and load it. Note that the bucket has to already exist and
   the effective AWS account has to have write access to it.
+* (OPTIONAL) `lambda_memory_size`: amount of memory to allocate to the AWS lambda function.
+  Default is `3008`, Maximum is `10030`, `~3GB` and `~10GB` respectively. 
 
 Once all the non-optional variables are set, the following command will push
 the lambda (or update any changes thereof): `terraform apply`.
@@ -62,6 +64,18 @@ Upon successful push, Terraform will output the URL of the lambda endpoint and
 the corresponding `api_key`.
 Note that the recipe sets up AWS API Gateway proxy, see `api_gateway.tf`.
 Look for `base_url` and `api_key` in the output.
+
+#### Resource Considerations
+
+Mojo pipelines are loaded into memory when deployed. AWS Lambda supports deployments that can
+require up to 10GB of memory: https://docs.aws.amazon.com/lambda/latest/dg/configuration-function-common.html.
+
+As per AWS documentation, Lambda functions can support memory requests between 128 MB to 1024 MB (~10GB)
+
+By default, this template requests 3008 MB (~3GB) but this can be changed using terraform variable
+`lambda_memory_size`. 
+
+### Scoring
 
 ```text
 Outputs:

@@ -1,0 +1,36 @@
+plugins {
+    id 'org.springframework.boot'
+    id 'org.hidetake.swagger.generator'
+}
+apply from: project(":").file('gradle/java.gradle')
+
+dependencies {
+    implementation group: 'io.swagger', name: 'swagger-annotations'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+    swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
+}
+
+swaggerSources {
+    api {
+        inputFile = file('../swagger/vertex-ai-swagger.yaml')
+        code {
+            language = 'spring'
+            configFile = file('../swagger/vertex_ai_swagger_codegen.json')
+            components = [models: true, apis: true]
+            dependsOn validation
+        }
+    }
+}
+
+jar {
+    // As a SpringBoot module, we need to enable the jar file generation.
+    enabled=true
+}
+
+bootJar {
+    enabled=false
+}
+
+compileJava.dependsOn swaggerSources.api.code
+sourceSets.main.java.srcDir "${swaggerSources.api.code.outputDir}/src/main/java"

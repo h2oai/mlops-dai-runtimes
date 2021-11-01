@@ -4,8 +4,11 @@
 
 import ai.h2o.ci.Utils
 
-JAVA_IMAGE = 'openjdk:8u222-jdk-slim'
+JAVA_IMAGE = 'harbor.h2o.ai/dockerhub-proxy/library/openjdk:8u222-jdk-slim'
 NODE_LABEL = 'docker'
+DOCKERHUB_CREDS = 'dockerhub'
+HARBOR_URL = "http://harbor.h2o.ai/"
+HARBOR_CREDS = 'harbor.h2o.ai'
 
 def versionText = null
 def utilsLib = new Utils()
@@ -56,6 +59,8 @@ pipeline {
             // Run inside JAVA_IMAGE container on NODE_LABEL host.
             agent {
                 docker {
+                    registryCredentialsId HARBOR_CREDS
+                    registryUrl HARBOR_URL
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
@@ -80,6 +85,8 @@ pipeline {
             // Run inside JAVA_IMAGE container on NODE_LABEL host.
             agent {
                 docker {
+                    registryCredentialsId HARBOR_CREDS
+                    registryUrl HARBOR_URL
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
@@ -143,6 +150,8 @@ pipeline {
             }
             agent {
                 docker {
+                    registryCredentialsId HARBOR_CREDS
+                    registryUrl HARBOR_URL
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
@@ -152,13 +161,17 @@ pipeline {
                     script {
                         def gitCommitHash = env.GIT_COMMIT
                         def imageTags = "${versionText},${gitCommitHash}"
-                        withDockerCredentials("harbor.h2o.ai") {
-                            sh "./gradlew jib \
-                            -Djib.to.auth.username=${DOCKER_USERNAME} \
-                            -Djib.to.auth.password=${DOCKER_PASSWORD} \
-                            -Djib.to.tags=${imageTags} \
-                            -Djib.allowInsecureRegistries=true \
-                            -DsendCredentialsOverHttp=true"
+                        withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
+                            withDockerCredentials("harbor.h2o.ai", "TO_") {
+                                sh "./gradlew jib \
+                                -Djib.to.auth.username=${TO_DOCKER_USERNAME} \
+                                -Djib.to.auth.password=${TO_DOCKER_PASSWORD} \
+                                -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
+                                -Djib.from.auth.password=${FROM_DOCKER_PASSWORD} \
+                                -Djib.to.tags=${imageTags} \
+                                -Djib.allowInsecureRegistries=true \
+                                -DsendCredentialsOverHttp=true"
+                            }
                         }
                     }
                 }
@@ -173,6 +186,8 @@ pipeline {
             }
             agent {
                 docker {
+                    registryCredentialsId HARBOR_CREDS
+                    registryUrl HARBOR_URL
                     image JAVA_IMAGE
                     label NODE_LABEL
                 }
@@ -182,12 +197,16 @@ pipeline {
                     script {
                         def gitCommitHash = env.GIT_COMMIT
                         def imageTags = "${versionText},${gitCommitHash}"
-                        withDockerCredentials("dockerhub") {
-                            sh "./gradlew jib \
-                            -Djib.to.auth.username=${DOCKER_USERNAME} \
-                            -Djib.to.auth.password=${DOCKER_PASSWORD} \
-                            -Djib.to.tags=${imageTags} \
-                            -PdockerRepositoryPrefix=h2oai/"
+                        withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
+                            withDockerCredentials(DOCKERHUB_CREDS, "TO_") {
+                                sh "./gradlew jib \
+                                -Djib.to.auth.username=${TO_DOCKER_USERNAME} \
+                                -Djib.to.auth.password=${TO_DOCKER_PASSWORD} \
+                                -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
+                                -Djib.from.auth.password=${FROM_DOCKER_PASSWORD} \
+                                -Djib.to.tags=${imageTags} \
+                                -PdockerRepositoryPrefix=h2oai/"
+                            }
                         }
                     }
                 }
@@ -237,12 +256,18 @@ def isReleaseBranch() {
 
 /** Context manager that runs content with set up credentials for a Docker repository. */
 def withDockerCredentials(String credentialsId, Closure body) {
+    withDockerCredentials(credentialsId, "", body)
+}
+
+def withDockerCredentials(String credentialsId, String prefix, Closure body) {
     def dockerCredentials = usernamePassword(
             credentialsId: credentialsId,
-            passwordVariable: "DOCKER_PASSWORD",
-            usernameVariable: "DOCKER_USERNAME"
+            passwordVariable: "${prefix}DOCKER_PASSWORD",
+            usernameVariable: "${prefix}DOCKER_USERNAME"
     )
     withCredentials([dockerCredentials]) {
         body()
     }
 }
+
+

@@ -7,6 +7,7 @@ apply from: project(":").file('gradle/java.gradle')
 dependencies {
     implementation group: 'io.swagger', name: 'swagger-annotations'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
 }
 

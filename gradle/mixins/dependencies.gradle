@@ -38,10 +38,14 @@ dependencyManagement {
             entry 'mockito-junit-jupiter'
         }
         dependency group: 'commons-cli', name: 'commons-cli', version: apacheCommonsCliVersion
-        dependencySet(group: 'org.slf4j', version: slf4jVersion) {
-            entry 'slf4j-api'
-            entry 'slf4j-log4j12'
+        dependency group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+
+        dependencySet(group: 'org.apache.logging.log4j', version: log4jVersion) {
+            entry 'log4j-api'
+            entry 'log4j-core'
+            entry 'log4j-slf4j-impl'
         }
+
         dependency group: 'org.apache.spark', name: 'spark-core_2.11', version: sparkVersion
         dependency group: 'org.apache.spark', name: 'spark-sql_2.11', version: sparkVersion
         dependency group: 'org.apache.spark', name: 'spark-mllib_2.11', version: sparkVersion

@@ -18,6 +18,112 @@ To run the local scorer, you can either use `bootRun` gradle task or run directl
 java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}-boot.jar
 ``` 
 
+To run the local scorer with shapley contribution enabled
+```bash
+java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -Dshapley.enable=true -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}-boot.jar
+``` 
+
+> Tip: If you run into an error loading the MOJO, ensure you specify its full path and are not triggering shell expansion (e.g. avoid the `~` character).
+
+### Enable Https
+
+Springboot application come with built-in support for HTTPS. You can get more information from the
+Springboot [documentation](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto.webserver.configure-ssl)
+
+The servers support using either JKS or PKSC12 type certificates to secure network traffic. 
+If you do not have certificates, you can create a self-signed SSL Certificate
+with java built in tool `keytool` or via `openssl`. See some examples [below](#using-or-creating-self-signed-certificates).
+
+
+#### Simple Configuration
+
+Configuration of SSL requires several parameters to be set for the application:
+
+```
+# Required
+server.ssl.enabled=true
+server.ssl.key-store=/path/to/keystore.jks
+server.ssl.key-password=<enter password>
+
+# Optional
+server.port=<default port is 8080>
+server.ssl.key-alias=<alias associated with keystore provided>
+server.ssl.key-store-provider=SUN  # can be SUN for example
+server.ssl.key-store-type=JKS  # JKS, PKCS12
+```
+
+These can be set in an application.properties file or via the command line. 
+
+* Deploy via command line:
+
+```shell
+java -Dmojo.path=/path/to/pipeline.mojo \
+     -jar /path/to/local-rest-scorer.jar \
+     --server.ssl.enabled=true \
+     --server.ssl.key-store=/path/to/keystore.jks \
+     --server.ssl.key-password=mypassword
+```
+
+* Deploy via command line with shapley contribution enabled:
+
+```shell
+java -Dmojo.path=/path/to/pipeline.mojo \
+     -Dshapley.enable=true \
+     -jar /path/to/local-rest-scorer.jar \
+     --server.ssl.enabled=true \
+     --server.ssl.key-store=/path/to/keystore.jks \
+     --server.ssl.key-password=mypassword
+```
+
+* Deploy with `application.properties` file. See [here](./examples/application.properties) for example `application.properties` file.
+
+```shell
+java -Dmojo.path=/path/to/pipeline.mojo \
+     -Dspring.config.location=/path/to/application.properties
+     -jar /path/to/local-rest-scorer.jar
+```
+
+* Deploy with shapley contribution enabled
+
+```shell
+java -Dmojo.path=/path/to/pipeline.mojo \
+     -Dshapley.enable=true \
+     -Dspring.config.location=/path/to/application.properties
+     -jar /path/to/local-rest-scorer.jar
+```
+
+#### Using or Creating Self-Signed Certificates
+
+Below are some examples of how to create a self-signed certificate using `keytool` and 
+how to convert a preexisting `PEM` based certificate into a useable `PKSC12` certificate.
+
+```shell
+# Example: using keytool to create a JKS certificate
+keytool -genkey \
+        -alias selfsigned_localhost_sslserver \
+        -keyalg RSA -keysize 2048 \
+        -validity 700 \
+        -keypass <changeit> \
+        -storepass <changeit> \
+        -keystore ssl-server.jks
+```
+
+If you already have a PEM based certificate pair, you can convert it to PKCS12 and use it with the 
+server using the following:
+
+```shell
+# Example: using openssl to convert a preexisting .pem certificate pair into a usable PKCS12 certificate 
+# NOTE: This will ask for a password that will you will need to provide in server configurations
+openssl pkcs12 -export \
+    -in /path/to/server-certificate.pem \
+    -inkey /path/to/server-key.pem \
+    -name scorer \
+    -out /path/to/scorer.p12
+```
+
+NOTE: remember to set `server.ssl.key-store-type=PKSC12` in the server configurations if you want to
+use PKSC12 type certificates
+
 ### Score JSON Request
 
 To test the endpoint, send a request to http://localhost:8080 as follows:
