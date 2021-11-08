@@ -12,10 +12,11 @@ dependencies {
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-h2o3-impl'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
-    implementation group: 'io.springfox', name: 'springfox-swagger2'
-    implementation group: 'io.springfox', name: 'springfox-swagger-ui'
+    implementation group: 'io.springfox', name: 'springfox-boot-starter', version: springFoxVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.54'
+
+    implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
 
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'

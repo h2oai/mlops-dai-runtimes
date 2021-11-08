@@ -9,8 +9,9 @@ dependencies {
     implementation project(':common:transform')
     implementation project(':common:jdbc')
 
-    implementation group: 'io.springfox', name: 'springfox-swagger2'
-    implementation group: 'io.springfox', name: 'springfox-swagger-ui'
+    implementation group: 'io.springfox', name: 'springfox-boot-starter', version: springFoxVersion
+    implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
+
     implementation (group: 'org.springframework.boot', name: 'spring-boot-starter-web') {
         exclude group: 'spring-boot-starter-logging'
     }
