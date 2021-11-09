@@ -247,7 +247,7 @@ curl -X GET http://localhost:8080/model/sample_request | curl -X POST \
 You can use SpringFox endpoints that allow both programmatic and manual inspection of the API:
 
 * Swagger JSON representation for programmatic access: http://localhost:8080/v2/api-docs.
-* The UI for manual API inspection: http://localhost:8080/swagger-ui.html.
+* The UI for manual API inspection: http://localhost:8080/swagger-ui/index.html.
 
 ## Docker Image
 

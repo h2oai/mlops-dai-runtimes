@@ -45,7 +45,7 @@ On a successful deployment to Google Cloud Run, you will be provided an endpoint
 
 The api for scoring is the same as the [Local Rest Scorer](../local-rest-scorer)
 
-To access api information: `https://<google provided endpoint>/swagger-ui.html`
+To access api information: `https://<google provided endpoint>/swagger-ui/index.html`
 
 To score the model: `https://<google provided endpoint>/model/score`
 

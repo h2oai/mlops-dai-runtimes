@@ -20,10 +20,7 @@ dependencyManagement {
         dependency group: 'com.google.guava', name: 'guava', version: guavaVersion
         dependency group: 'com.google.truth.extensions', name: 'truth-java8-extension', version: truthVersion
         dependency group: 'com.google.cloud', name: 'google-cloud-storage', version: googleStorageVersion
-        dependencySet(group: 'io.springfox', version: springFoxVersion) {
-            entry 'springfox-swagger2'
-            entry 'springfox-swagger-ui'
-        }
+        dependency group: 'io.springfox', name: 'springfox-boot-starter', version: springFoxVersion
         dependency group: 'io.swagger', name: 'swagger-annotations', version: swaggerCoreSpringVersion
         dependency group: 'io.swagger.core.v3', name: 'swagger-annotations', version: swaggerCoreVersion
         dependency group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
