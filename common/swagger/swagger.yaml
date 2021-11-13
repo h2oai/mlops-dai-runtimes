@@ -137,16 +137,19 @@ paths:
         - application/json
       consumes:
         - multipart/form-data
+        - application/x-www-form-urlencoded
       parameters:
-        - in: formData
-          name: request
+        - name: request
+          in: formData
           required: true
           type: string
         - in: formData
           name: files
           type: array
+          items:
+            type: string
+            format: binary
           required: true
-          format: binary
       responses:
         '200':
           description: Successful operation
