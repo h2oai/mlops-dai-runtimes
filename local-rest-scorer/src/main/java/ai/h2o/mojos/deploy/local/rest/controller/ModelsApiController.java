@@ -95,6 +95,13 @@ public class ModelsApiController implements ModelApi {
   }
 
   @Override
+  public ResponseEntity<ScoreResponse> getScoreUploadedFiles(
+          String request, List<String> uploadedFiles) {
+    log.info(" Unsupported operation: Scoring image model on uploaded files");
+    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+  }
+
+  @Override
   public ResponseEntity<ContributionResponse> getContribution(
           ContributionRequest request) {
     try {

@@ -124,6 +124,38 @@ paths:
             $ref: '#/definitions/ScoreResponse'
         '400':
           description: Invalid payload
+  '/model/score/media':
+    post:
+      tags:
+        - scoring
+      summary: Score on given data and provided uploaded files.
+      description: >-
+        Computes score of the rows sent in the body of the post request. Replacing file names
+        in rows with provided uploaded files.
+      operationId: getScoreUploadedFiles
+      produces:
+        - application/json
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: request
+          required: true
+          type: string
+        - in: formData
+          name: files
+          type: array
+          required: true
+          format: binary
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ScoreResponse'
+        '501':
+          description: Implementation not supported
+        '400':
+          description: Invalid payload
   '/model/contribution':
     post:
       tags:
