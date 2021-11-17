@@ -46,38 +46,13 @@ jobs:
           distribution: 'adopt'
 
       - name: Snyk scan for Java dependancies - h2o-mli/build.gradle
-        #if: contains(steps.changed-files.outputs.any_changed)
+        if: contains(steps.changed-files.outputs.any_changed)
         run: snyk test --all-projects -d --fail-on=all
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-#      - name: Snyk scan for Java dependancies - h2o-mli/mli-algos/build.gradle
-#        if: contains(steps.changed-files.outputs.all_changed_and_modified_files, 'h2o-mli/mli-algos/build.gradle')
-#        id: scan2
-#        run: snyk test --file=mli-algos/build.gradle -d --fail-on=all
-#        continue-on-error: true
-#        env:
-#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-#
-#      - name: Snyk scan for Java dependancies - h2o-mli/mli-backend/build.gradle
-#        if: contains(steps.changed-files.outputs.all_changed_and_modified_files, 'h2o-mli/mli-backend/build.gradle')
-#        id: scan3
-#        run: snyk test --file=mli-backend/build.gradle  -d --fail-on=all
-#        continue-on-error: true
-#        env:
-#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-#
-#      - name: Check on Snyk scan failures
-#        if: steps.scan1.outcome == 'failure' || steps.scan2.outcome == 'failure' || steps.scan3.outcome == 'failure'
-#        run: |
-#          echo "[warning] Please solve the fixable security vulnerabilities found in failed steps!
-#                h2o-mli/build.gradle - ${{ steps.scan1.outcome }}
-#                h2o-mli/mli-algos/build.gradle - ${{ steps.scan2.outcome }}
-#                h2o-mli/mli-backend/build.gradle - ${{ steps.scan3.outcome }}"
-#          exit 1
-
   snyk_scan_monitor:
-    #if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'push' }}
     strategy:
       matrix:
         depsfiles: [
@@ -118,15 +93,3 @@ jobs:
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-#      - name: Snyk scan for Java dependancies - h2o-mli/mli-algos/build.gradle
-#        run: snyk monitor --org=h2oai --remote-repo-url=DAI --file=mli-algos/build.gradle --project-name=DAI/mli/${{ steps.extract_ref.outputs.ref }}/h2o-mli/mli-algos/build.gradle -d
-#        continue-on-error: true
-#        env:
-#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-#
-#      - name: Snyk scan for Java dependancies - h2o-mli/mli-backend/build.gradle
-#        run: snyk monitor --org=h2oai --remote-repo-url=DAI --file=mli-backend/build.gradle --project-name=DAI/mli/${{ steps.extract_ref.outputs.ref }}/h2o-mli/mli-backend/build.gradle -d
-#        continue-on-error: true
-#        env:
-#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
