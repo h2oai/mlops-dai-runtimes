@@ -53,6 +53,26 @@ jobs:
 
   snyk_scan_monitor:
     if: ${{ github.event_name == 'push' }}
+    strategy:
+      matrix:
+        depsfiles: [
+          build.gradle,
+          common/jdbc/build.gradle,
+          gcp-cloud-run/build.gradle,
+          common/kdb-java/build.gradle,
+          kdb-mojo-scorer/build.gradle,
+          sql-jdbc-scorer/build.gradle,
+          common/transform/build.gradle,
+          local-rest-scorer/build.gradle,
+          common/rest-java-model/build.gradle,
+          common/rest-spring-api/build.gradle,
+          gcp-vertex-ai-mojo-scorer/build.gradle,
+          aws-sagemaker-hosted-scorer/build.gradle,
+          common/rest-jdbc-spring-api/build.gradle,
+          common/rest-vertex-ai-spring-api/build.gradle,
+          aws-lambda-scorer/lambda-template/build.gradle,
+          aws-lambda-scorer/terraform-recipe/build.gradle
+        ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
