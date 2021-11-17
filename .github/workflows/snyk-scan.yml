@@ -45,7 +45,7 @@ jobs:
           java-version: "8"
           distribution: 'adopt'
 
-      - name: Snyk scan for Java dependancies - h2o-mli/build.gradle
+      - name: Snyk scan for Java dependancies
         if: steps.changed-files.outputs.any_changed == 'true'
         run: snyk test --all-projects -d --fail-on=all
         env:
