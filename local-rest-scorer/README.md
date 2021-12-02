@@ -20,7 +20,22 @@ java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -jar build/libs/local-rest-scorer-{YOUR
 
 To run the local scorer with shapley contribution enabled
 ```bash
+# Equivalent to using below and setting `-Dshapley.types.enabled=ALL`
 java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -Dshapley.enable=true -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}-boot.jar
+
+# SHAPLEY_TYPE can be one of [ALL, TRANSFORMED, ORIGINAL]
+java -Dmojo.path={PATH_TO_MOJO_PIPELINE} -Dshapley.types.enabled={SHAPLEY_TYPE} -jar build/libs/local-rest-scorer-{YOUR_CURRENT_VERSION}-boot.jar
+``` 
+
+Note: Current Mojo2 shapley implementation means that the mojo must be loaded one
+time for each shapley value type. This means that if `-Dshapley.types.enabled=ALL`
+the mojo will be loaded three times:
+
+1. for standard scoring
+2. for scoring shapley values on transformed features
+3. for scoring shapley values on original features
+
+This is important because, depending on the size of the mojo, the scorer may run out of memory if `ALL` is set.
 ``` 
 
 > Tip: If you run into an error loading the MOJO, ensure you specify its full path and are not triggering shell expansion (e.g. avoid the `~` character).
