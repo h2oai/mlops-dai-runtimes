@@ -36,7 +36,8 @@ import org.slf4j.LoggerFactory;
  */
 public class MojoScorer {
   private static final String ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE
-          = "shapley.enable property has to be set to true in the runtime configuration "
+          = "shapley.types.enabled property has to be set to one of [TRANSFORMED, ORIGINAL, ALL]"
+          + " or shapley.enable property has to be set to true in the runtime configuration "
           + "to obtain Shapley contribution";
 
   private static final Logger log = LoggerFactory.getLogger(MojoScorer.class);
@@ -47,6 +48,9 @@ public class MojoScorer {
   private static final String SHAPLEY_ENABLE_PROPERTY = "shapley.enable";
   private static final boolean ENABLE_SHAPLEY_CONTRIBUTION =
           Boolean.getBoolean(SHAPLEY_ENABLE_PROPERTY);
+  private static final String SHAPLEY_ENABLED_TYPES_PROPERTY = "shapley.types.enabled";
+  private static final ShapleyType ENABLED_SHAPLEY_TYPES =
+          ShapleyType.fromValue(System.getProperty(SHAPLEY_ENABLED_TYPES_PROPERTY, "NONE"));
   private static MojoPipeline pipelineTransformedShapley;
   private static MojoPipeline pipelineOriginalShapley;
 
@@ -79,17 +83,7 @@ public class MojoScorer {
     this.modelInfoConverter = modelInfoConverter;
     this.csvConverter = csvConverter;
 
-    if (ENABLE_SHAPLEY_CONTRIBUTION) {
-      // note the mojo pipeline need to be reloaded here as we have a constrain from java mojo
-      // both SHAP values and predictions cannot be provided with the same pipeline
-      // Link: https://github.com/h2oai/mojo2/blob/7a1ab76b09f056334842a5b442ff89859aabf518/doc/shap.md
-
-      pipelineTransformedShapley = loadMojoPipelineFromFile();
-      pipelineTransformedShapley.setShapPredictContrib(true);
-
-      pipelineOriginalShapley = loadMojoPipelineFromFile();
-      pipelineOriginalShapley.setShapPredictContribOriginal(true);
-    }
+    loadMojoPipelinesForShapley();
   }
 
   /**
@@ -110,7 +104,7 @@ public class MojoScorer {
       return response;
     }
 
-    if (!ENABLE_SHAPLEY_CONTRIBUTION) {
+    if (!isShapleyEnabled()) {
       throw new IllegalArgumentException(ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE);
     }
 
@@ -154,7 +148,7 @@ public class MojoScorer {
    */
   public ContributionResponse computeContribution(ContributionRequest request) {
 
-    if (!ENABLE_SHAPLEY_CONTRIBUTION) {
+    if (!isShapleyEnabled()) {
       throw new IllegalArgumentException(ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE);
     }
 
@@ -297,6 +291,67 @@ public class MojoScorer {
 
   public Model getModelInfo() {
     return modelInfoConverter.apply(pipeline);
+  }
+
+  private boolean isShapleyEnabled() {
+    if (ENABLE_SHAPLEY_CONTRIBUTION) {
+      return true;
+    }
+    switch (ENABLED_SHAPLEY_TYPES) {
+      case ALL:
+      case ORIGINAL:
+      case TRANSFORMED:
+        return true;
+      case NONE:
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Method to load mojo pipelines for shapley scoring based on configuration
+   *
+   * <p>Order of operations to preserve backwards compatibility:
+   * 1. if property or env var shapley.types.enabled is set, load pipelines based on that
+   * 2. if shapley.enabled is true load all pipelines
+   *
+   */
+  private void loadMojoPipelinesForShapley() {
+    if (!ShapleyType.NONE.equals(ENABLED_SHAPLEY_TYPES)) {
+      switch (ENABLED_SHAPLEY_TYPES) {
+        case ORIGINAL:
+          log.info("Loading mojo for original shapley values");
+          pipelineOriginalShapley = loadMojoPipelineFromFile();
+          pipelineOriginalShapley.setShapPredictContribOriginal(true);
+          break;
+        case TRANSFORMED:
+          log.info("Loading mojo for transformed shapley values.");
+          pipelineTransformedShapley = loadMojoPipelineFromFile();
+          pipelineTransformedShapley.setShapPredictContrib(true);
+          break;
+        case ALL:
+          log.info("Loading mojo for all shapley value types.");
+          pipelineTransformedShapley = loadMojoPipelineFromFile();
+          pipelineTransformedShapley.setShapPredictContrib(true);
+
+          pipelineOriginalShapley = loadMojoPipelineFromFile();
+          pipelineOriginalShapley.setShapPredictContribOriginal(true);
+          break;
+        default:
+          throw new IllegalArgumentException("Unexpected enabled shapley value type.");
+      }
+    } else if (ENABLE_SHAPLEY_CONTRIBUTION) {
+      // note the mojo pipeline need to be reloaded here as we have a constrain from java mojo
+      // both SHAP values and predictions cannot be provided with the same pipeline
+      // Link: https://github.com/h2oai/mojo2/blob/7a1ab76b09f056334842a5b442ff89859aabf518/doc/shap.md
+
+      log.info("Property shapley.enable set, loading mojo for all shapley values");
+      pipelineTransformedShapley = loadMojoPipelineFromFile();
+      pipelineTransformedShapley.setShapPredictContrib(true);
+
+      pipelineOriginalShapley = loadMojoPipelineFromFile();
+      pipelineOriginalShapley.setShapPredictContribOriginal(true);
+    }
   }
 
   private static MojoPipeline loadMojoPipelineFromFile() {
