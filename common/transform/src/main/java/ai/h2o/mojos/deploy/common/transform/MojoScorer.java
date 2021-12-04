@@ -27,7 +27,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*
+/**
  * H2O DAI mojo scorer.
  *
  * <p>The scorer code is shared for all mojo deployments and is only parameterized by the
@@ -48,11 +48,11 @@ public class MojoScorer {
   private static final String SHAPLEY_ENABLE_PROPERTY = "shapley.enable";
   private static final String SHAPLEY_ENABLED_TYPES_PROPERTY = "shapley.types.enabled";
   private static final ShapleyLoadOptions ENABLED_SHAPLEY_TYPES =
-      (Boolean.getBoolean(SHAPLEY_ENABLE_PROPERTY))
+      Boolean.getBoolean(SHAPLEY_ENABLE_PROPERTY)
           ? ShapleyLoadOptions.ALL
           : ShapleyLoadOptions.fromValue(
               System.getProperty(SHAPLEY_ENABLED_TYPES_PROPERTY, "NONE"));
-  private static final boolean SHAPLEY_ENABLED = isShapleyEnabled();
+  private static final boolean SHAPLEY_ENABLED = ENABLED_SHAPLEY_TYPES.isEnabled();
 
   private static MojoPipeline pipelineTransformedShapley;
   private static MojoPipeline pipelineOriginalShapley;
@@ -102,8 +102,9 @@ public class MojoScorer {
     ScoreResponse response = scoreResponseConverter.apply(responseFrame, request);
     response.id(pipeline.getUuid());
 
-    if (request.getRequestShapleyValueType() == null
-            || request.getRequestShapleyValueType().equals(ShapleyType.NONE)) {
+    ShapleyType requestShapleyType = request.getRequestShapleyValueType();
+    if (requestShapleyType == null
+            || requestShapleyType.equals(ShapleyType.NONE)) {
       return response;
     }
 
@@ -111,9 +112,16 @@ public class MojoScorer {
       throw new IllegalArgumentException(ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE);
     }
 
+    if (!ENABLED_SHAPLEY_TYPES.requestedTypeEnabled(requestShapleyType.toString())) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Requested Shapley type %s not enabled for this scorer. Expected: %s",
+              requestShapleyType,
+              ENABLED_SHAPLEY_TYPES));
+    }
+
     try {
-      ShapleyType requestedShapleyType = request.getRequestShapleyValueType();
-      switch (requestedShapleyType) {
+      switch (requestShapleyType) {
         case TRANSFORMED:
           response.setFeatureShapleyContributions(transformedFeatureContribution(request));
           break;
@@ -151,7 +159,7 @@ public class MojoScorer {
    */
   public ContributionResponse computeContribution(ContributionRequest request) {
 
-    if (!isShapleyEnabled()) {
+    if (!SHAPLEY_ENABLED) {
       throw new IllegalArgumentException(ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE);
     }
 
@@ -294,18 +302,6 @@ public class MojoScorer {
 
   public Model getModelInfo() {
     return modelInfoConverter.apply(pipeline);
-  }
-
-  private static boolean isShapleyEnabled() {
-    switch (ENABLED_SHAPLEY_TYPES) {
-      case ALL:
-      case ORIGINAL:
-      case TRANSFORMED:
-        return true;
-      case NONE:
-      default:
-        return false;
-    }
   }
 
   /**

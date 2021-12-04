@@ -343,7 +343,7 @@ definitions:
           $ref: '#/definitions/DataField'
   ShapleyType:
     type: string
-    enum: [ ORIGINAL, TRANSFORMED, NONE, ALL ]
+    enum: [ ORIGINAL, TRANSFORMED, NONE ]
   ScoringType:
     type: string
     enum: [ REGRESSION, CLASSIFICATION, BINOMIAL ]
