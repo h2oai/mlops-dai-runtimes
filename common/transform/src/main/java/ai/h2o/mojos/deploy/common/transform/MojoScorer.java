@@ -48,7 +48,7 @@ public class MojoScorer {
   private static final String SHAPLEY_ENABLE_PROPERTY = "shapley.enable";
   private static final String SHAPLEY_ENABLED_TYPES_PROPERTY = "shapley.types.enabled";
 
-  private static ShapleyLoadOptions ENABLED_SHAPLEY_TYPES;
+  private static ShapleyLoadOption ENABLED_SHAPLEY_TYPES;
   private static boolean SHAPLEY_ENABLED;
   private static MojoPipeline pipelineTransformedShapley;
   private static MojoPipeline pipelineOriginalShapley;
@@ -84,11 +84,11 @@ public class MojoScorer {
 
     ENABLED_SHAPLEY_TYPES =
         Boolean.getBoolean(SHAPLEY_ENABLE_PROPERTY)
-            ? ShapleyLoadOptions.ALL
-            : ShapleyLoadOptions.valueOf(
+            ? ShapleyLoadOption.ALL
+            : ShapleyLoadOption.valueOf(
             System.getProperty(SHAPLEY_ENABLED_TYPES_PROPERTY, "NONE"));
     SHAPLEY_ENABLED =
-        ShapleyLoadOptions.isEnabled(ENABLED_SHAPLEY_TYPES);
+        ShapleyLoadOption.isEnabled(ENABLED_SHAPLEY_TYPES);
 
     loadMojoPipelinesForShapley();
   }
@@ -116,7 +116,7 @@ public class MojoScorer {
       throw new IllegalArgumentException(ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE);
     }
 
-    if (!ShapleyLoadOptions.requestedTypeEnabled(
+    if (!ShapleyLoadOption.requestedTypeEnabled(
         ENABLED_SHAPLEY_TYPES, requestShapleyType.toString())) {
       throw new IllegalArgumentException(
           String.format(
@@ -318,7 +318,7 @@ public class MojoScorer {
    *
    */
   private void loadMojoPipelinesForShapley() {
-    if (ShapleyLoadOptions.NONE.equals(ENABLED_SHAPLEY_TYPES)) {
+    if (ShapleyLoadOption.NONE.equals(ENABLED_SHAPLEY_TYPES)) {
       return;
     }
     switch (ENABLED_SHAPLEY_TYPES) {
