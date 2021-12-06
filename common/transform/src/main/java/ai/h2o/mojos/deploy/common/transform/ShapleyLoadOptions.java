@@ -4,32 +4,18 @@ package ai.h2o.mojos.deploy.common.transform;
  * Enum defining options for loading the mojo to enable Shapley predictions.
  */
 public enum ShapleyLoadOptions {
-  ALL("ALL"),
-  NONE("NONE"),
-  ORIGINAL("ORIGINAL"),
-  TRANSFORMED("TRANSFORMED");
+  ALL,
+  NONE,
+  ORIGINAL,
+  TRANSFORMED;
 
-  private final String value;
-
-  ShapleyLoadOptions(String value) {
-    this.value = value;
-  }
-
-  public String getValue() {
-    return value;
-  }
-
-  @Override
-  public String toString() {
-    return String.valueOf(value);
-  }
 
   /**
    * Checks whether Shapley scoring is permitted.
+   * @param options {@link ShapleyLoadOptions}
    * @return {@link Boolean}
    */
-  public boolean isEnabled() {
-    ShapleyLoadOptions options = ShapleyLoadOptions.fromValue(value);
+  public static boolean isEnabled(ShapleyLoadOptions options) {
     switch (options) {
       case ALL:
       case ORIGINAL:
@@ -46,24 +32,10 @@ public enum ShapleyLoadOptions {
    * @param requested {@link String}
    * @return {@link Boolean}
    */
-  public boolean requestedTypeEnabled(String requested) {
-    if (value.equals(ALL.getValue())) {
+  public static boolean requestedTypeEnabled(ShapleyLoadOptions options, String requested) {
+    if (options.equals(ALL)) {
       return true;
     }
-    return value.equals(requested);
-  }
-
-  /**
-   * Obtain ShaplelyLoadOptions value from input string.
-   * @param text {@link String} one of [ALL, NONE, ORIGINAL, TRANSFORMED]
-   * @return {@link ShapleyLoadOptions} ShapleyLoadOptions representation of input string
-   */
-  public static ShapleyLoadOptions fromValue(String text) {
-    for (ShapleyLoadOptions b : ShapleyLoadOptions.values()) {
-      if (String.valueOf(b.value).equals(text)) {
-        return b;
-      }
-    }
-    return NONE;
+    return options.name().equals(requested);
   }
 }

@@ -50,9 +50,10 @@ public class MojoScorer {
   private static final ShapleyLoadOptions ENABLED_SHAPLEY_TYPES =
       Boolean.getBoolean(SHAPLEY_ENABLE_PROPERTY)
           ? ShapleyLoadOptions.ALL
-          : ShapleyLoadOptions.fromValue(
+          : ShapleyLoadOptions.valueOf(
               System.getProperty(SHAPLEY_ENABLED_TYPES_PROPERTY, "NONE"));
-  private static final boolean SHAPLEY_ENABLED = ENABLED_SHAPLEY_TYPES.isEnabled();
+  private static final boolean SHAPLEY_ENABLED =
+      ShapleyLoadOptions.isEnabled(ENABLED_SHAPLEY_TYPES);
 
   private static MojoPipeline pipelineTransformedShapley;
   private static MojoPipeline pipelineOriginalShapley;
@@ -112,7 +113,8 @@ public class MojoScorer {
       throw new IllegalArgumentException(ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE);
     }
 
-    if (!ENABLED_SHAPLEY_TYPES.requestedTypeEnabled(requestShapleyType.toString())) {
+    if (!ShapleyLoadOptions.requestedTypeEnabled(
+        ENABLED_SHAPLEY_TYPES, requestShapleyType.toString())) {
       throw new IllegalArgumentException(
           String.format(
               "Requested Shapley type %s not enabled for this scorer. Expected: %s",
@@ -313,29 +315,30 @@ public class MojoScorer {
    *
    */
   private void loadMojoPipelinesForShapley() {
-    if (!ShapleyLoadOptions.NONE.equals(ENABLED_SHAPLEY_TYPES)) {
-      switch (ENABLED_SHAPLEY_TYPES) {
-        case ORIGINAL:
-          log.info("Loading mojo for original shapley values");
-          pipelineOriginalShapley = loadMojoPipelineFromFile();
-          pipelineOriginalShapley.setShapPredictContribOriginal(true);
-          break;
-        case TRANSFORMED:
-          log.info("Loading mojo for transformed shapley values.");
-          pipelineTransformedShapley = loadMojoPipelineFromFile();
-          pipelineTransformedShapley.setShapPredictContrib(true);
-          break;
-        case ALL:
-          log.info("Loading mojo for all shapley value types.");
-          pipelineTransformedShapley = loadMojoPipelineFromFile();
-          pipelineTransformedShapley.setShapPredictContrib(true);
+    if (ShapleyLoadOptions.NONE.equals(ENABLED_SHAPLEY_TYPES)) {
+      return;
+    }
+    switch (ENABLED_SHAPLEY_TYPES) {
+      case ORIGINAL:
+        log.info("Loading mojo for original shapley values");
+        pipelineOriginalShapley = loadMojoPipelineFromFile();
+        pipelineOriginalShapley.setShapPredictContribOriginal(true);
+        break;
+      case TRANSFORMED:
+        log.info("Loading mojo for transformed shapley values.");
+        pipelineTransformedShapley = loadMojoPipelineFromFile();
+        pipelineTransformedShapley.setShapPredictContrib(true);
+        break;
+      case ALL:
+        log.info("Loading mojo for all shapley value types.");
+        pipelineTransformedShapley = loadMojoPipelineFromFile();
+        pipelineTransformedShapley.setShapPredictContrib(true);
 
-          pipelineOriginalShapley = loadMojoPipelineFromFile();
-          pipelineOriginalShapley.setShapPredictContribOriginal(true);
-          break;
-        default:
-          throw new IllegalArgumentException("Unexpected enabled shapley value type.");
-      }
+        pipelineOriginalShapley = loadMojoPipelineFromFile();
+        pipelineOriginalShapley.setShapPredictContribOriginal(true);
+        break;
+      default:
+        throw new IllegalArgumentException("Unexpected enabled shapley value type.");
     }
   }
 
