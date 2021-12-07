@@ -9,6 +9,10 @@ public enum ShapleyLoadOption {
   ORIGINAL,
   TRANSFORMED;
 
+  private static final String SHAPLEY_ENABLE_PROPERTY = "shapley.enable";
+  private static final String SHAPLEY_ENABLE_ENV_VAR = "SHAPLEY_ENABLE";
+  private static final String SHAPLEY_ENABLED_TYPES_PROPERTY = "shapley.types.enabled";
+  private static final String SHAPLEY_ENABLED_TYPES_ENV_VAR = "SHAPLEY_TYPES_ENABLED";
 
   /**
    * Checks whether Shapley scoring is permitted.
@@ -37,5 +41,33 @@ public enum ShapleyLoadOption {
       return true;
     }
     return option.name().equals(requested);
+  }
+
+  /**
+   * Extracts configuration from system properties or environment variables.
+   * @return {@link ShapleyLoadOption}
+   */
+  public static ShapleyLoadOption fromEnvironment() {
+    return shapleyEnabledFromEnvironment()
+        ? ALL
+        : shapleyTypeFromEnvironment();
+  }
+
+  private static boolean shapleyEnabledFromEnvironment() {
+    boolean enabledProperty = Boolean.getBoolean(SHAPLEY_ENABLE_PROPERTY);
+    boolean enabledEnvironment = Boolean.parseBoolean(System.getenv(SHAPLEY_ENABLE_ENV_VAR));
+    return enabledEnvironment || enabledProperty;
+  }
+
+  private static ShapleyLoadOption shapleyTypeFromEnvironment() {
+    String enabledTypeProperty = System.getProperty(SHAPLEY_ENABLED_TYPES_PROPERTY);
+    if (enabledTypeProperty != null) {
+      return ShapleyLoadOption.valueOf(enabledTypeProperty);
+    }
+    String enabledTypeEnvironment = System.getenv(SHAPLEY_ENABLED_TYPES_ENV_VAR);
+    if (enabledTypeEnvironment != null) {
+      return ShapleyLoadOption.valueOf(enabledTypeEnvironment);
+    }
+    return NONE;
   }
 }
