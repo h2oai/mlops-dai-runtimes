@@ -48,8 +48,8 @@ public class MojoScorer {
   private static final String SHAPLEY_ENABLE_PROPERTY = "shapley.enable";
   private static final String SHAPLEY_ENABLED_TYPES_PROPERTY = "shapley.types.enabled";
 
-  private final ShapleyLoadOption ENABLED_SHAPLEY_TYPES;
-  private final boolean SHAPLEY_ENABLED;
+  private final ShapleyLoadOption enabledShapleyTypes;
+  private final boolean shapleyEnabled;
   private static MojoPipeline pipelineTransformedShapley;
   private static MojoPipeline pipelineOriginalShapley;
 
@@ -82,13 +82,13 @@ public class MojoScorer {
     this.modelInfoConverter = modelInfoConverter;
     this.csvConverter = csvConverter;
 
-    ENABLED_SHAPLEY_TYPES =
+    this.enabledShapleyTypes =
         Boolean.getBoolean(SHAPLEY_ENABLE_PROPERTY)
             ? ShapleyLoadOption.ALL
             : ShapleyLoadOption.valueOf(
             System.getProperty(SHAPLEY_ENABLED_TYPES_PROPERTY, "NONE"));
-    SHAPLEY_ENABLED =
-        ShapleyLoadOption.isEnabled(ENABLED_SHAPLEY_TYPES);
+    this.shapleyEnabled =
+        ShapleyLoadOption.isEnabled(enabledShapleyTypes);
 
     loadMojoPipelinesForShapley();
   }
@@ -112,17 +112,17 @@ public class MojoScorer {
       return response;
     }
 
-    if (!SHAPLEY_ENABLED) {
+    if (!shapleyEnabled) {
       throw new IllegalArgumentException(ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE);
     }
 
     if (!ShapleyLoadOption.requestedTypeEnabled(
-        ENABLED_SHAPLEY_TYPES, requestShapleyType.toString())) {
+        enabledShapleyTypes, requestShapleyType.toString())) {
       throw new IllegalArgumentException(
           String.format(
               "Requested Shapley type %s not enabled for this scorer. Expected: %s",
               requestShapleyType,
-              ENABLED_SHAPLEY_TYPES));
+              enabledShapleyTypes));
     }
 
     try {
@@ -164,7 +164,7 @@ public class MojoScorer {
    */
   public ContributionResponse computeContribution(ContributionRequest request) {
 
-    if (!SHAPLEY_ENABLED) {
+    if (!shapleyEnabled) {
       throw new IllegalArgumentException(ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE);
     }
 
@@ -318,10 +318,10 @@ public class MojoScorer {
    *
    */
   private void loadMojoPipelinesForShapley() {
-    if (ShapleyLoadOption.NONE == ENABLED_SHAPLEY_TYPES) {
+    if (ShapleyLoadOption.NONE == enabledShapleyTypes) {
       return;
     }
-    switch (ENABLED_SHAPLEY_TYPES) {
+    switch (enabledShapleyTypes) {
       case ORIGINAL:
         log.info("Loading mojo for original shapley values");
         pipelineOriginalShapley = loadMojoPipelineFromFile();

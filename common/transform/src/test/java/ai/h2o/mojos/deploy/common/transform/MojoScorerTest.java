@@ -1,5 +1,6 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -30,7 +31,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -93,10 +93,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
@@ -189,10 +187,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
@@ -213,10 +209,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
@@ -237,10 +231,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
@@ -260,10 +252,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
@@ -284,10 +274,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
@@ -308,10 +296,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
@@ -331,10 +317,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
@@ -355,10 +339,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
@@ -401,10 +383,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
@@ -448,10 +428,8 @@ class MojoScorerTest {
 
     MojoScorer scorer = dummyScorer();
 
-    // When
-    scorer.score(request);
-
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   private static Row toRow(String... values) {
