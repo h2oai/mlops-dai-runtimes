@@ -33,7 +33,7 @@ public enum ShapleyLoadOption {
    * @return {@link Boolean}
    */
   public static boolean requestedTypeEnabled(ShapleyLoadOption option, String requested) {
-    if (option.equals(ALL)) {
+    if (option == ALL) {
       return true;
     }
     return option.name().equals(requested);
