@@ -1,5 +1,6 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -28,8 +29,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -49,25 +50,9 @@ class MojoScorerTest {
   @Mock private MojoPipelineToModelInfoConverter modelInfoConverter;
   @Mock private CsvToMojoFrameConverter csvConverter;
 
-  private MojoScorer scorer;
-
-  @BeforeEach
-  public void init() {
-    scorer = new MojoScorer(
-            scoreRequestConverter,
-            scoreResponseConverter,
-            contributionRequestConverter,
-            contributionResponseConverter,
-            modelInfoConverter,
-            csvConverter);
-
-  }
-
   @BeforeAll
   static void setup() {
     System.setProperty("mojo.path", MOJO_PIPELINE_PATH);
-    // disable shapley
-    System.setProperty("shapley.enable", "false");
     mockDummyPipeline();
   }
 
@@ -84,10 +69,17 @@ class MojoScorerTest {
     // reset properties
     System.clearProperty("mojo.path");
     System.clearProperty("shapley.enable");
+    System.clearProperty("shapley.types.enabled");
+  }
+
+  @AfterEach
+  void clearShapleyProperties() {
+    System.clearProperty("shapley.enable");
+    System.clearProperty("shapley.types.enabled");
   }
 
   @Test
-  void verifyScoreRequestWithoutShapley_succeeds() {
+  void verifyScoreRequestWithoutShapley_ShapleyDisabled_Succeeds() {
     // Given
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
@@ -99,14 +91,15 @@ class MojoScorerTest {
     given(scoreResponseConverter.apply(any(), any()))
             .willReturn(dummyResponse);
 
-    // When
-    scorer.score(request);
+    MojoScorer scorer = dummyScorer();
 
-    // Then all ok
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   @Test
-  void verifyScoreRequestWithTransformedShapley_fails() {
+  void verifyScoreRequestWithTransformedShapley_ShapleyDisabled_Fails() {
+    // Given
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -118,13 +111,16 @@ class MojoScorerTest {
     given(scoreResponseConverter.apply(any(), any()))
             .willReturn(dummyResponse);
 
+    MojoScorer scorer = dummyScorer();
+
     // When & Then
     assertThrows(
             IllegalArgumentException.class, () -> scorer.score(request));
   }
 
   @Test
-  void verifyScoreRequestWithOriginalShapley_fails() {
+  void verifyScoreRequestWithOriginalShapley_ShapleyDisabled_Fails() {
+    // Given
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -136,33 +132,304 @@ class MojoScorerTest {
     given(scoreResponseConverter.apply(any(), any()))
             .willReturn(dummyResponse);
 
+    MojoScorer scorer = dummyScorer();
+
     // When & Then
     assertThrows(
             IllegalArgumentException.class, () -> scorer.score(request));
   }
 
   @Test
-  void verifyContributionWithOriginalShapley_fails() {
+  void verifyContributionWithOriginalShapley_ShapleyDisabled_Fails() {
+    // Given
+    System.setProperty("shapley.enable", "false");
     ContributionRequest request = new ContributionRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.ORIGINAL);
 
+    MojoScorer scorer = dummyScorer();
+
     // When & Then
     assertThrows(IllegalArgumentException.class, () -> scorer
             .computeContribution(request));
   }
 
   @Test
-  void verifyContributionWithTransformedShapley_fails() {
+  void verifyContributionWithTransformedShapley_ShapleyDisabled_Fails() {
+    // Given
     ContributionRequest request = new ContributionRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
 
+    MojoScorer scorer = dummyScorer();
+
     // When & Then
     assertThrows(IllegalArgumentException.class, () -> scorer
             .computeContribution(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithoutShapley_ShapleyEnabled_Succeeds() {
+    // Given
+    System.setProperty("shapley.enable", "true");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithTransformedShapley_ShapleyEnabled_Succeeds() {
+    // Given
+    System.setProperty("shapley.enable", "true");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithOriginalShapley_ShapleyEnabled_Succeeds() {
+    // Given
+    System.setProperty("shapley.enable", "true");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.ORIGINAL);
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithoutShapley_ShapleyOptionAll_Succeeds() {
+    // Given
+    System.setProperty("shapley.types.enabled", "ALL");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithTransformedShapley_ShapleyOptionAll_Succeeds() {
+    // Given
+    System.setProperty("shapley.types.enabled", "ALL");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithOriginalShapley_ShapleyOptionAll_Succeeds() {
+    // Given
+    System.setProperty("shapley.types.enabled", "ALL");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.ORIGINAL);
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithoutShapley_ShapleyOptionTransformed_Succeeds() {
+    // Given
+    System.setProperty("shapley.types.enabled", "TRANSFORMED");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithTransformedShapley_ShapleyOptionTransformed_Succeeds() {
+    // Given
+    System.setProperty("shapley.types.enabled", "TRANSFORMED");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithOriginalShapley_ShapleyOptionTransformed_Fails() {
+    // Given
+    System.setProperty("shapley.types.enabled", "TRANSFORMED");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.ORIGINAL);
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertThrows(
+        IllegalArgumentException.class, () -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithoutShapley_ShapleyOptionOriginal_Succeeds() {
+    // Given
+    System.setProperty("shapley.types.enabled", "ORIGINAL");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithTransformedShapley_ShapleyOptionOriginal_Fails() {
+    // Given
+    System.setProperty("shapley.types.enabled", "ORIGINAL");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertThrows(
+        IllegalArgumentException.class, () -> scorer.score(request));
+  }
+
+  @Test
+  void verifyScoreRequestWithOriginalShapley_ShapleyOptionOriginal_Succeeds() {
+    // Given
+    System.setProperty("shapley.types.enabled", "ORIGINAL");
+
+    ScoreRequest request = new ScoreRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.ORIGINAL);
+    MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
+    given(scoreRequestConverter.apply(any(), any()))
+        .willReturn(dummyMojoFrame);
+    ScoreResponse dummyResponse = generateDummyResponse();
+    given(scoreResponseConverter.apply(any(), any()))
+        .willReturn(dummyResponse);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertDoesNotThrow(() -> scorer.score(request));
   }
 
   private static Row toRow(String... values) {
@@ -246,5 +513,16 @@ class MojoScorerTest {
     @Override
     public void setListener(BasePipelineListener listener) {
     }
+  }
+
+  public MojoScorer dummyScorer() {
+    return new MojoScorer(
+      scoreRequestConverter,
+      scoreResponseConverter,
+      contributionRequestConverter,
+      contributionResponseConverter,
+      modelInfoConverter,
+      csvConverter
+    );
   }
 }
