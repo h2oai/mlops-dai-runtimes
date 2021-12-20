@@ -45,8 +45,6 @@ public class MojoScorer {
   private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
   private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
   private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
-  private static final String SHAPLEY_ENABLE_PROPERTY = "shapley.enable";
-  private static final String SHAPLEY_ENABLED_TYPES_PROPERTY = "shapley.types.enabled";
 
   private final ShapleyLoadOption enabledShapleyTypes;
   private final boolean shapleyEnabled;
@@ -82,13 +80,8 @@ public class MojoScorer {
     this.modelInfoConverter = modelInfoConverter;
     this.csvConverter = csvConverter;
 
-    this.enabledShapleyTypes =
-        Boolean.getBoolean(SHAPLEY_ENABLE_PROPERTY)
-            ? ShapleyLoadOption.ALL
-            : ShapleyLoadOption.valueOf(
-            System.getProperty(SHAPLEY_ENABLED_TYPES_PROPERTY, "NONE"));
-    this.shapleyEnabled =
-        ShapleyLoadOption.isEnabled(enabledShapleyTypes);
+    this.enabledShapleyTypes = ShapleyLoadOption.fromEnvironment();
+    this.shapleyEnabled = ShapleyLoadOption.isEnabled(enabledShapleyTypes);
 
     loadMojoPipelinesForShapley();
   }
