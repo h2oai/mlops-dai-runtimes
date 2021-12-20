@@ -12,7 +12,7 @@ import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
 @ExtendWith(SystemStubsExtension.class)
-public class ShapleyLoadOptionTest {
+class ShapleyLoadOptionTest {
 
   @SystemStub
   private EnvironmentVariables environmentVariables;
