@@ -9,6 +9,7 @@ NODE_LABEL = 'docker'
 DOCKERHUB_CREDS = 'dockerhub'
 HARBOR_URL = "http://harbor.h2o.ai/"
 HARBOR_CREDS = 'harbor.h2o.ai'
+VORVAN_CRED = 'MM_GCR_VORVAN_CREDENTIALS'
 
 def versionText = null
 def utilsLib = new Utils()
@@ -40,6 +41,11 @@ pipeline {
             name: 'PUSH_DISTRIBUTION_ZIP',
             defaultValue: false,
             description: 'Whether to also push distribution ZIP archive to S3.',
+        )
+        booleanParam(
+                name: 'PUSH_TO_GOOGLE_CLOUD',
+                defaultValue: false,
+                description: 'Whether to also push Docker images to Google Cloud Registry.',
         )
     }
 
@@ -212,6 +218,42 @@ pipeline {
                 }
             }
         }
+
+        stage('7. Push Docker Images To GoogleCloud') {
+            when {
+                expression {
+                    return isReleaseBranch() || params.PUSH_TO_GOOGLE_CLOUD
+                }
+            }
+            agent {
+                docker {
+                    registryCredentialsId HARBOR_CREDS
+                    registryUrl HARBOR_URL
+                    image JAVA_IMAGE
+                    label NODE_LABEL
+                }
+            }
+            steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    script {
+                        def gitCommitHash = env.GIT_COMMIT
+                        def imageTags = "${versionText},${gitCommitHash}"
+                        withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
+                            withGCRCredentials(VORVAN_CRED) {
+                                def gcrCreds = readFile("${GCR_JSON_KEY}")
+                                withEnv(['TO_DOCKER_USERNAME=_json_key', "TO_DOCKER_PASSWORD=${gcrCreds}"]) {
+                                    sh "./gradlew jib \
+                                    -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
+                                    -Djib.from.auth.password=${FROM_DOCKER_PASSWORD} \
+                                    -Djib.to.tags=${imageTags} \
+                                    -PdockerRepositoryPrefix=gcr.io/vorvan/h2oai/"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -270,4 +312,10 @@ def withDockerCredentials(String credentialsId, String prefix, Closure body) {
     }
 }
 
+void withGCRCredentials(final String credentialsId, final Closure body) {
+    gcrCredentials = file(credentialsId: credentialsId, variable: 'GCR_JSON_KEY')
+    withCredentials([gcrCredentials]) {
+        body()
+    }
+}
 
