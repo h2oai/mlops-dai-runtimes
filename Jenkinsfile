@@ -43,9 +43,9 @@ pipeline {
             description: 'Whether to also push distribution ZIP archive to S3.',
         )
         booleanParam(
-                name: 'PUSH_TO_GOOGLE_CLOUD',
+                name: 'PUSH_TO_VORVAN',
                 defaultValue: false,
-                description: 'Whether to also push Docker images to Google Cloud Registry.',
+                description: 'Whether to also push Docker images to h2o.ai maintained gcr.io repo Vorvan.',
         )
     }
 
@@ -222,7 +222,7 @@ pipeline {
         stage('7. Push Docker Images To GoogleCloud') {
             when {
                 expression {
-                    return isReleaseBranch() || params.PUSH_TO_GOOGLE_CLOUD
+                    return isReleaseBranch() || params.PUSH_TO_VORVAN
                 }
             }
             agent {
