@@ -302,6 +302,10 @@ public class MojoScorer {
     return modelInfoConverter.apply(pipeline);
   }
 
+  public ShapleyLoadOption getEnabledShapleyTypes() {
+    return enabledShapleyTypes;
+  }
+
   /**
    * Method to load mojo pipelines for shapley scoring based on configuration
    *
