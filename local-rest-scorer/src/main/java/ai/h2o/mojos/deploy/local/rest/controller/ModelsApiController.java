@@ -10,6 +10,7 @@ import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
+import ai.h2o.mojos.deploy.common.transform.ShapleyScoreException;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.Arrays;
@@ -71,10 +72,20 @@ public class ModelsApiController implements ModelApi {
       log.info("Got scoring request");
       ScoreResponse scoreResponse = scorer.score(request);
       return ResponseEntity.ok(scoreResponse);
+    } catch (ShapleyScoreException se) {
+      String message = String.format(
+          "Failed scoring Shapley values in scoring request: %s, due to: %s",
+          request,
+          se.getMessage());
+      log.info(message);
+      log.debug(" - failure cause: ", se);
+      return scoreResponseFailure(HttpStatus.BAD_REQUEST, message);
     } catch (Exception e) {
-      log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
+      String message = String.format(
+          "Failed scoring request: %s, due to: %s", request, e.getMessage());
+      log.info(message);
       log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      return scoreResponseFailure(HttpStatus.BAD_REQUEST, message);
     }
   }
 
@@ -88,13 +99,17 @@ public class ModelsApiController implements ModelApi {
       log.info("Got scoring request for CSV");
       return ResponseEntity.ok(scorer.scoreCsv(file));
     } catch (IOException e) {
-      log.info("Failed loading CSV file: {}, due to: {}", file, e.getMessage());
+      String message = String.format(
+          "Failed loading CSV file: %s, due to: %s", file, e.getMessage());
+      log.info(message);
       log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      return scoreResponseFailure(HttpStatus.BAD_REQUEST, message);
     } catch (Exception e) {
-      log.info("Failed scoring CSV file: {}, due to: {}", file, e.getMessage());
+      String message = String.format(
+          "Failed scoring CSV file: %s, due to: %s", file, e.getMessage());
+      log.info(message);
       log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      return scoreResponseFailure(HttpStatus.BAD_REQUEST, message);
     }
   }
 
@@ -107,12 +122,15 @@ public class ModelsApiController implements ModelApi {
               = scorer.computeContribution(request);
       return ResponseEntity.ok(contributionResponse);
     } catch (UnsupportedOperationException e) {
-      log.info("Unsupported operation due to: {}", e.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+      String message = String.format("Unsupported operation due to: %s", e.getMessage());
+      log.info(message);
+      return scoreContributionResponseFailure(HttpStatus.NOT_IMPLEMENTED, message);
     } catch (Exception e) {
-      log.info("Failed shapley contribution request due to: {}", e.getMessage());
+      String message = String.format(
+          "Failed shapley contribution request due to: %s", e.getMessage());
+      log.info(message);
       log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      return scoreContributionResponseFailure(HttpStatus.BAD_REQUEST, message);
     }
   }
 
@@ -137,5 +155,21 @@ public class ModelsApiController implements ModelApi {
       default:
         return Arrays.asList(CapabilityType.SCORE);
     }
+  }
+
+  private ResponseEntity<ScoreResponse> scoreResponseFailure(
+      HttpStatus status,
+      String message) {
+    ScoreResponse response = new ScoreResponse();
+    response.setMessage(message);
+    return ResponseEntity.status(status).body(response);
+  }
+
+  private ResponseEntity<ContributionResponse> scoreContributionResponseFailure(
+      HttpStatus status,
+      String message) {
+    ContributionResponse response = new ContributionResponse();
+    response.setMessage(message);
+    return ResponseEntity.status(status).body(response);
   }
 }

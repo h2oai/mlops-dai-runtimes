@@ -92,7 +92,7 @@ public class MojoScorer {
    * @param request {@link ScoreRequest}
    * @return response {@link ScoreResponse}
    */
-  public ScoreResponse score(ScoreRequest request) {
+  public ScoreResponse score(ScoreRequest request) throws ShapleyScoreException {
     MojoFrame requestFrame = scoreRequestConverter
             .apply(request, pipeline.getInputFrameBuilder());
     MojoFrame responseFrame = doScore(requestFrame);
@@ -133,6 +133,7 @@ public class MojoScorer {
     } catch (Exception e) {
       log.info("Failed shapley contribution due to: {}", e.getMessage());
       log.debug(" - failure cause: ", e);
+      throw new ShapleyScoreException(e.getMessage());
     }
     return response;
   }

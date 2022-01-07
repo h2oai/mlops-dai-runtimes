@@ -221,6 +221,10 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ContributionGroup'
+      message:
+        description: >
+          Any message related to the scoring result. Typically used for propagating error messages.
+        type: string
   ContributionGroup:
     type: object
     properties:
@@ -309,6 +313,10 @@ definitions:
           An object with features and shapley values that was requested by the client.
           This field will not be populated if the Shapley values are not available for a model.
         $ref: '#/definitions/ContributionResponse'
+      message:
+        description: >
+          Any message related to the scoring result. Typically used for propagating error messages.
+        type: string
   DataField:
     type: object
     properties:
