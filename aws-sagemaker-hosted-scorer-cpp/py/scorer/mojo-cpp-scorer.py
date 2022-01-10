@@ -55,7 +55,7 @@ class MojoPipeline(object):
         return self._model.predict(d_frame)
 
 
-class PredictAPI(Resource):
+class ScorerAPI(Resource):
 
     def post(self):
         request_body = request.get_json()
@@ -71,7 +71,7 @@ class PingAPI(Resource):
         pass
 
 
-api.add_resource(PredictAPI, '/invocations')
+api.add_resource(ScorerAPI, '/invocations')
 api.add_resource(PingAPI, '/ping')
 
 
