@@ -32,8 +32,7 @@ docker run \
     -ti \
     -v `pwd`:/opt/ml/model \
     -p 8080:8080 \
-    harbor.h2o.ai/opsh2oai/h2oai/sagemaker-hosted-scorer:<tag> \
-    serve
+    harbor.h2o.ai/opsh2oai/h2oai/sagemaker-hosted-scorer:<tag>
 ```
 Step 3:  Use the following curl command to test the container locally:
 
