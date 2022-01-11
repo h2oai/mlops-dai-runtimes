@@ -12,7 +12,7 @@ import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import com.google.common.base.Strings;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -121,24 +121,21 @@ public class ModelsApiController implements ModelApi {
     return ResponseEntity.ok(sampleRequestBuilder.build(scorer.getPipeline().getInputMeta()));
   }
 
-  private List<CapabilityType> assembleSupportedCapabilities(
+  private static List<CapabilityType> assembleSupportedCapabilities(
       ShapleyLoadOption enabledShapleyTypes) {
-    List<CapabilityType> capabilityTypes = new ArrayList<>();
-    capabilityTypes.add(CapabilityType.SCORE);
     switch (enabledShapleyTypes) {
       case ALL:
-        capabilityTypes.add(CapabilityType.CONTRIBUTION_ORIGINAL);
-        capabilityTypes.add(CapabilityType.CONTRIBUTION_TRANSFORMED);
-        return capabilityTypes;
+        return Arrays.asList(
+            CapabilityType.SCORE,
+            CapabilityType.CONTRIBUTION_ORIGINAL,
+            CapabilityType.CONTRIBUTION_TRANSFORMED);
       case ORIGINAL:
-        capabilityTypes.add(CapabilityType.CONTRIBUTION_ORIGINAL);
-        return capabilityTypes;
+        return Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_ORIGINAL);
       case TRANSFORMED:
-        capabilityTypes.add(CapabilityType.CONTRIBUTION_TRANSFORMED);
-        return capabilityTypes;
+        return Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_TRANSFORMED);
       case NONE:
       default:
-        return capabilityTypes;
+        return Arrays.asList(CapabilityType.SCORE);
     }
   }
 }

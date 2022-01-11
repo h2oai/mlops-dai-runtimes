@@ -9,14 +9,10 @@ import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import ai.h2o.mojos.runtime.MojoPipeline;
-import ai.h2o.mojos.runtime.api.BasePipelineListener;
 import ai.h2o.mojos.runtime.api.MojoPipelineService;
-import ai.h2o.mojos.runtime.frame.MojoColumn;
-import ai.h2o.mojos.runtime.frame.MojoFrame;
-import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
-import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,23 +28,20 @@ import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 class ModelsApiControllerTest {
-  private static final String MOJO_PIPELINE_PATH = "src/test/resources/multinomial-pipeline.mojo";
-  private static final String TEST_UUID = "TEST_UUID";
-
   @Mock private SampleRequestBuilder sampleRequestBuilder;
 
   @BeforeAll
-  static void setup() {
-    System.setProperty("mojo.path", "src/test/resources/multinomial-pipeline.mojo");
-    mockDummyPipeline();
+  static void setup() throws IOException {
+    File tmpModel = File.createTempFile("pipeline", ".mojo");
+    System.setProperty("mojo.path", tmpModel.getAbsolutePath());
+    mockMojoPipeline(tmpModel);
   }
 
-  private static void mockDummyPipeline() {
-    MojoPipeline dummyPipeline =
-        new DummyPipeline(TEST_UUID, MojoFrameMeta.getEmpty(), MojoFrameMeta.getEmpty());
+  private static void mockMojoPipeline(File tmpModel) {
+    MojoPipeline mojoPipeline = Mockito.mock(MojoPipeline.class);
     MockedStatic<MojoPipelineService> theMock = Mockito.mockStatic(MojoPipelineService.class);
     theMock.when(() -> MojoPipelineService
-        .loadPipeline(new File(MOJO_PIPELINE_PATH))).thenReturn(dummyPipeline);
+        .loadPipeline(new File(tmpModel.getAbsolutePath()))).thenReturn(mojoPipeline);
   }
 
   @Test
@@ -121,54 +114,5 @@ class ModelsApiControllerTest {
 
     // Then
     assertEquals(expectedCapabilities, response.getBody());
-  }
-
-  /** Dummy pipeline {@link MojoPipeline} just to mock the static methods used inside scoring. */
-  private static class DummyPipeline extends MojoPipeline {
-    private final MojoFrameMeta inputMeta;
-    private final MojoFrameMeta outputMeta;
-
-    private DummyPipeline(String uuid, MojoFrameMeta inputMeta, MojoFrameMeta outputMeta) {
-      super(uuid, null, null);
-      this.inputMeta = inputMeta;
-      this.outputMeta = outputMeta;
-    }
-
-    @Override
-    public MojoFrameMeta getInputMeta() {
-      return inputMeta;
-    }
-
-    @Override
-    public MojoFrameMeta getOutputMeta() {
-      return outputMeta;
-    }
-
-    @Override
-    protected MojoFrameBuilder getFrameBuilder(MojoColumn.Kind kind) {
-      return new MojoFrameBuilder(outputMeta);
-    }
-
-    @Override
-    protected MojoFrameMeta getMeta(MojoColumn.Kind kind) {
-      return outputMeta;
-    }
-
-    @Override
-    public MojoFrame transform(MojoFrame inputFrame, MojoFrame outputFrame) {
-      return outputFrame;
-    }
-
-    @Override
-    public void setShapPredictContrib(boolean enable) {
-    }
-
-    @Override
-    public void setShapPredictContribOriginal(boolean enable) {
-    }
-
-    @Override
-    public void setListener(BasePipelineListener listener) {
-    }
   }
 }
