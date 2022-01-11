@@ -14,8 +14,8 @@ ENV MOJO_FILE_PATH='/opt/ml/model/pipeline.mojo'
 
 RUN mkdir -p /opt/ml/code
 
-COPY py/scorer/mojo-cpp-scorer.py /opt/ml/code
+COPY py/scorer/mojo_cpp_scorer.py /opt/ml/code
 
 WORKDIR /opt/ml/code
 
-ENTRYPOINT ["python", "mojo-cpp-scorer.py"]
+ENTRYPOINT ["python", "mojo_cpp_scorer.py"]

@@ -55,13 +55,20 @@ class MojoPipeline(object):
         return self._model.predict(d_frame)
 
 
+class ScorerError(Exception):
+    """Base Scorer Error"""
+    status_code = 500
+
+class BadRequest(ScorerError):
+    """Bad request"""
+    status_code = 400
+
+
 class ScorerAPI(Resource):
 
     def post(self):
-        request_body = request.get_json()
-        res = predict(request_body)
-
-        json_response = json.dumps(res)
+        response = request_handler(request)
+        json_response = json.dumps(response)
         return json_response
 
 
@@ -75,7 +82,21 @@ api.add_resource(ScorerAPI, '/invocations')
 api.add_resource(PingAPI, '/ping')
 
 
-def predict(request_body):
+def request_handler(request):
+    request_body = request.get_json()
+    if request_body is None or len(request_body.keys()) == 0:
+       raise BadRequest("Invalid request. Need a request body.")
+
+    if 'fields' not in request_body.keys() or not isinstance(request_body['fields'], list):
+       raise BadRequest("Cannot determine the request column fields")
+
+    if 'rows' not in request_body.keys() or not isinstance(request_body['rows'], list):
+       raise BadRequest("Cannot determine the request rows")
+
+    scoring_result = score(request_body)
+    return scoring_result
+
+def score(request_body):
     mojo = MojoPipeline()
 
     # properly define types based on the request elements order
@@ -94,7 +115,7 @@ def predict(request_body):
     result = mojo.get_prediction(d_frame)
 
     return {
-        'Scores': result.to_list()
+        'score': result.to_list()
     }
 
 
