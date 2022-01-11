@@ -9,6 +9,7 @@ import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
+import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.Arrays;
@@ -24,12 +25,12 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ModelsApiController implements ModelApi {
 
-  private static final List<CapabilityType> SUPPORTED_CAPABILITIES
-      = Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_TRANSFORMED);
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
   private final MojoScorer scorer;
   private final SampleRequestBuilder sampleRequestBuilder;
+
+  private final List<CapabilityType> supportedCapabilities;
 
   /**
    * Simple Api controller. Inherits from {@link ModelApi}, which controls global, expected request
@@ -44,6 +45,9 @@ public class ModelsApiController implements ModelApi {
   public ModelsApiController(MojoScorer scorer, SampleRequestBuilder sampleRequestBuilder) {
     this.scorer = scorer;
     this.sampleRequestBuilder = sampleRequestBuilder;
+    this.supportedCapabilities = assembleSupportedCapabilities(
+        scorer.getEnabledShapleyTypes()
+    );
   }
 
   @Override
@@ -58,7 +62,7 @@ public class ModelsApiController implements ModelApi {
 
   @Override
   public ResponseEntity<List<CapabilityType>> getCapabilities() {
-    return ResponseEntity.ok(SUPPORTED_CAPABILITIES);
+    return ResponseEntity.ok(supportedCapabilities);
   }
 
   @Override
@@ -115,5 +119,23 @@ public class ModelsApiController implements ModelApi {
   @Override
   public ResponseEntity<ScoreRequest> getSampleRequest() {
     return ResponseEntity.ok(sampleRequestBuilder.build(scorer.getPipeline().getInputMeta()));
+  }
+
+  private static List<CapabilityType> assembleSupportedCapabilities(
+      ShapleyLoadOption enabledShapleyTypes) {
+    switch (enabledShapleyTypes) {
+      case ALL:
+        return Arrays.asList(
+            CapabilityType.SCORE,
+            CapabilityType.CONTRIBUTION_ORIGINAL,
+            CapabilityType.CONTRIBUTION_TRANSFORMED);
+      case ORIGINAL:
+        return Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_ORIGINAL);
+      case TRANSFORMED:
+        return Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_TRANSFORMED);
+      case NONE:
+      default:
+        return Arrays.asList(CapabilityType.SCORE);
+    }
   }
 }
