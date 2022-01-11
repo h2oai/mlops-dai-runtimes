@@ -45,7 +45,9 @@ public class ModelsApiController implements ModelApi {
   public ModelsApiController(MojoScorer scorer, SampleRequestBuilder sampleRequestBuilder) {
     this.scorer = scorer;
     this.sampleRequestBuilder = sampleRequestBuilder;
-    this.supportedCapabilities = setSupportedCapabilities();
+    this.supportedCapabilities = assembleSupportedCapabilities(
+        scorer.getEnabledShapleyTypes()
+    );
   }
 
   @Override
@@ -119,25 +121,24 @@ public class ModelsApiController implements ModelApi {
     return ResponseEntity.ok(sampleRequestBuilder.build(scorer.getPipeline().getInputMeta()));
   }
 
-  private List<CapabilityType> setSupportedCapabilities() {
+  private List<CapabilityType> assembleSupportedCapabilities(
+      ShapleyLoadOption enabledShapleyTypes) {
     List<CapabilityType> capabilityTypes = new ArrayList<>();
     capabilityTypes.add(CapabilityType.SCORE);
-    ShapleyLoadOption enabledShapleyTypes = scorer.getEnabledShapleyTypes();
     switch (enabledShapleyTypes) {
       case ALL:
         capabilityTypes.add(CapabilityType.CONTRIBUTION_ORIGINAL);
         capabilityTypes.add(CapabilityType.CONTRIBUTION_TRANSFORMED);
-        break;
+        return capabilityTypes;
       case ORIGINAL:
         capabilityTypes.add(CapabilityType.CONTRIBUTION_ORIGINAL);
-        break;
+        return capabilityTypes;
       case TRANSFORMED:
         capabilityTypes.add(CapabilityType.CONTRIBUTION_TRANSFORMED);
-        break;
+        return capabilityTypes;
       case NONE:
       default:
-        break;
+        return capabilityTypes;
     }
-    return capabilityTypes;
   }
 }
