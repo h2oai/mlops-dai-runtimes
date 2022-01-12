@@ -82,8 +82,7 @@ public class ModelsApiController implements ModelApi {
   @Override
   public ResponseEntity<ScoreResponse> getScoreByFile(String file) {
     if (Strings.isNullOrEmpty(file)) {
-      log.info("Request is missing a valid CSV file path");
-      return ResponseEntity.badRequest().build();
+      throw new ScoringException("Request is missing a valid CSV file path");
     }
     try {
       log.info("Got scoring request for CSV");
