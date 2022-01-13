@@ -1,8 +1,10 @@
 FROM python:3.8
 
-RUN apt-get -y update && pip3 install datatable \
-    flask-restful \
-    https://s3.amazonaws.com/artifacts.h2o.ai/releases/ai/h2o/daimojo/2.7.5/x86_64-centos7/daimojo-2.7.5-cp38-cp38-linux_x86_64.whl
+RUN apt-get update && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /tmp/requirements.txt
+
+RUN pip install -r /tmp/requirements.txt
 
 ENV DRIVERLESS_AI_LICENSE_FILE='/opt/ml/model/license.sig' \
     MOJO_FILE_PATH='/opt/ml/model/pipeline.mojo'
