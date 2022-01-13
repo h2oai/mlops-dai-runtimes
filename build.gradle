@@ -17,8 +17,6 @@ buildscript {
                 version: errorpronePluginVersion
         classpath group: 'com.google.cloud.tools.jib', name: 'com.google.cloud.tools.jib.gradle.plugin',
                 version: jibPluginVersion
-        classpath group: 'org.github.ngbinh.scalastyle', name: 'gradle-scalastyle-plugin_2.11',
-                version: '1.0.1'
     }
 }
 
