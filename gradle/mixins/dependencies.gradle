@@ -43,11 +43,11 @@ dependencyManagement {
             entry 'log4j-slf4j-impl'
         }
 
-        dependency group: 'org.apache.spark', name: 'spark-core_2.11', version: sparkVersion
-        dependency group: 'org.apache.spark', name: 'spark-sql_2.11', version: sparkVersion
-        dependency group: 'org.apache.spark', name: 'spark-mllib_2.11', version: sparkVersion
+        dependency group: 'org.apache.spark', name: 'spark-core_2.12', version: sparkVersion
+        dependency group: 'org.apache.spark', name: 'spark-sql_2.12', version: sparkVersion
+        dependency group: 'org.apache.spark', name: 'spark-mllib_2.12', version: sparkVersion
         dependency group: 'org.scala-lang', name: 'scala-library', version: scalaVersion
-        dependency group: 'ai.h2o', name: 'sparkling-water-scoring_2.11', version: sparklingWaterVersion
+        dependency group: 'ai.h2o', name: 'sparkling-water-scoring_2.12', version: sparklingWaterVersion
         dependency group: 'com.typesafe', name:'config', version: configVersion
         dependency group: 'uk.org.webcompere', name: 'system-stubs-jupiter', version: jupiterSystemStubsVersion
 

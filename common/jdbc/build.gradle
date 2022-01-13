@@ -9,15 +9,15 @@ dependencies {
     implementation project(':common:rest-jdbc-spring-api')
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
-    implementation group: 'ai.h2o', name: 'sparkling-water-scoring_2.11'
+    implementation group: 'ai.h2o', name: 'sparkling-water-scoring_2.12'
     implementation group: 'org.scala-lang', name: 'scala-library'
-    implementation group: 'org.apache.spark', name: 'spark-core_2.11'
-    implementation group: 'org.apache.spark', name: 'spark-sql_2.11'
-    implementation group: 'org.apache.spark', name: 'spark-mllib_2.11'
+    implementation group: 'org.apache.spark', name: 'spark-core_2.12'
+    implementation group: 'org.apache.spark', name: 'spark-sql_2.12'
+    implementation group: 'org.apache.spark', name: 'spark-mllib_2.12'
     implementation group: 'com.typesafe', name:'config'
 
-    testImplementation group: 'org.scalatest', name: 'scalatest_2.11', version: '3.0.5'
-    testRuntimeOnly group:'org.scala-lang.modules', name: 'scala-xml_2.11', version: '1.1.1'
+    testImplementation group: 'org.scalatest', name: 'scalatest_2.12', version: '3.0.5'
+    testRuntimeOnly group:'org.scala-lang.modules', name: 'scala-xml_2.12', version: '1.1.1'
     testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'
     testImplementation group: 'org.mockito', name: 'mockito-core'
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter'
@@ -35,14 +35,4 @@ bootJar {
 
 jar {
     enabled=true
-}
-
-apply plugin: 'scalaStyle'
-
-scalaStyle {
-    //configLocation = "$rootDir/gradle/conf/scalastyle_conf.xml"
-    configLocation = "${rootDir}/conf/scalastyle-config.xml"
-    includeTestSourceDirectory = true
-    source = "src/main/scala"
-    testSource = "src/test/scala"
 }
