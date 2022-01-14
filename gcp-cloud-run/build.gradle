@@ -41,8 +41,8 @@ jib {
         image = dockerRepositoryPrefix + 'google-cloud-run-scorer'
         tags = [version]
         auth {
-            username = System.getenv('TO_DOCKER_USERNAME')
-            password = System.getenv('TO_DOCKER_PASSWORD')
+            username = System.getenv('TO_DOCKER_USERNAME') ?: ''
+            password = System.getenv('TO_DOCKER_PASSWORD') ?: ''
         }
     }
     container {

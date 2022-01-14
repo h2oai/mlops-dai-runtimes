@@ -61,8 +61,8 @@ jib {
         image = dockerRepositoryPrefix + 'rest-scorer'
         tags = [version]
         auth {
-            username = System.getenv('TO_DOCKER_USERNAME')
-            password = System.getenv('TO_DOCKER_PASSWORD')
+            username = System.getenv('TO_DOCKER_USERNAME') ?: ''
+            password = System.getenv('TO_DOCKER_PASSWORD') ?: ''
         }
     }
     container {
