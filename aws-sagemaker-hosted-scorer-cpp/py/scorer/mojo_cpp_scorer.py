@@ -6,6 +6,7 @@ import os
 import threading
 import daimojo.model
 import datatable as dt
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -67,9 +68,8 @@ class BadRequest(ScorerError):
 class ScorerAPI(Resource):
 
     def post(self):
-        response = request_handler(request)
-        json_response = json.dumps(response)
-        return json_response
+        response_payload = request_handler(request)
+        return response_payload
 
 
 class PingAPI(Resource):
@@ -112,12 +112,12 @@ def score(request_body):
         na_strings=mojo.get_missing_values()
     )
 
-    result = mojo.get_prediction(d_frame)
+    result_frame = mojo.get_prediction(d_frame)
+    combined_frame = dt.cbind(d_frame, result_frame)
+    pandas_df = combined_frame.to_pandas()
+    json_response = pandas_df.to_json(orient = 'records', date_format='iso')
 
-    return {
-        'score': result.to_list()
-    }
-
+    return json_response
 
 if __name__ == '__main__':
     logger.info('==== Starting the H2O mojo-cpp scoring server =====')
