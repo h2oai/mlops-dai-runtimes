@@ -32,6 +32,9 @@ class MojoPipeline(object):
         mojo_file_path = os.getenv('MOJO_FILE_PATH')
         self._model = daimojo.model(mojo_file_path)
 
+    def get_id(self):
+        return self._model.uuid
+
     def get_feature_names(self):
         """Return feature names"""
 
@@ -69,7 +72,8 @@ class ScorerAPI(Resource):
 
     def post(self):
         response_payload = request_handler(request)
-        return response_payload
+        json_response = json.dumps(response_payload)
+        return json_response
 
 
 class PingAPI(Resource):
@@ -113,11 +117,37 @@ def score(request_body):
     )
 
     result_frame = mojo.get_prediction(d_frame)
-    combined_frame = dt.cbind(d_frame, result_frame)
-    pandas_df = combined_frame.to_pandas()
-    json_response = pandas_df.to_json(orient = 'records', date_format='iso')
+    request_id = mojo.get_id()
 
-    return json_response
+
+    #check whether 'includeFieldsInOutput' comes with request body and combined them with scored result
+    if 'includeFieldsInOutput' in request_body:
+      include_fields = list(request_body['includeFieldsInOutput'])
+      if len(include_fields) > 0:
+          combined_df = get_combined_frame(d_frame, result_frame, include_fields)
+          pandas_df = combined_df.to_pandas()
+          json_response = pandas_df.to_json(orient = 'values', date_format='iso')
+
+          return {
+              'id': request_id,
+              'fields' : list(combined_df.names),
+              'score': json_response
+          }
+
+    return {
+        'id': request_id,
+        'score': result_frame.to_list()
+    }
+
+def get_combined_frame(input_frame, result_frame, include_on_out_fields):
+    combined_frame = dt.Frame()
+
+    for include_column in include_on_out_fields:
+        combined_frame = dt.cbind(combined_frame, input_frame[include_column])
+
+    combined_frame = dt.cbind(combined_frame, result_frame)
+    return combined_frame
+
 
 if __name__ == '__main__':
     logger.info('==== Starting the H2O mojo-cpp scoring server =====')
