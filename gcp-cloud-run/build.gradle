@@ -35,7 +35,7 @@ rootProject.distributionZip {
 // Docker image configuration.
 jib {
     from {
-        image = 'openjdk:8-jre-alpine'
+        image = javaBaseImage
     }
     to {
         image = dockerRepositoryPrefix + 'google-cloud-run-scorer'
