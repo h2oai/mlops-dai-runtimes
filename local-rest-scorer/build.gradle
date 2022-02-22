@@ -38,6 +38,11 @@ bootRun {
 bootJar {
     mainClassName = 'ai.h2o.mojos.deploy.local.rest.ScorerApplication'
     archiveClassifier = 'boot'
+    manifest {
+        attributes 'Main-Class': 'water.H2OApp'
+        attributes 'Add-Opens': 'java.base/java.lang java.base/java.util java.base/java.lang.reflect'
+        attributes 'Multi-Release': 'true'
+    }
 }
 
 jar {
