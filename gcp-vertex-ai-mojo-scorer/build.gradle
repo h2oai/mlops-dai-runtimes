@@ -63,7 +63,7 @@ jib {
         }
     }
     container {
-        jvmFlags = ['-Dmojo.path=/tmp/pipeline.mojo']
+        jvmFlags = defaultJibContainerJvmFlags.split(" ").each { it.trim() }
         ports = ['8080']
         environment = [
                 // The expected path to the DAI license file.
