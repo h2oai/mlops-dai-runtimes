@@ -38,11 +38,6 @@ bootRun {
 bootJar {
     mainClassName = 'ai.h2o.mojos.deploy.local.rest.ScorerApplication'
     archiveClassifier = 'boot'
-    manifest {
-        attributes 'Main-Class': 'water.H2OApp'
-        attributes 'Add-Opens': 'java.base/java.lang java.base/java.util java.base/java.lang.reflect'
-        attributes 'Multi-Release': 'true'
-    }
 }
 
 jar {
@@ -71,7 +66,7 @@ jib {
         }
     }
     container {
-        jvmFlags = ['-Dmojo.path=/mojos/pipeline.mojo']
+        jvmFlags = defaultJibContainerJvmFlags.split(" ").each { it.trim() }
         ports = ['8080']
         volumes = [
                 // For storing the mojo2 file with the model to be used for scoring.
