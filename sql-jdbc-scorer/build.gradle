@@ -33,5 +33,5 @@ bootRun {
 }
 
 bootJar {
-    mainClassName = 'ai.h2o.mojos.deploy.sql.db.ScorerApplication'
+    mainClass = 'ai.h2o.mojos.deploy.sql.db.ScorerApplication'
 }

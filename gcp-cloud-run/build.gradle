@@ -21,7 +21,7 @@ bootRun {
 }
 
 bootJar {
-    mainClassName = 'ai.h2o.mojos.deploy.gcp.cloud.run.GcpScorerApplication'
+    mainClass = 'ai.h2o.mojos.deploy.gcp.cloud.run.GcpScorerApplication'
 }
 
 // Include the local rest scorer executable jar in the root package distribution zip file.
