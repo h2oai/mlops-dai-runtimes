@@ -37,7 +37,7 @@ bootRun {
 }
 
 bootJar {
-    mainClassName = 'ai.h2o.mojos.deploy.gcp.vertex.ai.GcpVertexAiApplication'
+    mainClass = 'ai.h2o.mojos.deploy.gcp.vertex.ai.GcpVertexAiApplication'
     archiveClassifier = 'boot'
 }
 
