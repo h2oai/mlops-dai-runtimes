@@ -1,12 +1,11 @@
-from flask import Flask, request
-from flask_restful import Resource, Api
 import logging
-import json
 import os
 import threading
+
 import daimojo.model
 import datatable as dt
-import pandas as pd
+from flask import Flask, request
+from flask_restful import Resource, Api
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,6 +28,7 @@ class MojoPipeline(object):
         return MojoPipeline._instance
 
     def setup(self):
+        self._set_omp_threads()
         mojo_file_path = os.getenv('MOJO_FILE_PATH')
         self._model = daimojo.model(mojo_file_path)
 
@@ -52,7 +52,12 @@ class MojoPipeline(object):
 
     def get_prediction(self, d_frame):
         """Score and return predictions on a given dataset"""
+        self._set_omp_threads()
         return self._model.predict(d_frame)
+
+    @staticmethod
+    def _set_omp_threads():
+        os.environ['OMP_NUM_THREADS'] = str(1)
 
 
 class ScorerError(Exception):
