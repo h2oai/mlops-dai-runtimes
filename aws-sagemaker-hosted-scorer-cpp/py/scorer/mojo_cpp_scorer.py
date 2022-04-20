@@ -1,6 +1,7 @@
 import logging
 import os
 import threading
+import time
 
 import daimojo.model
 import datatable as dt
@@ -70,7 +71,7 @@ class BadRequest(ScorerError):
     status_code = 400
 
 
-def score(request_body):
+def score(request_body, timeit=False):
     if request_body is None or len(request_body.keys()) == 0:
         raise BadRequest("Invalid request. Need a request body.")
 
@@ -89,7 +90,9 @@ def score(request_body):
         stypes=list(mojo.get_types().values())
     )
 
+    start = time.time() if timeit else 0
     result_frame = mojo.get_prediction(d_frame)
+    delta = time.time() - start if timeit else 0
     request_id = mojo.get_id()
 
     # check whether 'includeFieldsInOutput' comes with request body and combined them with scored result
@@ -98,11 +101,15 @@ def score(request_body):
         if len(include_fields) > 0:
             result_frame = get_combined_frame(d_frame, result_frame, include_fields)
 
-    return {
+    ret = {
         'id': request_id,
         'fields': result_frame.names,
         'score': result_frame.to_list()
     }
+    if timeit:
+        ret['time'] = delta
+
+    return ret
 
 
 def get_combined_frame(input_frame, result_frame, include_on_out_fields):
@@ -119,7 +126,7 @@ class ScorerAPI(Resource):
     def post(self):
         request_body = request.get_json()
         try:
-            scoring_result = score(request_body)
+            scoring_result = score(request_body, timeit='timeit' in request.args.keys())
         except ScorerError as e:
             return {'message': str(e)}, e.status_code
         except Exception as exc:
