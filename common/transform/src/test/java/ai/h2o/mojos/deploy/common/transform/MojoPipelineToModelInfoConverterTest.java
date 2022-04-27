@@ -14,6 +14,7 @@ import ai.h2o.mojos.runtime.frame.MojoColumn.Type;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
+import java.io.PrintStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -162,6 +163,11 @@ class MojoPipelineToModelInfoConverterTest {
     }
 
     @Override
+    public MojoFrameBuilder getOutputFrameBuilder(MojoFrameBuilder inputFrameBuilder) {
+      return null;
+    }
+
+    @Override
     protected MojoFrameBuilder getFrameBuilder(MojoColumn.Kind kind) {
       throw new AssertionError("Not supported by test DummyPipeline.");
     }
@@ -189,6 +195,11 @@ class MojoPipelineToModelInfoConverterTest {
     @Override
     public void setListener(BasePipelineListener listener) {
       throw new AssertionError("Not supported by test DummyPipeline.");
+    }
+
+    @Override
+    public void printPipelineInfo(PrintStream out) {
+
     }
   }
 }

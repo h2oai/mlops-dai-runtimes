@@ -21,6 +21,7 @@ import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -488,6 +489,11 @@ class MojoScorerTest {
     }
 
     @Override
+    public MojoFrameBuilder getOutputFrameBuilder(MojoFrameBuilder inputFrameBuilder) {
+      return null;
+    }
+
+    @Override
     protected MojoFrameBuilder getFrameBuilder(MojoColumn.Kind kind) {
       return new MojoFrameBuilder(outputMeta);
     }
@@ -512,6 +518,11 @@ class MojoScorerTest {
 
     @Override
     public void setListener(BasePipelineListener listener) {
+    }
+
+    @Override
+    public void printPipelineInfo(PrintStream out) {
+
     }
   }
 
