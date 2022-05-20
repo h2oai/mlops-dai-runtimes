@@ -1,4 +1,4 @@
 pandas
 datatable
 flask-restful
-https://s3.amazonaws.com/artifacts.h2o.ai/releases/ai/h2o/daimojo/2.7.9%2Bcu111.master.447/x86_64-centos7/daimojo-2.7.9%2Bmaster.447-cp38-cp38-linux_x86_64.whl
+https://s3.amazonaws.com/artifacts.h2o.ai/releases/ai/h2o/daimojo/2.7.8/x86_64-centos7/daimojo-2.7.8-cp38-cp38-linux_x86_64.whl
