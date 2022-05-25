@@ -147,4 +147,4 @@ api.add_resource(PingAPI, '/ping')
 
 if __name__ == '__main__':
     logger.info('==== Starting the H2O mojo-cpp scoring server =====')
-    app.run(host='0.0.0.0', port=8080, threaded=True)
+    app.run(host='0.0.0.0', port=8080, threaded=False)
