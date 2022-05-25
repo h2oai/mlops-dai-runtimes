@@ -60,7 +60,7 @@ class MojoPipeline(object):
     def _set_omp_threads():
         os.environ['OMP_NUM_THREADS'] = str(max(1, int(os.cpu_count()/2)))
         os.environ['OMP_SCHEDULE'] = 'STATIC'
-        #os.environ['OMP_PROC_BIND'] = 'CLOSE'
+        os.environ['OMP_PROC_BIND'] = 'CLOSE'
 
 
 class ScorerError(Exception):
@@ -147,4 +147,4 @@ api.add_resource(PingAPI, '/ping')
 
 if __name__ == '__main__':
     logger.info('==== Starting the H2O mojo-cpp scoring server =====')
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, threaded=True)
