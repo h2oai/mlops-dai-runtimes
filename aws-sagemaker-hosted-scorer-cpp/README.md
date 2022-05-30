@@ -10,6 +10,13 @@ Run the following command to build the docker image.
 docker build -t <aws_account_id>.dkr.ecr.<region>.amazonaws.com/h2oai/sagemaker-hosted-scorer:<tag> .
 ```
 
+Run the following command to build the docker image with gpu support.
+
+```bash
+docker build -t <aws_account_id>.dkr.ecr.<region>.amazonaws.com/h2oai/sagemaker-hosted-scorer:<tag> -f gpu.docker .
+```
+
+
 Verify that the Docker image was created, and take note of the version created.
 
 ```bash
@@ -34,6 +41,20 @@ docker run \
     -p 8080:8080 \
     harbor.h2o.ai/opsh2oai/h2oai/sagemaker-hosted-scorer:<tag>
 ```
+
+And to run the gpu image.
+
+```
+docker run \
+    --gpus all \
+    --rm \
+    --init \
+    -ti \
+    -v `pwd`:/opt/ml/model \
+    -p 8080:8080 \
+    harbor.h2o.ai/opsh2oai/h2oai/sagemaker-hosted-scorer:<tag>
+```
+
 (the number of web server workers can be configured by setting the environment variable: `WEB_SERVER_WORKERS` in the docker run command)
 
 Step 3:  Use the following curl command to test the container locally:
