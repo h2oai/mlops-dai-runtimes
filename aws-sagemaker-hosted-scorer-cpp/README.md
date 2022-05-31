@@ -34,6 +34,8 @@ docker run \
     -p 8080:8080 \
     harbor.h2o.ai/opsh2oai/h2oai/sagemaker-hosted-scorer:<tag>
 ```
+(the number of web server workers can be configured by setting the environment variable: `WEB_SERVER_WORKERS` in the docker run command)
+
 Step 3:  Use the following curl command to test the container locally:
 
 ```
