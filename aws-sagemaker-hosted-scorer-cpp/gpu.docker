@@ -19,4 +19,4 @@ COPY py/scorer/mojo_cpp_scorer.py /opt/ml/code
 
 WORKDIR /opt/ml/code
 
-ENTRYPOINT gunicorn -w ${WEB_SERVER_WORKERS:-4} -b 0.0.0.0:8080 mojo_cpp_scorer:app
+ENTRYPOINT gunicorn -w ${WEB_SERVER_WORKERS} -b 0.0.0.0:8080 mojo_cpp_scorer:app
