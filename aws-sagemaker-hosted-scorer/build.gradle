@@ -16,8 +16,8 @@ dependencies {
     implementation group: 'io.springfox', name: 'springfox-boot-starter', version: springFoxVersion
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.60'
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '9.0.60'
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.63'
+    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '9.0.63'
 }
 
 test {
