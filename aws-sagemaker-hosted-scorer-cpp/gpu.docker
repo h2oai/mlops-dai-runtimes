@@ -1,0 +1,22 @@
+FROM nvidia/cuda:11.1.1-base-ubuntu20.04
+
+RUN apt-get update && \
+    apt-get install -y libopenblas-dev python3.8 python3-pip && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3.8 0 && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements_gpu.txt /tmp/requirements.txt
+
+RUN python -m pip install pip==21.1 && pip install -r /tmp/requirements.txt
+
+ENV DRIVERLESS_AI_LICENSE_FILE='/opt/ml/model/license.sig'
+ENV MOJO_FILE_PATH='/opt/ml/model/pipeline.mojo'
+ENV WEB_SERVER_WORKERS=4
+
+RUN mkdir -p /opt/ml/code
+
+COPY py/scorer/mojo_cpp_scorer.py /opt/ml/code
+
+WORKDIR /opt/ml/code
+
+ENTRYPOINT gunicorn -w ${WEB_SERVER_WORKERS} -b 0.0.0.0:8080 mojo_cpp_scorer:app
