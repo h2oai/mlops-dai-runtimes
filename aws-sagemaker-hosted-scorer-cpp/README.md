@@ -57,6 +57,11 @@ docker run \
 
 (the number of web server workers can be configured by setting the environment variable: `WEB_SERVER_WORKERS` in the docker run command)
 
+Recommended parameters:
+* `OMP_NUM_THREADS=8` and can be increased for long size texts.
+* `cores/(2*OMP_NUM_THREADS) <= WEB_SERVER_WORKERS <= cores/OMP_NUM_THREADS`
+* `OMP_NUM_THREADS*WEB_SERVER_WORKERS` MUST NOT exceed `cores`
+
 Step 3:  Use the following curl command to test the container locally:
 
 ```

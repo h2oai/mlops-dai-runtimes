@@ -58,9 +58,7 @@ class MojoPipeline(object):
 
     @staticmethod
     def _set_omp_threads():
-        os.environ['OMP_NUM_THREADS'] = str(max(1, int(os.cpu_count()/2)))
-        os.environ['OMP_SCHEDULE'] = 'STATIC'
-        os.environ['OMP_PROC_BIND'] = 'CLOSE'
+        os.environ['OMP_NUM_THREADS'] = str(min(8, int(os.cpu_count())/2))
 
 
 class ScorerError(Exception):
