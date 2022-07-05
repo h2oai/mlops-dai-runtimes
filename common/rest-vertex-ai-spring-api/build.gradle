@@ -13,10 +13,10 @@ dependencies {
 
 swaggerSources {
     api {
-        inputFile = file('../swagger/vertex-ai-swagger.yaml')
+        inputFile = file('../swagger/v1/vertex-ai-swagger.yaml')
         code {
             language = 'spring'
-            configFile = file('../swagger/vertex_ai_swagger_codegen.json')
+            configFile = file('../swagger/v1/vertex_ai_swagger_codegen.json')
             components = [models: true, apis: true]
             dependsOn validation
         }

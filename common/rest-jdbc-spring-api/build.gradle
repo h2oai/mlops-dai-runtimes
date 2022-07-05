@@ -13,10 +13,10 @@ dependencies {
 
 swaggerSources {
     api {
-        inputFile = file('../swagger/jdbc-swagger.yaml')
+        inputFile = file('../swagger/v1/jdbc-swagger.yaml')
         code {
             language = 'spring'
-            configFile = file('../swagger/jdbc_swagger_codegen.json')
+            configFile = file('../swagger/v1/jdbc_swagger_codegen.json')
             components = [models: true, apis: true]
             dependsOn validation
         }

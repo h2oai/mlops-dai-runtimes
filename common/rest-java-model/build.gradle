@@ -12,10 +12,10 @@ dependencies {
 
 swaggerSources {
     model {
-        inputFile = file('../swagger/swagger.yaml')
+        inputFile = file('../swagger/v1/swagger.yaml')
         code {
             language = 'java'
-            configFile = file('../swagger/swagger_codegen.json')
+            configFile = file('../swagger/v1/swagger_codegen.json')
             components = [models: true]
             dependsOn validation
         }
