@@ -53,4 +53,7 @@ sourceSets {
     }
 }
 
-compileJava.dependsOn swaggerSources.api.code
+compileJava {
+    dependsOn swaggerSources.api.code
+    dependsOn swaggerSources.apiV2.code
+}

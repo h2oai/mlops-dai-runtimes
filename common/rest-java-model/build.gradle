@@ -40,4 +40,7 @@ sourceSets {
     }
 }
 
-compileJava.dependsOn swaggerSources.model.code
+compileJava {
+    dependsOn swaggerSources.model.code
+    dependsOn swaggerSources.modelV2.code
+}
