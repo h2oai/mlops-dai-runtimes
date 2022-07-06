@@ -1,0 +1,68 @@
+openapi: '3.0.0'
+info:
+  description: >-
+    This is an extension of the REST API for scoring from H2O. This API is
+    intended to be used for scoring within H2O.ai MLOps.
+  version: 2.0.0
+  title: Scoring API - v2
+  contact:
+    email: support@h2o.ai
+  license:
+    name: License
+    url: 'http://www.h2o.ai'
+servers:
+  - url: '{protocol}://127.0.0.1'
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: http
+      port:
+        default: '8080'
+paths:
+  /model/score/media:
+    post:
+      tags:
+        - scoring
+      summary: Score model with provided media files
+      description: Computes score of provided data making use of provided media files
+      operationId: getScoreMedia
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                payload:
+                  $ref: '#/components/schemas/ScoreMediaRequest'
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Successful scoring operation
+          content:
+            application/json:
+              schema:
+                $ref: '../v1/swagger.yaml#/definitions/ScoreResponse'
+        '501':
+          description: Implementation not supported
+        '400':
+          description: Invalid payload
+components:
+  schemas:
+    ScoreMediaRequest:
+      allOf:
+        - $ref: '../v1/swagger.yaml#/definitions/ScoreRequest'
+        - properties:
+            mediaColumns:
+              description: >
+                An array holding the names of all fields which are expected to contain media files.
+                Contents of these fields will be replaced by corresponding uploaded files where the
+                expected values in the column must be the file names of the uploaded files
+              type: array
+              items:
+                type: string
