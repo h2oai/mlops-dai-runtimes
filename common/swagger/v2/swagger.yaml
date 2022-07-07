@@ -41,6 +41,9 @@ paths:
                   items:
                     type: string
                     format: binary
+              required:
+                - payload
+                - files
       responses:
         '200':
           description: Successful scoring operation

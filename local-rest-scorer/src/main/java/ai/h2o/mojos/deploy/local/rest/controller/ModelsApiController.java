@@ -7,7 +7,6 @@ import ai.h2o.mojos.deploy.common.rest.model.ContributionResponse;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
-import ai.h2o.mojos.deploy.common.rest.v2.model.ScoreMediaRequest;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
@@ -19,14 +18,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 @Controller
-public class ModelsApiController implements
-    ModelApi, ai.h2o.mojos.deploy.common.rest.v2.api.ModelApi {
+public class ModelsApiController implements ModelApi {
 
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
@@ -140,11 +137,5 @@ public class ModelsApiController implements
       default:
         return Arrays.asList(CapabilityType.SCORE);
     }
-  }
-
-  @Override
-  public ResponseEntity<ai.h2o.mojos.deploy.common.rest.v2.model.ScoreResponse> getScoreMedia(
-      ScoreMediaRequest payload, List<Resource> files) {
-    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
   }
 }
