@@ -8,6 +8,6 @@ public class MultipartConverter implements Converter<MultipartFile, Resource> {
 
   @Override
   public Resource convert(MultipartFile source) {
-    return null;
+    return source.getResource();
   }
 }
