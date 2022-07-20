@@ -21,8 +21,6 @@ public class ModelsApiControllerV2 implements ModelApi {
 
   private static final Logger log = LoggerFactory.getLogger(ModelsApiControllerV2.class);
 
-  // TODO (@nkpng2k): https://github.com/OpenAPITools/openapi-generator/issues/1646
-  // Generated code does not work properly despite proper spec.
   @Override
   public ResponseEntity<ScoreResponse> getScoreMedia(
       ScoreMediaRequest payload, List<Resource> files) {
