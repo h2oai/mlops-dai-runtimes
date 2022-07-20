@@ -21,6 +21,7 @@ paths:
       description: Computes score of provided data making use of provided media files
       operationId: getScoreMedia
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
@@ -42,16 +43,145 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../v1/swagger.yaml#/definitions/ScoreResponse'
+                $ref: '#/components/schemas/ScoreResponse'
         '501':
           description: Implementation not supported
         '400':
           description: Invalid payload
 components:
   schemas:
+    Row:
+      type: array
+      items:
+        type: string
+    ShapleyType:
+      description: >
+        The string to say what type of Shap values are needed.
+        `ORIGINAL` implies Shap values of original features are requested,
+        `TRANSFORMED` implies that Shap values of transformed features are requested.
+      type: string
+      enum: [ ORIGINAL, TRANSFORMED, NONE ]
+    ContributionRequest:
+      type: object
+      required:
+        - requestShapleyValueType
+      properties:
+        requestShapleyValueType:
+          $ref: '#/components/schemas/ShapleyType'
+        fields:
+          description: >
+            An array holding the names of fields in the order of appearance in the `rows` property. The length of `fields`
+            has to match length of each row in `rows`. No duplicates are allowed.
+          type: array
+          items:
+            type: string
+        rows:
+          description: >
+            An array of rows consisting the actual input data for scoring, one scoring request per row.
+          type: array
+          items:
+            $ref: '#/components/schemas/Row'
+    ContributionResponse:
+      description: >
+        An object with features and shapley values that was requested by the client.
+        This field will not be populated if the Shapley values are not available for a model.
+      type: object
+      properties:
+        features:
+          description: >
+            An array holding the names of fields in the order of appearance in the rows of the  `contributions` property.
+          type: array
+          items:
+            type: string
+        contributionGroups:
+          description: >
+            An array of rows consisting of the shapley contributions output corresponding to an output group.
+          type: array
+          items:
+            $ref: '#/components/schemas/ContributionGroup'
+    ContributionGroup:
+      type: object
+      properties:
+        outputGroup:
+          description: >
+            Name of the output group. It will be populated only for multinomial models.
+            Shapley values are not supported for third party models yet, hence this field will not be populated.
+          type: string
+        contributions:
+          description: >
+            An array of rows consisting of the shapley contributions output corresponding to columns in the fields
+          type: array
+          items:
+            $ref: '#/components/schemas/Row'
+    ScoreRequest:
+      type: object
+      properties:
+        requestShapleyValueType:
+          $ref: '#/components/schemas/ShapleyType'
+        includeFieldsInOutput:
+          description: >
+            An array holding the list of field names to be copied from the input request row to the corresponding scoring
+            output. It is an error to specify a field name not present in the `fields` property, except when it is equal
+            to the `idField` property. In the latter case, the row id would be generated and returned in the response.
+            Note that the order of items in `includeFieldsInOutput` is ignored and the specified fields are returned in
+            the order of appearance in the input request row.
+          type: array
+          items:
+            type: string
+        noFieldNamesInOutput:
+          description: >
+            If set to `true`. The scorer will not fill response column names in the `fields` field.
+            This is can be useful to maintain compatibility with older scorer versions or to save bandwidth.
+          type: boolean
+        idField:
+          description: >
+            Name of the field that holds a row id, e.g., a value that uniquely identifies each row of the request.
+            The caller may specify a name of the field that is not present in fields. In which case, the scorer is allowed
+            to generate a UUID to identify each row (e.g., for logging and monitoring purposes). To retrieve such a
+            generated id as a part of the response, simply name it in the `includeFieldsInOutput`.
+          type: string
+        fields:
+          description: >
+            An array holding the names of fields in the order of appearance in the `rows` property. The length of `fields`
+            has to match length of each row in `rows`. No duplicates are allowed.
+          type: array
+          items:
+            type: string
+        rows:
+          description: >
+            An array of rows consisting the actual input data for scoring, one scoring request per row.
+          type: array
+          items:
+            $ref: '#/components/schemas/Row'
+    ScoreResponse:
+      type: object
+      properties:
+        id:
+          description: >
+            A unique id of the model used for scoring.
+          type: string
+        fields:
+          description: >
+            An array holding the names of fields in the order of appearance in the rows of the  `score` property.
+            This field is not populated if requested by setting the `noFieldNamesInOutput` request field to `true`.
+          type: array
+          items:
+            type: string
+        score:
+          description: >
+            An array of rows consisting the actual scoring output. The order of rows corresponds to the order of the input
+            request rows. Each row contains any copied input fields first (in the order of appearance in the input row).
+            If the `idField` was specified and also listed in the `includeFieldsInOutput` but not provided in `fields`,
+            a unique id will be generated and positioned right after all the other fields copied from the input.
+            The scoring output follows.
+          type: array
+          items:
+            $ref: '#/components/schemas/Row'
+        featureShapleyContributions:
+          $ref: '#/components/schemas/ContributionResponse'
     ScoreMediaRequest:
       allOf:
-        - $ref: '../v1/swagger.yaml#/definitions/ScoreRequest'
+        - $ref: '#/components/schemas/ScoreRequest'
         - properties:
             mediaColumns:
               description: >
