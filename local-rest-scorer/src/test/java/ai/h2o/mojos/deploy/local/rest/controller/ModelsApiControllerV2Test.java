@@ -3,8 +3,8 @@ package ai.h2o.mojos.deploy.local.rest.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-import ai.h2o.mojos.deploy.common.rest.v2.model.ScoreMediaRequest;
-import ai.h2o.mojos.deploy.common.rest.v2.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.v1exp.model.ScoreMediaRequest;
+import ai.h2o.mojos.deploy.common.rest.v1exp.model.ScoreResponse;
 
 import java.util.ArrayList;
 import java.util.List;

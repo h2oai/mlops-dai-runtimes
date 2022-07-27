@@ -1,6 +1,6 @@
 package ai.h2o.mojos.deploy.local.rest.converters;
 
-import ai.h2o.mojos.deploy.common.rest.v2.model.ScoreMediaRequest;
+import ai.h2o.mojos.deploy.common.rest.v1exp.model.ScoreMediaRequest;
 import com.google.gson.Gson;
 import org.springframework.core.convert.converter.Converter;
 

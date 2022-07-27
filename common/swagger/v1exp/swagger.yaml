@@ -3,8 +3,8 @@ info:
   description: >-
     This is an extension of the REST API for scoring from H2O. This API is
     intended to be used for scoring within H2O.ai.
-  version: 2.0.0
-  title: Scoring API - v2
+  version: 1.2.0-exp
+  title: Scoring API - v1 experimental
   contact:
     email: support@h2o.ai
   license:
@@ -13,7 +13,7 @@ info:
 servers:
   - url: /
 paths:
-  /model/score/media:
+  /model/media-score:
     post:
       tags:
         - scoring
@@ -26,7 +26,7 @@ paths:
             schema:
               type: object
               properties:
-                payload:
+                scoreMediaRequest:
                   $ref: '#/components/schemas/ScoreMediaRequest'
                 files:
                   type: array
@@ -34,7 +34,7 @@ paths:
                     type: string
                     format: binary
               required:
-                - payload
+                - scoreMediaRequest
                 - files
       responses:
         '200':

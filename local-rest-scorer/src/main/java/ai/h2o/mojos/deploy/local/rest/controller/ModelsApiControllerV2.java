@@ -1,8 +1,8 @@
 package ai.h2o.mojos.deploy.local.rest.controller;
 
-import ai.h2o.mojos.deploy.common.rest.v2.api.ModelApi;
-import ai.h2o.mojos.deploy.common.rest.v2.model.ScoreMediaRequest;
-import ai.h2o.mojos.deploy.common.rest.v2.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.v1exp.api.ModelApi;
+import ai.h2o.mojos.deploy.common.rest.v1exp.model.ScoreMediaRequest;
+import ai.h2o.mojos.deploy.common.rest.v1exp.model.ScoreResponse;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class ModelsApiControllerV2 implements ModelApi {
 
   @Override
   public ResponseEntity<ScoreResponse> getScoreMedia(
-      ScoreMediaRequest payload, List<Resource> files) {
+      ScoreMediaRequest scoreMediaRequest, List<Resource> files) {
     log.info("Received score media request");
     return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
   }
