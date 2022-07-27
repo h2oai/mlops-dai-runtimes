@@ -17,14 +17,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-class ModelsApiControllerV2Test {
+class ModelsApiControllerV1ExpTest {
 
   @Test
   void verifyScoreMedia_ReturnsUnimplemented() {
     // Given
     ScoreMediaRequest request = mock(ScoreMediaRequest.class);
     List<Resource> files = new ArrayList<>();
-    ModelsApiControllerV2 controller = new ModelsApiControllerV2();
+    ModelsApiControllerV1Exp controller = new ModelsApiControllerV1Exp();
 
     // When
     ResponseEntity<ScoreResponse> response =

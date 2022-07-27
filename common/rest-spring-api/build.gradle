@@ -24,7 +24,7 @@ swaggerSources {
             dependsOn validation
         }
     }
-    apiV2 {
+    apiV1Exp {
         inputFile = file("../swagger/v1exp/swagger.yaml")
         code {
             language = 'spring'
@@ -48,12 +48,12 @@ sourceSets {
     main {
         java {
             srcDirs "${swaggerSources.api.code.outputDir}/src/main/java"
-            srcDirs "${swaggerSources.apiV2.code.outputDir}/src/main/java"
+            srcDirs "${swaggerSources.apiV1Exp.code.outputDir}/src/main/java"
         }
     }
 }
 
 compileJava {
     dependsOn swaggerSources.api.code
-    dependsOn swaggerSources.apiV2.code
+    dependsOn swaggerSources.apiV1Exp.code
 }

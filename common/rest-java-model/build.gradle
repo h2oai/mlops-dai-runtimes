@@ -20,7 +20,7 @@ swaggerSources {
             dependsOn validation
         }
     }
-    modelV2 {
+    modelV1Exp {
         inputFile = file("../swagger/v1exp/swagger.yaml")
         code {
             language = 'java'
@@ -35,12 +35,12 @@ sourceSets {
     main {
         java {
             srcDirs "${swaggerSources.model.code.outputDir}/src/main/java"
-            srcDirs "${swaggerSources.modelV2.code.outputDir}/src/main/java"
+            srcDirs "${swaggerSources.modelV1Exp.code.outputDir}/src/main/java"
         }
     }
 }
 
 compileJava {
     dependsOn swaggerSources.model.code
-    dependsOn swaggerSources.modelV2.code
+    dependsOn swaggerSources.modelV1Exp.code
 }

@@ -17,9 +17,9 @@ import org.springframework.stereotype.Controller;
  * Simple Javadoc.
  */
 @Controller
-public class ModelsApiControllerV2 implements ModelApi {
+public class ModelsApiControllerV1Exp implements ModelApi {
 
-  private static final Logger log = LoggerFactory.getLogger(ModelsApiControllerV2.class);
+  private static final Logger log = LoggerFactory.getLogger(ModelsApiControllerV1Exp.class);
 
   @Override
   public ResponseEntity<ScoreResponse> getScoreMedia(
