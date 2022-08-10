@@ -53,7 +53,7 @@ components:
       allOf:
         - $ref: '../v1/swagger.yaml#/definitions/ScoreRequest'
         - properties:
-            mediaColumns:
+            mediaFields:
               description: >
                 An array holding the names of all fields which are expected to contain media files.
                 Contents of these fields will be replaced by corresponding uploaded files where the
