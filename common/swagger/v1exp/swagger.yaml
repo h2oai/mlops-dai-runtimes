@@ -18,23 +18,23 @@ paths:
       tags:
         - scoring
       summary: Score model with provided media files
-      description: Computes score of provided data making use of provided media files
-      operationId: getScoreMedia
+      description: Computes score of provided data making use of provided media files.
+      operationId: getMediaScore
       requestBody:
         content:
           multipart/form-data:
             schema:
               type: object
               properties:
-                scoreMediaRequest:
-                  $ref: '#/components/schemas/ScoreMediaRequest'
+                mediaScoreRequest:
+                  $ref: '#/components/schemas/MediaScoreRequest'
                 files:
                   type: array
                   items:
                     type: string
                     format: binary
               required:
-                - scoreMediaRequest
+                - mediaScoreRequest
                 - files
       responses:
         '200':
@@ -49,7 +49,7 @@ paths:
           description: Invalid payload
 components:
   schemas:
-    ScoreMediaRequest:
+    MediaScoreRequest:
       allOf:
         - $ref: '../v1/swagger.yaml#/definitions/ScoreRequest'
         - properties:
@@ -57,7 +57,7 @@ components:
               description: >
                 An array holding the names of all fields which are expected to contain media files.
                 Contents of these fields will be replaced by corresponding uploaded files where the
-                expected values in the column must be the file names of the uploaded files
+                expected values in the column must be the file names of the uploaded files.
               type: array
               items:
                 type: string
