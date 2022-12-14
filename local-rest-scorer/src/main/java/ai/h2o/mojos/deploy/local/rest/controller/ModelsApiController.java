@@ -72,7 +72,8 @@ public class ModelsApiController implements ModelApi {
       ScoreResponse scoreResponse = scorer.score(request);
       return ResponseEntity.ok(scoreResponse);
     } catch (Exception e) {
-      log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
+      log.info("Failed scoring request due to: {}", e.getMessage());
+      log.debug(" - request content: ", request);
       log.debug(" - failure cause: ", e);
       return ResponseEntity.badRequest().build();
     }
