@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     tags:
-      - 'v.[0-9]+.[0-100]+.[0-100]+'
+      - 'v.[0-9]+.[0-9]+.[0-9]+'
     branches:
       - 'master'
 
@@ -22,23 +22,8 @@ jobs:
         id: changed-files
         with:
           files: |
-              build.gradle
-              common/jdbc/build.gradle
-              gcp-cloud-run/build.gradle
-              common/kdb-java/build.gradle
-              kdb-mojo-scorer/build.gradle
-              sql-jdbc-scorer/build.gradle
-              common/transform/build.gradle
-              local-rest-scorer/build.gradle
-              common/rest-java-model/build.gradle
-              common/rest-spring-api/build.gradle
-              gcp-vertex-ai-mojo-scorer/build.gradle
-              aws-sagemaker-hosted-scorer/build.gradle
-              common/rest-jdbc-spring-api/build.gradle
-              common/rest-vertex-ai-spring-api/build.gradle
-              aws-lambda-scorer/lambda-template/build.gradle
-              aws-lambda-scorer/terraform-recipe/build.gradle
-
+              **/build.gradle
+              
       - uses: snyk/actions/setup@master
       - uses: actions/setup-java@v3
         with:
