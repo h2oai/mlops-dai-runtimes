@@ -1,10 +1,11 @@
 name: Snyk Security Vulnerability Scan
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     tags:
-      - 'v.[0-9]+.[0-100]+.[0-100]+'
+      - 'v.[0-9]+.[0-9]+.[0-9]+'
     branches:
       - 'master'
 
@@ -18,34 +19,19 @@ jobs:
           fetch-depth: 2
 
       - name: Check changed Deps files
-        uses: tj-actions/changed-files@v10
+        uses: tj-actions/changed-files@v35
         id: changed-files
         with:
           files: |
-              build.gradle
-              common/jdbc/build.gradle
-              gcp-cloud-run/build.gradle
-              common/kdb-java/build.gradle
-              kdb-mojo-scorer/build.gradle
-              sql-jdbc-scorer/build.gradle
-              common/transform/build.gradle
-              local-rest-scorer/build.gradle
-              common/rest-java-model/build.gradle
-              common/rest-spring-api/build.gradle
-              gcp-vertex-ai-mojo-scorer/build.gradle
-              aws-sagemaker-hosted-scorer/build.gradle
-              common/rest-jdbc-spring-api/build.gradle
-              common/rest-vertex-ai-spring-api/build.gradle
-              aws-lambda-scorer/lambda-template/build.gradle
-              aws-lambda-scorer/terraform-recipe/build.gradle
-
+              **/build.gradle
+              
       - uses: snyk/actions/setup@master
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v3
         with:
           java-version: "8"
           distribution: 'adopt'
 
-      - name: Snyk scan for Java dependancies
+      - name: Snyk scan for Java dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
         run: snyk test --all-projects -d --fail-on=all
         env:
@@ -79,17 +65,17 @@ jobs:
 
       - name: Extract github branch/tag name
         shell: bash
-        run: echo "##[set-output name=ref;]$(echo ${GITHUB_REF##*/})"
+        run: echo "ref=$(echo ${GITHUB_REF##*/})" >> $GITHUB_OUTPUT
         id: extract_ref
 
       - uses: snyk/actions/setup@master
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v3
         with:
           java-version: "8"
           distribution: 'adopt'
 
-      - name: Snyk scan for Java dependancies - ${{ matrix.depsfiles }}
-        run: snyk monitor --org=h2oai --remote-repo-url=DAI --file=${{ matrix.depsfiles }} --project-name=DAI/dai-deployment-templates/${{ steps.extract_ref.outputs.ref }}/${{ matrix.depsfiles }} -d
+      - name: Snyk scan for Java dependencies - ${{ matrix.depsfiles }}
+        run: snyk monitor --org=driverless-ai --remote-repo-url=dai-deployment-templates/${{ steps.extract_ref.outputs.ref }} --file=${{ matrix.depsfiles }} --project-name=DRIVERLESS-AI/dai-deployment-templates/${{ steps.extract_ref.outputs.ref }}/${{ matrix.depsfiles }} -d
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
