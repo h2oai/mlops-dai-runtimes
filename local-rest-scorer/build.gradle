@@ -12,7 +12,7 @@ dependencies {
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-h2o3-impl'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
-    runtimeOnly group: 'ai.h2o', name: 'mojo2-runtime', version: '2.7.11.1', ext: 'jar'
+    runtimeOnly group: 'ai.h2o', name: 'mojo2-runtime', ext: 'jar'
 
     constraints {
         // because https://app.snyk.io/vuln/SNYK-JAVA-COMMONSBEANUTILS-460111
