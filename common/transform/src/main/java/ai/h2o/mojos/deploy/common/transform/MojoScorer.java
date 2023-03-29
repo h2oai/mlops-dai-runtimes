@@ -57,6 +57,7 @@ public class MojoScorer {
   private final ContributionRequestToMojoFrameConverter contributionRequestConverter;
   private final MojoPipelineToModelInfoConverter modelInfoConverter;
   private final CsvToMojoFrameConverter csvConverter;
+  private final ScoreRequestTransformer scoreRequestTransformer = new ScoreRequestTransformer();
 
   /**
    * MojoScorer class initializer, requires below parameters.
@@ -93,6 +94,7 @@ public class MojoScorer {
    * @return response {@link ScoreResponse}
    */
   public ScoreResponse score(ScoreRequest request) {
+    scoreRequestTransformer.accept(request, getModelInfo().getSchema().getInputFields());
     MojoFrame requestFrame = scoreRequestConverter
             .apply(request, pipeline.getInputFrameBuilder());
     MojoFrame responseFrame = doScore(requestFrame);

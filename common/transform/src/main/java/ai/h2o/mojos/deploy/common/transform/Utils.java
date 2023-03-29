@@ -1,5 +1,6 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import ai.h2o.mojos.deploy.common.rest.model.DataField;
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 
@@ -22,5 +23,20 @@ public class Utils {
         outputRow.add(resultColumn[row]);
       }
     }
+  }
+
+  /**
+   * Sanitize boolean string literal values true / false (case insensitive) into 1 / 0 respectively.
+   * @return sanitized string.
+   */
+  public static String sanitizeBoolean(String value, DataField.DataTypeEnum dataType) {
+    if (dataType.equals(DataField.DataTypeEnum.FLOAT32) || dataType.equals(DataField.DataTypeEnum.FLOAT64)) {
+      if (value.matches("(?i)true")) {
+        return "1";
+      } else if (value.matches("(?i)false")) {
+        return "0";
+      }
+    }
+    return value;
   }
 }
