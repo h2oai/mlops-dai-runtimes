@@ -30,7 +30,10 @@ public class Utils {
    * @return sanitized string.
    */
   public static String sanitizeBoolean(String value, DataField.DataTypeEnum dataType) {
-    if (dataType.equals(DataField.DataTypeEnum.FLOAT32) || dataType.equals(DataField.DataTypeEnum.FLOAT64)) {
+    if (
+        dataType.equals(DataField.DataTypeEnum.FLOAT32)
+            || dataType.equals(DataField.DataTypeEnum.FLOAT64)
+    ) {
       if (value.matches("(?i)true")) {
         return "1";
       } else if (value.matches("(?i)false")) {

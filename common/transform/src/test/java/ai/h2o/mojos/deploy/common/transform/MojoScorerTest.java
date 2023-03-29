@@ -6,6 +6,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
+import ai.h2o.mojos.deploy.common.rest.model.DataField;
+import ai.h2o.mojos.deploy.common.rest.model.Model;
+import ai.h2o.mojos.deploy.common.rest.model.ModelSchema;
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
@@ -82,6 +85,7 @@ class MojoScorerTest {
   @Test
   void verifyScoreRequestWithoutShapley_ShapleyDisabled_Succeeds() {
     // Given
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -101,6 +105,7 @@ class MojoScorerTest {
   @Test
   void verifyScoreRequestWithTransformedShapley_ShapleyDisabled_Fails() {
     // Given
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -122,6 +127,7 @@ class MojoScorerTest {
   @Test
   void verifyScoreRequestWithOriginalShapley_ShapleyDisabled_Fails() {
     // Given
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -175,7 +181,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithoutShapley_ShapleyEnabled_Succeeds() {
     // Given
     System.setProperty("shapley.enable", "true");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -196,7 +202,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithTransformedShapley_ShapleyEnabled_Succeeds() {
     // Given
     System.setProperty("shapley.enable", "true");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -218,7 +224,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithOriginalShapley_ShapleyEnabled_Succeeds() {
     // Given
     System.setProperty("shapley.enable", "true");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -240,7 +246,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithoutShapley_ShapleyOptionAll_Succeeds() {
     // Given
     System.setProperty("shapley.types.enabled", "ALL");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -261,7 +267,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithTransformedShapley_ShapleyOptionAll_Succeeds() {
     // Given
     System.setProperty("shapley.types.enabled", "ALL");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -283,7 +289,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithOriginalShapley_ShapleyOptionAll_Succeeds() {
     // Given
     System.setProperty("shapley.types.enabled", "ALL");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -305,7 +311,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithoutShapley_ShapleyOptionTransformed_Succeeds() {
     // Given
     System.setProperty("shapley.types.enabled", "TRANSFORMED");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -326,7 +332,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithTransformedShapley_ShapleyOptionTransformed_Succeeds() {
     // Given
     System.setProperty("shapley.types.enabled", "TRANSFORMED");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -348,7 +354,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithOriginalShapley_ShapleyOptionTransformed_Fails() {
     // Given
     System.setProperty("shapley.types.enabled", "TRANSFORMED");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -371,7 +377,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithoutShapley_ShapleyOptionOriginal_Succeeds() {
     // Given
     System.setProperty("shapley.types.enabled", "ORIGINAL");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -392,7 +398,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithTransformedShapley_ShapleyOptionOriginal_Fails() {
     // Given
     System.setProperty("shapley.types.enabled", "ORIGINAL");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -415,7 +421,7 @@ class MojoScorerTest {
   void verifyScoreRequestWithOriginalShapley_ShapleyOptionOriginal_Succeeds() {
     // Given
     System.setProperty("shapley.types.enabled", "ORIGINAL");
-
+    given(modelInfoConverter.apply(any())).willReturn(generateDummyModelInfo());
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
@@ -461,6 +467,15 @@ class MojoScorerTest {
     response.setScore(outputRows);
     response.setFields(Arrays.asList("field1"));
     return response;
+  }
+
+  private Model generateDummyModelInfo() {
+    Model model = new Model();
+    List<DataField> dataFields = Collections.emptyList();
+    ModelSchema modelSchema = new ModelSchema();
+    modelSchema.setInputFields(dataFields);
+    model.setSchema(modelSchema);
+    return model;
   }
 
   /** Dummy pipeline {@link MojoPipeline} just to mock the static methods used inside scoring. */
