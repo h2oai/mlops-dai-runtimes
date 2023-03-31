@@ -11,6 +11,7 @@ import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -77,10 +78,16 @@ public class ModelsApiController implements ModelApi {
       ScoreResponse scoreResponse = scorer.score(request);
       return ResponseEntity.ok(scoreResponse);
     } catch (Exception e) {
-      log.info("Failed scoring request due to: {}", e.getMessage());
+      log.error("Failed scoring request", e);
       log.debug(" - request content: ", request);
       log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      return new ResponseEntity(
+          ImmutableMap
+              .builder()
+              .put("detail", String.format("Failed scoring request due to: %s", e))
+              .build(),
+          HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -94,13 +101,25 @@ public class ModelsApiController implements ModelApi {
       log.info("Got scoring request for CSV");
       return ResponseEntity.ok(scorer.scoreCsv(file));
     } catch (IOException e) {
-      log.info("Failed loading CSV file: {}, due to: {}", file, e.getMessage());
+      log.error("Failed loading CSV file: {}", file, e);
       log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      return new ResponseEntity(
+          ImmutableMap
+              .builder()
+              .put("detail", String.format("Failed loading CSV file due to: %s", e))
+              .build(),
+          HttpStatus.INTERNAL_SERVER_ERROR
+      );
     } catch (Exception e) {
-      log.info("Failed scoring CSV file: {}, due to: {}", file, e.getMessage());
+      log.error("Failed scoring CSV file: {}", file, e);
       log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      return new ResponseEntity(
+          ImmutableMap
+              .builder()
+              .put("detail", String.format("Failed scoring CSV file due to: %s", e))
+              .build(),
+          HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -113,12 +132,20 @@ public class ModelsApiController implements ModelApi {
               = scorer.computeContribution(request);
       return ResponseEntity.ok(contributionResponse);
     } catch (UnsupportedOperationException e) {
-      log.info("Unsupported operation due to: {}", e.getMessage());
+      log.error("Unsupported operation due to: {}", e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     } catch (Exception e) {
-      log.info("Failed shapley contribution request due to: {}", e.getMessage());
+      log.error("Failed shapley contribution request", e);
       log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      return new ResponseEntity(
+          ImmutableMap
+              .builder()
+              .put(
+                  "detail",
+                  String.format("Failed shapley contribution request due to: %s", e)
+              ).build(),
+          HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 

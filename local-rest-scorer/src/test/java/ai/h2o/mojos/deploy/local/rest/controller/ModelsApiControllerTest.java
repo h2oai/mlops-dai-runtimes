@@ -1,10 +1,14 @@
 package ai.h2o.mojos.deploy.local.rest.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
+import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
@@ -15,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
@@ -114,5 +120,56 @@ class ModelsApiControllerTest {
 
     // Then
     assertEquals(expectedCapabilities, response.getBody());
+  }
+
+  @Test
+  void verifyScore_Fails_ReturnsException() {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.score(any())).thenThrow(new IllegalStateException("Test Exception"));
+
+    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
+
+    // When
+    ResponseEntity resp = controller.getScore(new ScoreRequest());
+
+    // Then
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, resp.getStatusCode());
+    assertTrue(resp.getBody() instanceof Map);
+  }
+
+  @Test
+  void verifyScoreByFile_Fails_ReturnsException() throws IOException {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.scoreCsv("Test File")).thenThrow(new IllegalStateException("Test Exception"));
+
+    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
+
+    // When
+    ResponseEntity resp = controller.getScoreByFile("Test File");
+
+    // Then
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, resp.getStatusCode());
+    assertTrue(resp.getBody() instanceof Map);
+  }
+
+  @Test
+  void verifyScoreContribution_Fails_ReturnsException() {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.computeContribution(any())).thenThrow(new IllegalStateException("Test Exception"));
+
+    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
+
+    // When
+    ResponseEntity resp = controller.getContribution(new ContributionRequest());
+
+    // Then
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, resp.getStatusCode());
+    assertTrue(resp.getBody() instanceof Map);
   }
 }
