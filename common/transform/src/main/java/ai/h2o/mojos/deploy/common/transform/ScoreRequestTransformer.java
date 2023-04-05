@@ -47,7 +47,7 @@ public class ScoreRequestTransformer implements BiConsumer<ScoreRequest, List<Da
                   origin, dataFields.get(colName).getDataType()
               );
               if (!sanitizeValue.equals(origin)) {
-                logger.info("Value '{}' parsed as '{}'", origin, sanitizeValue);
+                logger.debug("Value '{}' parsed as '{}'", origin, sanitizeValue);
               }
               return sanitizeValue;
             } else {
