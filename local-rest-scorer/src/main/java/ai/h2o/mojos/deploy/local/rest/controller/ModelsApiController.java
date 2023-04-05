@@ -25,6 +25,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ModelsApiController implements ModelApi {
 
+  private static final String MODEL_ID = "MODEL_ID";
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
   private final MojoScorer scorer;
@@ -57,7 +58,11 @@ public class ModelsApiController implements ModelApi {
 
   @Override
   public ResponseEntity<String> getModelId() {
-    return ResponseEntity.ok(scorer.getModelId());
+    try {
+      return ResponseEntity.ok(System.getenv(MODEL_ID));
+    } catch (Exception ignored) {
+      return ResponseEntity.ok(scorer.getModelId());
+    }
   }
 
   @Override
