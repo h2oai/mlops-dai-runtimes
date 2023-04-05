@@ -52,6 +52,7 @@ class MojoScorerTest {
   @Mock private MojoFrameToContributionResponseConverter contributionResponseConverter;
   @Mock private ContributionRequestToMojoFrameConverter contributionRequestConverter;
   @Mock private MojoPipelineToModelInfoConverter modelInfoConverter;
+  @Mock private ScoreRequestTransformer scoreRequestTransformer;
   @Mock private CsvToMojoFrameConverter csvConverter;
 
   @BeforeAll
@@ -548,6 +549,7 @@ class MojoScorerTest {
       contributionRequestConverter,
       contributionResponseConverter,
       modelInfoConverter,
+      scoreRequestTransformer,
       csvConverter
     );
   }

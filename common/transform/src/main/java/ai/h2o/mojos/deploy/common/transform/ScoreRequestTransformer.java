@@ -34,7 +34,9 @@ public class ScoreRequestTransformer implements BiConsumer<ScoreRequest, List<Da
     );
   }
 
-  List<Row> transformRow(List<String> fields, List<Row> rows, Map<String, DataField> dataFields) {
+  private List<Row> transformRow(
+      List<String> fields, List<Row> rows, Map<String, DataField> dataFields
+  ) {
     return rows.stream().map(row -> {
       List<String> transformData = IntStream.range(0, row.size()).mapToObj(
           fieldIdx -> {

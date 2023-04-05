@@ -8,6 +8,7 @@ import ai.h2o.mojos.deploy.common.transform.MojoPipelineToModelInfoConverter;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ScoreRequestToMojoFrameConverter;
+import ai.h2o.mojos.deploy.common.transform.ScoreRequestTransformer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -49,12 +50,18 @@ class ScorerConfiguration {
   }
 
   @Bean
+  public ScoreRequestTransformer scoreRequestTransformer() {
+    return new ScoreRequestTransformer();
+  }
+
+  @Bean
   public MojoScorer mojoScorer(
       ScoreRequestToMojoFrameConverter requestConverter,
       MojoFrameToScoreResponseConverter responseConverter,
       ContributionRequestToMojoFrameConverter contributionRequestConverter,
       MojoFrameToContributionResponseConverter contributionResponseConverter,
       MojoPipelineToModelInfoConverter modelInfoConverter,
+      ScoreRequestTransformer scoreRequestTransformer,
       CsvToMojoFrameConverter csvConverter) {
     return new MojoScorer(
             requestConverter,
@@ -62,6 +69,7 @@ class ScorerConfiguration {
             contributionRequestConverter,
             contributionResponseConverter,
             modelInfoConverter,
+            scoreRequestTransformer,
             csvConverter);
   }
 }

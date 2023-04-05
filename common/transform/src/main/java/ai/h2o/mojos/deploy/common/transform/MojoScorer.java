@@ -57,7 +57,7 @@ public class MojoScorer {
   private final ContributionRequestToMojoFrameConverter contributionRequestConverter;
   private final MojoPipelineToModelInfoConverter modelInfoConverter;
   private final CsvToMojoFrameConverter csvConverter;
-  private final ScoreRequestTransformer scoreRequestTransformer = new ScoreRequestTransformer();
+  private final ScoreRequestTransformer scoreRequestTransformer;
 
   /**
    * MojoScorer class initializer, requires below parameters.
@@ -73,12 +73,14 @@ public class MojoScorer {
       ContributionRequestToMojoFrameConverter contributionRequestConverter,
       MojoFrameToContributionResponseConverter contributionResponseConverter,
       MojoPipelineToModelInfoConverter modelInfoConverter,
+      ScoreRequestTransformer scoreRequestTransformer,
       CsvToMojoFrameConverter csvConverter) {
     this.scoreRequestConverter = scoreRequestConverter;
     this.scoreResponseConverter = scoreResponseConverter;
     this.contributionRequestConverter = contributionRequestConverter;
     this.contributionResponseConverter = contributionResponseConverter;
     this.modelInfoConverter = modelInfoConverter;
+    this.scoreRequestTransformer = scoreRequestTransformer;
     this.csvConverter = csvConverter;
 
     this.enabledShapleyTypes = ShapleyLoadOption.fromEnvironment();

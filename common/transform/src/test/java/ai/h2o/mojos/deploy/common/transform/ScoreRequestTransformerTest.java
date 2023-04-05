@@ -10,11 +10,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 public class ScoreRequestTransformerTest {
 
   private final ScoreRequestTransformer scoreRequestTransformer = new ScoreRequestTransformer();
+
+  @Test
+  void transform_Empty_Empty() {
+    // Given
+    ScoreRequest scoreRequest = new ScoreRequest();
+    scoreRequest.setFields(Collections.emptyList());
+    scoreRequest.setRows(new ArrayList<>(Collections.emptyList()));
+    DataField dataField = new DataField();
+    dataField.setName("test");
+    dataField.setDataType(DataField.DataTypeEnum.FLOAT32);
+    List<DataField> dataFields = Collections.singletonList(dataField);
+
+    // When
+    scoreRequestTransformer.accept(scoreRequest, dataFields);
+
+    // Then
+    assertEquals(Collections.emptyList(), scoreRequest.getRows());
+  }
 
   @Test
   void transform_BooleanLiteral_Transformed() {
