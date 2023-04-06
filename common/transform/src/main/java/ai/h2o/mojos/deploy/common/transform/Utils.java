@@ -34,9 +34,9 @@ public class Utils {
         dataType.equals(DataField.DataTypeEnum.FLOAT32)
             || dataType.equals(DataField.DataTypeEnum.FLOAT64)
     ) {
-      if (value.equalsIgnoreCase("true")) {
+      if ("true".equalsIgnoreCase(value)) {
         return "1";
-      } else if (value.equalsIgnoreCase("false")) {
+      } else if ("false".equalsIgnoreCase(value)) {
         return "0";
       }
     }
