@@ -49,7 +49,7 @@ public class ScoreRequestTransformerTest {
     rows.get(3).addAll(Collections.singletonList("FALse"));
     rows.get(4).addAll(Collections.singletonList("1"));
     rows.get(5).addAll(Collections.singletonList("0"));
-    rows.get(6).addAll(Collections.singletonList("dumb"));
+    rows.get(6).addAll(Collections.singletonList("unchangedFeature"));
     scoreRequest.setRows(rows);
     DataField dataField = new DataField();
     dataField.setName("test");
@@ -69,7 +69,7 @@ public class ScoreRequestTransformerTest {
     expected.get(3).addAll(Collections.singletonList("0"));
     expected.get(4).addAll(Collections.singletonList("1"));
     expected.get(5).addAll(Collections.singletonList("0"));
-    expected.get(6).addAll(Collections.singletonList("dumb"));
+    expected.get(6).addAll(Collections.singletonList("unchangedFeature"));
     assertEquals(expected, scoreRequest.getRows());
   }
 
@@ -79,8 +79,8 @@ public class ScoreRequestTransformerTest {
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setFields(Collections.singletonList("test"));
     List<Row> rows = new ArrayList<>(Arrays.asList(new Row(), new Row()));
-    rows.get(0).addAll(Collections.singletonList("dumb1"));
-    rows.get(1).addAll(Collections.singletonList("dumb2"));
+    rows.get(0).addAll(Collections.singletonList("unchangedFeature1"));
+    rows.get(1).addAll(Collections.singletonList("unchangedFeature2"));
     scoreRequest.setRows(rows);
     DataField dataField = new DataField();
     dataField.setName("test");
@@ -92,8 +92,8 @@ public class ScoreRequestTransformerTest {
 
     // Then
     List<Row> expected = new ArrayList<>(Arrays.asList(new Row(), new Row()));
-    expected.get(0).addAll(Collections.singletonList("dumb1"));
-    expected.get(1).addAll(Collections.singletonList("dumb2"));
+    expected.get(0).addAll(Collections.singletonList("unchangedFeature1"));
+    expected.get(1).addAll(Collections.singletonList("unchangedFeature2"));
     assertEquals(expected, scoreRequest.getRows());
   }
 }
