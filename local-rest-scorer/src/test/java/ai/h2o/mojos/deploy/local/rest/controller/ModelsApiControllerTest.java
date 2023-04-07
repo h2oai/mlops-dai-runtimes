@@ -7,7 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
-import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
@@ -19,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -147,7 +145,6 @@ class ModelsApiControllerTest {
     // Given
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
-    when(scorer.scoreCsv("Test File")).thenThrow(new IllegalArgumentException("Test Exception"));
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -156,7 +153,7 @@ class ModelsApiControllerTest {
       controller.getScore(new ScoreRequest());
     } catch (Exception ex) {
       assertTrue(ex instanceof ResponseStatusException);
-      assertTrue(ex.getCause() instanceof IllegalArgumentException);
+      assertTrue(ex.getCause() instanceof IllegalStateException);
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseStatusException) ex).getStatus());
     }
   }
@@ -166,7 +163,6 @@ class ModelsApiControllerTest {
     // Given
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
-    when(scorer.computeContribution(any())).thenThrow(new IllegalStateException("Test Exception"));
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 

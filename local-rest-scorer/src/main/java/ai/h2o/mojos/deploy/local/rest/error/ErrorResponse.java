@@ -7,6 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(staticName = "of")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
-  @NonNull private final int status;
+  private final int status;
   @NonNull private final String detail;
 }
