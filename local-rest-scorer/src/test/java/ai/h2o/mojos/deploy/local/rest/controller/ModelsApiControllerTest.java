@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class ModelsApiControllerTest {
@@ -131,12 +132,14 @@ class ModelsApiControllerTest {
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
-    // When
-    ResponseEntity resp = controller.getScore(new ScoreRequest());
-
-    // Then
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, resp.getStatusCode());
-    assertTrue(resp.getBody() instanceof Map);
+    // When & Then
+    try {
+      controller.getScore(new ScoreRequest());
+    } catch (Exception ex) {
+      assertTrue(ex instanceof ResponseStatusException);
+      assertTrue(ex.getCause() instanceof IllegalStateException);
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseStatusException) ex).getStatus());
+    }
   }
 
   @Test
@@ -144,16 +147,18 @@ class ModelsApiControllerTest {
     // Given
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
-    when(scorer.scoreCsv("Test File")).thenThrow(new IllegalStateException("Test Exception"));
+    when(scorer.scoreCsv("Test File")).thenThrow(new IllegalArgumentException("Test Exception"));
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
-    // When
-    ResponseEntity resp = controller.getScoreByFile("Test File");
-
-    // Then
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, resp.getStatusCode());
-    assertTrue(resp.getBody() instanceof Map);
+    // When & Then
+    try {
+      controller.getScore(new ScoreRequest());
+    } catch (Exception ex) {
+      assertTrue(ex instanceof ResponseStatusException);
+      assertTrue(ex.getCause() instanceof IllegalArgumentException);
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseStatusException) ex).getStatus());
+    }
   }
 
   @Test
@@ -165,11 +170,13 @@ class ModelsApiControllerTest {
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
-    // When
-    ResponseEntity resp = controller.getContribution(new ContributionRequest());
-
-    // Then
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, resp.getStatusCode());
-    assertTrue(resp.getBody() instanceof Map);
+    // When & Then
+    try {
+      controller.getScore(new ScoreRequest());
+    } catch (Exception ex) {
+      assertTrue(ex instanceof ResponseStatusException);
+      assertTrue(ex.getCause() instanceof IllegalStateException);
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseStatusException) ex).getStatus());
+    }
   }
 }

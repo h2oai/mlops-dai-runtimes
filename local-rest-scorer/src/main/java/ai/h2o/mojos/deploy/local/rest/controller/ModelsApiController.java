@@ -10,8 +10,8 @@ import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
+import ai.h2o.mojos.deploy.local.rest.error.ErrorResponse;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class ModelsApiController implements ModelApi {
@@ -81,13 +84,10 @@ public class ModelsApiController implements ModelApi {
       log.error("Failed scoring request", e);
       log.debug(" - request content: ", request);
       log.debug(" - failure cause: ", e);
-      return new ResponseEntity(
-          ImmutableMap
-              .builder()
-              .put("detail", String.format("Failed scoring request due to: %s", e))
-              .build(),
-          HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format("Failed scoring request due to: %s", e.getMessage()),
+          e);
     }
   }
 
@@ -103,23 +103,17 @@ public class ModelsApiController implements ModelApi {
     } catch (IOException e) {
       log.error("Failed loading CSV file: {}", file, e);
       log.debug(" - failure cause: ", e);
-      return new ResponseEntity(
-          ImmutableMap
-              .builder()
-              .put("detail", String.format("Failed loading CSV file due to: %s", e))
-              .build(),
-          HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format("Failed loading CSV file due to: %s", e.getMessage()),
+          e);
     } catch (Exception e) {
       log.error("Failed scoring CSV file: {}", file, e);
       log.debug(" - failure cause: ", e);
-      return new ResponseEntity(
-          ImmutableMap
-              .builder()
-              .put("detail", String.format("Failed scoring CSV file due to: %s", e))
-              .build(),
-          HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format("Failed scoring CSV file due to: %s", e.getMessage()),
+          e);
     }
   }
 
@@ -133,19 +127,17 @@ public class ModelsApiController implements ModelApi {
       return ResponseEntity.ok(contributionResponse);
     } catch (UnsupportedOperationException e) {
       log.error("Unsupported operation due to: {}", e.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+      throw new ResponseStatusException(
+          HttpStatus.NOT_IMPLEMENTED,
+          String.format("Unsupported operation due to: %s", e.getMessage())
+          , e);
     } catch (Exception e) {
       log.error("Failed shapley contribution request", e);
       log.debug(" - failure cause: ", e);
-      return new ResponseEntity(
-          ImmutableMap
-              .builder()
-              .put(
-                  "detail",
-                  String.format("Failed shapley contribution request due to: %s", e)
-              ).build(),
-          HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format("Failed shapley contribution request due to: %s", e),
+          e);
     }
   }
 
@@ -170,5 +162,23 @@ public class ModelsApiController implements ModelApi {
       default:
         return Arrays.asList(CapabilityType.SCORE);
     }
+  }
+
+  @ExceptionHandler(ResponseStatusException.class)
+  public ResponseEntity<ErrorResponse> handleResponseStatusException(
+      ResponseStatusException exception, WebRequest request) {
+    log.error("Runtime exception occurred : {}", exception.getMessage(), exception);
+    ErrorResponse errorResponse = ErrorResponse.of(
+        exception.getStatus().value(), exception.getMessage());
+    return ResponseEntity.status(exception.getStatus()).body(errorResponse);
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ErrorResponse> handleAllException(
+      Exception exception, WebRequest request) {
+    log.error("Unexpected exception occurred : {}", exception.getMessage(), exception);
+    ErrorResponse errorResponse = ErrorResponse.of(
+        HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
   }
 }
