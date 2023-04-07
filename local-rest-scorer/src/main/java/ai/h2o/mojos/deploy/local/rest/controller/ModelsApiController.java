@@ -158,28 +158,4 @@ public class ModelsApiController implements ModelApi {
         return Arrays.asList(CapabilityType.SCORE);
     }
   }
-
-  /**
-   * Custom Exception handler for ResponseStatusException type.
-   */
-  @ExceptionHandler(ResponseStatusException.class)
-  public ResponseEntity<ErrorResponse> handleResponseStatusException(
-      ResponseStatusException exception, WebRequest request) {
-    log.error("Runtime exception occurred : {}", exception.getMessage(), exception);
-    ErrorResponse errorResponse = ErrorResponse.of(
-        exception.getStatus().value(), exception.getMessage());
-    return ResponseEntity.status(exception.getStatus()).body(errorResponse);
-  }
-
-  /**
-   * Custom Exception handler for all Exception type.
-   */
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponse> handleAllException(
-      Exception exception, WebRequest request) {
-    log.error("Unexpected exception occurred : {}", exception.getMessage(), exception);
-    ErrorResponse errorResponse = ErrorResponse.of(
-        HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage());
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-  }
 }
