@@ -86,8 +86,7 @@ public class ModelsApiController implements ModelApi {
       log.debug(" - failure cause: ", e);
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          String.format("Failed scoring request due to: %s", e.getMessage()),
-          e);
+          String.format("Failed scoring request due to: %s", e.getMessage()), e);
     }
   }
 
@@ -105,15 +104,13 @@ public class ModelsApiController implements ModelApi {
       log.debug(" - failure cause: ", e);
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          String.format("Failed loading CSV file due to: %s", e.getMessage()),
-          e);
+          String.format("Failed loading CSV file due to: %s", e.getMessage()), e);
     } catch (Exception e) {
       log.error("Failed scoring CSV file: {}", file, e);
       log.debug(" - failure cause: ", e);
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          String.format("Failed scoring CSV file due to: %s", e.getMessage()),
-          e);
+          String.format("Failed scoring CSV file due to: %s", e.getMessage()), e);
     }
   }
 
@@ -129,15 +126,13 @@ public class ModelsApiController implements ModelApi {
       log.error("Unsupported operation due to: {}", e.getMessage());
       throw new ResponseStatusException(
           HttpStatus.NOT_IMPLEMENTED,
-          String.format("Unsupported operation due to: %s", e.getMessage())
-          , e);
+          String.format("Unsupported operation due to: %s", e.getMessage()), e);
     } catch (Exception e) {
       log.error("Failed shapley contribution request", e);
       log.debug(" - failure cause: ", e);
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          String.format("Failed shapley contribution request due to: %s", e),
-          e);
+          String.format("Failed shapley contribution request due to: %s", e), e);
     }
   }
 
@@ -164,6 +159,9 @@ public class ModelsApiController implements ModelApi {
     }
   }
 
+  /**
+   * Custom Exception handler for ResponseStatusException type.
+   */
   @ExceptionHandler(ResponseStatusException.class)
   public ResponseEntity<ErrorResponse> handleResponseStatusException(
       ResponseStatusException exception, WebRequest request) {
@@ -173,6 +171,9 @@ public class ModelsApiController implements ModelApi {
     return ResponseEntity.status(exception.getStatus()).body(errorResponse);
   }
 
+  /**
+   * Custom Exception handler for all Exception type.
+   */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleAllException(
       Exception exception, WebRequest request) {
