@@ -11,7 +11,6 @@ import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class ModelsApiController implements ModelApi {
@@ -78,16 +78,12 @@ public class ModelsApiController implements ModelApi {
       ScoreResponse scoreResponse = scorer.score(request);
       return ResponseEntity.ok(scoreResponse);
     } catch (Exception e) {
-      log.error("Failed scoring request", e);
+      log.error("Failed scoring request due to: {}", e.getMessage());
       log.debug(" - request content: ", request);
       log.debug(" - failure cause: ", e);
-      return new ResponseEntity(
-          ImmutableMap
-              .builder()
-              .put("detail", String.format("Failed scoring request due to: %s", e))
-              .build(),
-          HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format("Failed scoring request due to: %s", e.getMessage()), e);
     }
   }
 
@@ -101,25 +97,17 @@ public class ModelsApiController implements ModelApi {
       log.info("Got scoring request for CSV");
       return ResponseEntity.ok(scorer.scoreCsv(file));
     } catch (IOException e) {
-      log.error("Failed loading CSV file: {}", file, e);
+      log.error("Failed loading CSV file {} due to: {}", file, e.getMessage());
       log.debug(" - failure cause: ", e);
-      return new ResponseEntity(
-          ImmutableMap
-              .builder()
-              .put("detail", String.format("Failed loading CSV file due to: %s", e))
-              .build(),
-          HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format("Failed loading CSV file due to: %s", e.getMessage()), e);
     } catch (Exception e) {
-      log.error("Failed scoring CSV file: {}", file, e);
+      log.error("Failed scoring CSV file {} due to: {}", file, e.getMessage());
       log.debug(" - failure cause: ", e);
-      return new ResponseEntity(
-          ImmutableMap
-              .builder()
-              .put("detail", String.format("Failed scoring CSV file due to: %s", e))
-              .build(),
-          HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format("Failed scoring CSV file due to: %s", e.getMessage()), e);
     }
   }
 
@@ -133,19 +121,15 @@ public class ModelsApiController implements ModelApi {
       return ResponseEntity.ok(contributionResponse);
     } catch (UnsupportedOperationException e) {
       log.error("Unsupported operation due to: {}", e.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+      throw new ResponseStatusException(
+          HttpStatus.NOT_IMPLEMENTED,
+          String.format("Unsupported operation due to: %s", e.getMessage()), e);
     } catch (Exception e) {
-      log.error("Failed shapley contribution request", e);
+      log.error("Failed shapley contribution request due to: {}", e.getMessage());
       log.debug(" - failure cause: ", e);
-      return new ResponseEntity(
-          ImmutableMap
-              .builder()
-              .put(
-                  "detail",
-                  String.format("Failed shapley contribution request due to: %s", e)
-              ).build(),
-          HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format("Failed shapley contribution request due to: %s", e), e);
     }
   }
 
