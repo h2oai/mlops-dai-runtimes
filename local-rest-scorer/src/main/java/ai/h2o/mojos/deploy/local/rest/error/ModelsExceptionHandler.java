@@ -11,8 +11,6 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.Objects;
-
 @ControllerAdvice("ai.h2o.mojos.deploy.local.rest")
 public class ModelsExceptionHandler extends ResponseEntityExceptionHandler {
   private static final Logger log = LoggerFactory.getLogger(ModelsExceptionHandler.class);
@@ -28,7 +26,7 @@ public class ModelsExceptionHandler extends ResponseEntityExceptionHandler {
         .status(exception.getStatus())
         .body(ImmutableMap
           .builder()
-          .put("detail", Objects.requireNonNull(exception.getMessage()))
+          .put("detail", exception.getMessage())
           .build()
         );
   }
