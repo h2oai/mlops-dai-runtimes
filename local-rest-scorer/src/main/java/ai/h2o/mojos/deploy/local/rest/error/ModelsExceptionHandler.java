@@ -39,10 +39,7 @@ public class ModelsExceptionHandler extends ResponseEntityExceptionHandler {
       Exception exception, WebRequest request) {
     log.error("Unexpected exception occurred : {}", exception.getMessage(), exception);
     return ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ImmutableMap
-          .builder()
-          .put("detail", exception.getMessage())
-          .build());
+        .internalServerError()
+        .body(ImmutableMap.builder().put("detail", exception.getMessage()).build());
   }
 }
