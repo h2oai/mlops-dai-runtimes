@@ -57,6 +57,7 @@ public class MojoScorer {
   private final ContributionRequestToMojoFrameConverter contributionRequestConverter;
   private final MojoPipelineToModelInfoConverter modelInfoConverter;
   private final CsvToMojoFrameConverter csvConverter;
+  private final ScoreRequestTransformer scoreRequestTransformer;
 
   /**
    * MojoScorer class initializer, requires below parameters.
@@ -72,12 +73,14 @@ public class MojoScorer {
       ContributionRequestToMojoFrameConverter contributionRequestConverter,
       MojoFrameToContributionResponseConverter contributionResponseConverter,
       MojoPipelineToModelInfoConverter modelInfoConverter,
+      ScoreRequestTransformer scoreRequestTransformer,
       CsvToMojoFrameConverter csvConverter) {
     this.scoreRequestConverter = scoreRequestConverter;
     this.scoreResponseConverter = scoreResponseConverter;
     this.contributionRequestConverter = contributionRequestConverter;
     this.contributionResponseConverter = contributionResponseConverter;
     this.modelInfoConverter = modelInfoConverter;
+    this.scoreRequestTransformer = scoreRequestTransformer;
     this.csvConverter = csvConverter;
 
     this.enabledShapleyTypes = ShapleyLoadOption.fromEnvironment();
@@ -93,6 +96,7 @@ public class MojoScorer {
    * @return response {@link ScoreResponse}
    */
   public ScoreResponse score(ScoreRequest request) {
+    scoreRequestTransformer.accept(request, getModelInfo().getSchema().getInputFields());
     MojoFrame requestFrame = scoreRequestConverter
             .apply(request, pipeline.getInputFrameBuilder());
     MojoFrame responseFrame = doScore(requestFrame);
