@@ -1,10 +1,13 @@
 package ai.h2o.mojos.deploy.local.rest.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
@@ -24,7 +27,9 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class ModelsApiControllerTest {
@@ -114,5 +119,60 @@ class ModelsApiControllerTest {
 
     // Then
     assertEquals(expectedCapabilities, response.getBody());
+  }
+
+  @Test
+  void verifyScore_Fails_ReturnsException() {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.score(any())).thenThrow(new IllegalStateException("Test Exception"));
+
+    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
+
+    // When & Then
+    try {
+      controller.getScore(new ScoreRequest());
+    } catch (Exception ex) {
+      assertTrue(ex instanceof ResponseStatusException);
+      assertTrue(ex.getCause() instanceof IllegalStateException);
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseStatusException) ex).getStatus());
+    }
+  }
+
+  @Test
+  void verifyScoreByFile_Fails_ReturnsException() throws IOException {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+
+    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
+
+    // When & Then
+    try {
+      controller.getScore(new ScoreRequest());
+    } catch (Exception ex) {
+      assertTrue(ex instanceof ResponseStatusException);
+      assertTrue(ex.getCause() instanceof IllegalStateException);
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseStatusException) ex).getStatus());
+    }
+  }
+
+  @Test
+  void verifyScoreContribution_Fails_ReturnsException() {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+
+    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
+
+    // When & Then
+    try {
+      controller.getScore(new ScoreRequest());
+    } catch (Exception ex) {
+      assertTrue(ex instanceof ResponseStatusException);
+      assertTrue(ex.getCause() instanceof IllegalStateException);
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseStatusException) ex).getStatus());
+    }
   }
 }
