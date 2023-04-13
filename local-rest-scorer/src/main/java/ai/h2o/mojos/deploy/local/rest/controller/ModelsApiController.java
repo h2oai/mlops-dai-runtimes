@@ -10,6 +10,7 @@ import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
+import ai.h2o.mojos.deploy.local.rest.error.ErrorUtil;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.Arrays;
@@ -77,12 +78,19 @@ public class ModelsApiController implements ModelApi {
       log.info("Got scoring request");
       ScoreResponse scoreResponse = scorer.score(request);
       return ResponseEntity.ok(scoreResponse);
+    } catch (IllegalArgumentException e) {
+      log.error("Invalid scoring request due to: {}", e.getMessage());
+      log.debug(" - request content: ", request);
+      log.debug(" - failure cause: ", e);
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          String.format("Invalid scoring request due to: %s", e.getMessage()), e);
     } catch (Exception e) {
       log.error("Failed scoring request due to: {}", e.getMessage());
       log.debug(" - request content: ", request);
       log.debug(" - failure cause: ", e);
       throw new ResponseStatusException(
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          ErrorUtil.translateErrorCode(e),
           String.format("Failed scoring request due to: %s", e.getMessage()), e);
     }
   }
@@ -102,11 +110,17 @@ public class ModelsApiController implements ModelApi {
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR,
           String.format("Failed loading CSV file due to: %s", e.getMessage()), e);
+    } catch (IllegalArgumentException e) {
+      log.error("Invalid scoring request for CSV file {} request due to: {}", file, e.getMessage());
+      log.debug(" - failure cause: ", e);
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          String.format("Invalid scoring request for CSV file due to: %s", e.getMessage()), e);
     } catch (Exception e) {
       log.error("Failed scoring CSV file {} due to: {}", file, e.getMessage());
       log.debug(" - failure cause: ", e);
       throw new ResponseStatusException(
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          ErrorUtil.translateErrorCode(e),
           String.format("Failed scoring CSV file due to: %s", e.getMessage()), e);
     }
   }
@@ -124,12 +138,18 @@ public class ModelsApiController implements ModelApi {
       throw new ResponseStatusException(
           HttpStatus.NOT_IMPLEMENTED,
           String.format("Unsupported operation due to: %s", e.getMessage()), e);
+    } catch (IllegalArgumentException e) {
+      log.error("Invalid shapley contribution request due to: {}", e.getMessage());
+      log.debug(" - failure cause: ", e);
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          String.format("Invalid shapley contribution request due to: %s", e.getMessage()), e);
     } catch (Exception e) {
       log.error("Failed shapley contribution request due to: {}", e.getMessage());
       log.debug(" - failure cause: ", e);
       throw new ResponseStatusException(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          String.format("Failed shapley contribution request due to: %s", e), e);
+          ErrorUtil.translateErrorCode(e),
+          String.format("Failed shapley contribution request due to: %s", e.getMessage()), e);
     }
   }
 

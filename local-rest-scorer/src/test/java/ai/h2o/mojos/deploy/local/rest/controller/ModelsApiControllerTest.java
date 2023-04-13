@@ -136,7 +136,7 @@ class ModelsApiControllerTest {
     } catch (Exception ex) {
       assertTrue(ex instanceof ResponseStatusException);
       assertTrue(ex.getCause() instanceof IllegalStateException);
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseStatusException) ex).getStatus());
+      assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ((ResponseStatusException) ex).getStatus());
     }
   }
 
