@@ -55,10 +55,14 @@ public class ModelsExceptionHandler extends ResponseEntityExceptionHandler {
         .body(ImmutableMap.builder().put("detail", exception.getMessage()).build());
   }
 
+  /**
+   * Custom Exception handler for unsupported exception type.
+   */
   @ExceptionHandler(UnsupportedOperationException.class)
   public ResponseEntity<Object> handleUnsupportedException(
       UnsupportedOperationException exception, WebRequest request) {
-    log.error("Unsupported request exception occurred {} : {}", request, exception.getMessage(), exception);
+    log.error("Unsupported request exception occurred {} : {}",
+            request, exception.getMessage(), exception);
     return ResponseEntity
         .status(HttpStatus.NOT_IMPLEMENTED)
         .body(ImmutableMap.builder().put("detail", exception.getMessage()).build());
