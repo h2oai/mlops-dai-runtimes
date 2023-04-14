@@ -179,6 +179,38 @@ class MojoScorerTest {
   }
 
   @Test
+  void verifyContributionWithOriginalShapley_TransformedShapleyEnabled_Fails() {
+    // Given
+    System.setProperty("shapley.types.enabled", "TRANSFORMED");
+    ContributionRequest request = new ContributionRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.ORIGINAL);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertThrows(IllegalArgumentException.class, () -> scorer
+            .computeContribution(request));
+  }
+
+  @Test
+  void verifyContributionWithTransformedShapley_OriginalShapleyEnabled_Fails() {
+    // Given
+    System.setProperty("shapley.types.enabled", "ORIGINAL");
+    ContributionRequest request = new ContributionRequest();
+    request.addFieldsItem("field1");
+    request.addRowsItem(toRow("text"));
+    request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
+
+    MojoScorer scorer = dummyScorer();
+
+    // When & Then
+    assertThrows(IllegalArgumentException.class, () -> scorer
+            .computeContribution(request));
+  }
+
+  @Test
   void verifyScoreRequestWithoutShapley_ShapleyEnabled_Succeeds() {
     // Given
     System.setProperty("shapley.enable", "true");

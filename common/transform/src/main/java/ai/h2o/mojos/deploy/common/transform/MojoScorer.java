@@ -166,6 +166,15 @@ public class MojoScorer {
     }
 
     ShapleyType requestedShapleyType = request.getRequestShapleyValueType();
+
+    if (!ShapleyLoadOption.requestedTypeEnabled(
+            enabledShapleyTypes, requestedShapleyType.toString())) {
+      throw new IllegalArgumentException(
+        String.format(
+          "Requested Shapley type %s not enabled for this scorer. Expected: %s",
+          requestedShapleyType, enabledShapleyTypes));
+    }
+
     MojoFrame requestFrame;
 
     switch (requestedShapleyType) {
