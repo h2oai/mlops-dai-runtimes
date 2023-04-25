@@ -36,6 +36,11 @@ import org.slf4j.LoggerFactory;
  * {@code shapley.enable} property to enable shapley contribution.
  */
 public class MojoScorer {
+
+  private static final String PREDICTION_INTERVAL_ENABLE_ENV_VAR = "PREDICTION_INTERVAL";
+
+  private static final String PREDICTION_INTERVAL_ENABLE_PROPERTY = "prediction.interval";
+
   private static final String ENABLE_SHAPLEY_CONTRIBUTION_MESSAGE
           = "shapley.types.enabled property has to be set to one of [TRANSFORMED, ORIGINAL, ALL]"
           + " or shapley.enable property has to be set to true in the runtime configuration "
@@ -391,14 +396,22 @@ public class MojoScorer {
     try {
       return MojoPipelineService.loadPipeline(mojoFile, buildPipelineConfig());
     } catch (IllegalArgumentException e) {
-      log.debug("Disable Prediction interval because it is only supports regression model", e);
+      log.debug("Disable Prediction interval as it is not supported for the given model", e);
       return MojoPipelineService.loadPipeline(mojoFile);
     }
   }
 
   private static PipelineConfig buildPipelineConfig() {
     PipelineConfig.Builder builder = PipelineConfig.builder();
-    builder.withPredictionInterval(Utils.isPredictionIntervalEnabled());
+    builder.withPredictionInterval(isPredictionIntervalEnabled());
     return builder.build();
+  }
+
+  /**
+   * Check if prediction interval is enabled or not.
+   */
+  private static boolean isPredictionIntervalEnabled() {
+    return Boolean.getBoolean(PREDICTION_INTERVAL_ENABLE_PROPERTY)
+      || "true".equalsIgnoreCase(System.getenv(PREDICTION_INTERVAL_ENABLE_ENV_VAR));
   }
 }

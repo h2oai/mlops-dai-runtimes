@@ -8,10 +8,6 @@ import java.util.List;
 
 public class Utils {
 
-  private static final String PREDICTION_INTERVAL_ENABLE_ENV_VAR = "PREDICTION_INTERVAL";
-
-  private static final String PREDICTION_INTERVAL_ENABLE_PROPERTY = "prediction.interval";
-
   /**
    * Method to copy rows from mojoFrame to a list of Rows.
    *
@@ -46,28 +42,5 @@ public class Utils {
       }
     }
     return value;
-  }
-
-  /**
-   * Check if prediction interval is enabled or not.
-   */
-  public static boolean isPredictionIntervalEnabled() {
-    return isPredictionIntervalEnabledFromEnv() || isPredictionIntervalEnabledFromProperty();
-  }
-
-  private static boolean isPredictionIntervalEnabledFromEnv() {
-    try {
-      return Boolean.getBoolean(PREDICTION_INTERVAL_ENABLE_PROPERTY);
-    } catch (Exception ignored) {
-      return false;
-    }
-  }
-
-  private static boolean isPredictionIntervalEnabledFromProperty() {
-    try {
-      return Boolean.parseBoolean(System.getenv(PREDICTION_INTERVAL_ENABLE_ENV_VAR));
-    } catch (Exception ignored) {
-      return false;
-    }
   }
 }
