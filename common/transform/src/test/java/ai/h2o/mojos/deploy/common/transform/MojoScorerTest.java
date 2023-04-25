@@ -17,6 +17,7 @@ import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.api.BasePipelineListener;
 import ai.h2o.mojos.runtime.api.MojoColumnMeta;
 import ai.h2o.mojos.runtime.api.MojoPipelineService;
+import ai.h2o.mojos.runtime.api.PipelineConfig;
 import ai.h2o.mojos.runtime.frame.MojoColumn;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
@@ -66,7 +67,8 @@ class MojoScorerTest {
             new DummyPipeline(TEST_UUID, MojoFrameMeta.getEmpty(), MojoFrameMeta.getEmpty());
     MockedStatic<MojoPipelineService> theMock = Mockito.mockStatic(MojoPipelineService.class);
     theMock.when(() -> MojoPipelineService
-            .loadPipeline(new File(MOJO_PIPELINE_PATH))).thenReturn(dummyPipeline);
+            .loadPipeline(Mockito.eq(new File(MOJO_PIPELINE_PATH)), any(PipelineConfig.class)))
+      .thenReturn(dummyPipeline);
   }
 
   @AfterAll

@@ -9,6 +9,7 @@ import ai.h2o.mojos.deploy.common.rest.model.ScoringType;
 import ai.h2o.mojos.deploy.common.rest.model.ShapleyType;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.api.MojoPipelineService;
+import ai.h2o.mojos.runtime.api.PipelineConfig;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.lic.LicenseException;
@@ -373,13 +374,31 @@ public class MojoScorer {
       throw new RuntimeException("Could not load mojo from file: " + mojoFile);
     }
     try {
-      MojoPipeline mojoPipeline = MojoPipelineService.loadPipeline(mojoFile);
+      MojoPipeline mojoPipeline = loadMojoPipelineFromFile(mojoFile);
       log.info("Mojo pipeline successfully loaded ({}).", mojoPipeline.getUuid());
       return mojoPipeline;
     } catch (IOException e) {
       throw new RuntimeException("Unable to load mojo from " + mojoFile, e);
     } catch (LicenseException e) {
       throw new RuntimeException("License file not found", e);
+    } catch (Exception e) {
+      throw new RuntimeException("Unexpected exception occurs", e);
     }
+  }
+
+  private static MojoPipeline loadMojoPipelineFromFile(File mojoFile)
+      throws IOException, LicenseException {
+    try {
+      return MojoPipelineService.loadPipeline(mojoFile, buildPipelineConfig());
+    } catch (IllegalArgumentException e) {
+      log.debug("Disable Prediction interval because it is only supports regression model", e);
+      return MojoPipelineService.loadPipeline(mojoFile);
+    }
+  }
+
+  private static PipelineConfig buildPipelineConfig() {
+    PipelineConfig.Builder builder = PipelineConfig.builder();
+    builder.withPredictionInterval(Utils.isPredictionIntervalEnabled());
+    return builder.build();
   }
 }
