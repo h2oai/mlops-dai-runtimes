@@ -55,3 +55,4 @@ task distributionZip(type: Zip) {
 task printVersion {
     println project.version
 }
+

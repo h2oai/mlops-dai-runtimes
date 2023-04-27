@@ -8,10 +8,11 @@ on:
       - 'v.[0-9]+.[0-9]+.[0-9]+'
     branches:
       - 'master'
+      - 'devops/snyk-optimization'
 
 jobs:
   snyk_scan_test:
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -33,7 +34,12 @@ jobs:
 
       - name: Snyk scan for Java dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
-        run: snyk test --all-projects -d --fail-on=all
+        run: snyk test \
+          --all-projects \
+          -d \
+          --fail-on=all \
+          --print-deps \
+          --configuration-matching='^\(compile\|runtime\)'
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
@@ -75,7 +81,14 @@ jobs:
           distribution: 'adopt'
 
       - name: Snyk scan for Java dependencies - ${{ matrix.depsfiles }}
-        run: snyk monitor --org=driverless-ai --remote-repo-url=dai-deployment-templates/${{ steps.extract_ref.outputs.ref }} --file=${{ matrix.depsfiles }} --project-name=DRIVERLESS-AI/dai-deployment-templates/${{ steps.extract_ref.outputs.ref }}/${{ matrix.depsfiles }} -d
+        run: snyk monitor \
+          --org=driverless-ai \
+          --remote-repo-url=dai-deployment-templates/${{ steps.extract_ref.outputs.ref }} \
+          --file=${{ matrix.depsfiles }} \
+          --project-name=DRIVERLESS-AI/dai-deployment-templates/${{ steps.extract_ref.outputs.ref }}/${{ matrix.depsfiles }} \
+          -d \
+          --print-deps \
+          --configuration-matching='^\(compile\|runtime\)'
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
