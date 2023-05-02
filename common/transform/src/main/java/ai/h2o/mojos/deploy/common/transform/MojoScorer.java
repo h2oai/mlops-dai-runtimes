@@ -9,6 +9,7 @@ import ai.h2o.mojos.deploy.common.rest.model.ScoringType;
 import ai.h2o.mojos.deploy.common.rest.model.ShapleyType;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.api.MojoPipelineService;
+import ai.h2o.mojos.runtime.api.PipelineConfig;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.lic.LicenseException;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import mojo.spec.PipelineOuterClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +46,9 @@ public class MojoScorer {
 
   private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
   private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
-  private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
-
+  private final MojoPipeline pipeline;
   private final ShapleyLoadOption enabledShapleyTypes;
   private final boolean shapleyEnabled;
-  private static MojoPipeline pipelineTransformedShapley;
-  private static MojoPipeline pipelineOriginalShapley;
-
   private final ScoreRequestToMojoFrameConverter scoreRequestConverter;
   private final MojoFrameToScoreResponseConverter scoreResponseConverter;
   private final MojoFrameToContributionResponseConverter contributionResponseConverter;
@@ -82,11 +80,11 @@ public class MojoScorer {
     this.modelInfoConverter = modelInfoConverter;
     this.scoreRequestTransformer = scoreRequestTransformer;
     this.csvConverter = csvConverter;
-
     this.enabledShapleyTypes = ShapleyLoadOption.fromEnvironment();
     this.shapleyEnabled = ShapleyLoadOption.isEnabled(enabledShapleyTypes);
+    this.pipeline = loadMojoPipelineFromFile(enabledShapleyTypes);
 
-    loadMojoPipelinesForShapley();
+    // loadMojoPipelinesForShapley();
   }
 
   /**
@@ -99,7 +97,7 @@ public class MojoScorer {
     scoreRequestTransformer.accept(request, getModelInfo().getSchema().getInputFields());
     MojoFrame requestFrame = scoreRequestConverter
             .apply(request, pipeline.getInputFrameBuilder());
-    MojoFrame responseFrame = doScore(requestFrame);
+    MojoFrame responseFrame = doScore(pipeline, requestFrame);
     ScoreResponse response = scoreResponseConverter.apply(responseFrame, request);
     response.id(pipeline.getUuid());
 
@@ -125,10 +123,8 @@ public class MojoScorer {
     try {
       switch (requestShapleyType) {
         case TRANSFORMED:
-          response.setFeatureShapleyContributions(transformedFeatureContribution(request));
-          break;
         case ORIGINAL:
-          response.setFeatureShapleyContributions(originalFeatureContribution(request));
+          response.setFeatureShapleyContributions(featureContribution(request));
           break;
         default:
           log.info("Only ORIGINAL or TRANSFORMED are accepted enums values of Shapley values");
@@ -141,16 +137,10 @@ public class MojoScorer {
     return response;
   }
 
-  private ContributionResponse originalFeatureContribution(ScoreRequest request) {
+  private ContributionResponse featureContribution(ScoreRequest request) {
     MojoFrame requestFrame = scoreRequestConverter
-            .apply(request, pipelineOriginalShapley.getInputFrameBuilder());
-    return contribution(doShapleyContrib(requestFrame, true));
-  }
-
-  private ContributionResponse transformedFeatureContribution(ScoreRequest request) {
-    MojoFrame requestFrame = scoreRequestConverter
-            .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
-    return contribution(doShapleyContrib(requestFrame, false));
+            .apply(request, pipeline.getInputFrameBuilder());
+    return contribution(doShapleyContrib(pipeline, requestFrame));
   }
 
   /**
@@ -179,13 +169,10 @@ public class MojoScorer {
 
     switch (requestedShapleyType) {
       case TRANSFORMED:
-        requestFrame = contributionRequestConverter
-                .apply(request, pipelineTransformedShapley.getInputFrameBuilder());
-        return contribution(doShapleyContrib(requestFrame, false));
       case ORIGINAL:
         requestFrame = contributionRequestConverter
-                .apply(request, pipelineOriginalShapley.getInputFrameBuilder());
-        return contribution(doShapleyContrib(requestFrame, true));
+                .apply(request, pipeline.getInputFrameBuilder());
+        return contribution(doShapleyContrib(pipeline, requestFrame));
       default:
         throw new IllegalArgumentException(
                 "Only ORIGINAL or TRANSFORMED are accepted enums values of Shapley values");
@@ -244,7 +231,7 @@ public class MojoScorer {
     try (InputStream csvStream = getInputStream(csvFilePath)) {
       requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
     }
-    MojoFrame responseFrame = doScore(requestFrame);
+    MojoFrame responseFrame = doScore(pipeline, requestFrame);
     ScoreResponse response = scoreResponseConverter.apply(responseFrame, new ScoreRequest());
     response.id(pipeline.getUuid());
     return response;
@@ -259,7 +246,7 @@ public class MojoScorer {
     return new FileInputStream(filePath);
   }
 
-  private static MojoFrame doScore(MojoFrame requestFrame) {
+  private static MojoFrame doScore(MojoPipeline pipeline, MojoFrame requestFrame) {
     log.debug(
         "Input has {} rows, {} columns: {}",
         requestFrame.getNrows(),
@@ -277,24 +264,18 @@ public class MojoScorer {
   /**
    * Method to get shapley contribution for an incoming request of type {@link ScoreRequest}.
    *
+   * @param pipeline {@link MojoFrame}
    * @param requestFrame {@link MojoFrame}
-   * @param isOriginal {@link boolean} Simple boolean to specify if the shapley contribution
-   *                                  has to be performed for original features
-   *                                  or transformed features
    * @return response {@link MojoFrame}
    */
-  private static MojoFrame doShapleyContrib(MojoFrame requestFrame, boolean isOriginal) {
+  private static MojoFrame doShapleyContrib(MojoPipeline pipeline, MojoFrame requestFrame) {
     log.debug(
             "Input has {} rows, {} columns: {}",
             requestFrame.getNrows(),
             requestFrame.getNcols(),
             Arrays.toString(requestFrame.getColumnNames()));
     MojoFrame shapleyResponseFrame;
-    if (isOriginal) {
-      shapleyResponseFrame = pipelineOriginalShapley.transform(requestFrame);
-    } else {
-      shapleyResponseFrame = pipelineTransformedShapley.transform(requestFrame);
-    }
+    shapleyResponseFrame = pipeline.transform(requestFrame);
     log.debug(
             "Response has {} rows, {} columns: {}",
             shapleyResponseFrame.getNrows(),
@@ -326,7 +307,8 @@ public class MojoScorer {
    * 1. if property or env var shapley.types.enabled is set, load pipelines based on that
    * 2. if shapley.enabled is true load all pipelines
    *
-   */
+  */
+  /*
   private void loadMojoPipelinesForShapley() {
     if (ShapleyLoadOption.NONE == enabledShapleyTypes) {
       return;
@@ -354,8 +336,9 @@ public class MojoScorer {
         throw new IllegalArgumentException("Unexpected enabled shapley value type.");
     }
   }
+   */
 
-  private static MojoPipeline loadMojoPipelineFromFile() {
+  private static MojoPipeline loadMojoPipelineFromFile(ShapleyLoadOption enabledShapleyTypes) {
     Preconditions.checkArgument(
         !Strings.isNullOrEmpty(MOJO_PIPELINE_PATH),
         "Path to mojo pipeline not specified, set the %s property.",
@@ -373,7 +356,8 @@ public class MojoScorer {
       throw new RuntimeException("Could not load mojo from file: " + mojoFile);
     }
     try {
-      MojoPipeline mojoPipeline = MojoPipelineService.loadPipeline(mojoFile);
+      MojoPipeline mojoPipeline = MojoPipelineService.loadPipeline(
+          mojoFile, buildPipelineConfig(enabledShapleyTypes));
       log.info("Mojo pipeline successfully loaded ({}).", mojoPipeline.getUuid());
       return mojoPipeline;
     } catch (IOException e) {
@@ -381,5 +365,26 @@ public class MojoScorer {
     } catch (LicenseException e) {
       throw new RuntimeException("License file not found", e);
     }
+  }
+
+  private static PipelineConfig buildPipelineConfig(ShapleyLoadOption enabledShapleyTypes) {
+    PipelineConfig.Builder builder = PipelineConfig.builder();
+    if (!ShapleyLoadOption.NONE.equals(enabledShapleyTypes)) {
+      switch (enabledShapleyTypes) {
+        case TRANSFORMED:
+          builder.enableShap(true);
+          break;
+        case ALL:
+          builder.enableShap(true);
+          builder.enableShapOriginal(true);
+          break;
+        case ORIGINAL:
+          builder.enableShapOriginal(true);
+          break;
+        default:
+          throw new IllegalArgumentException("Unexpected enabled shapley value type.");
+      }
+    }
+    return builder.build();
   }
 }
