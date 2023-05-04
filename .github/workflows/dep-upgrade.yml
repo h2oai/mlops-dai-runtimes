@@ -41,6 +41,11 @@ jobs:
           git config user.name "H2O.ai"
           git commit -am 'Switch ${{ inputs.component }} to ${{ inputs.new_version }}'
           git push -u origin upgrade/${{ inputs.component }}/${{ inputs.new_version }}
+      - name: Target branch
+        run: |
+          TARGET_BRANCH="${{ github.ref }}"
+          TARGET_BRANCH=${TARGET_BRANCH/#\refs\/heads\//}
+          echo "TARGET_BRANCH=$TARGET_BRANCH" >> $GITHUB_ENV # update GitHub ENV vars
       - name: Create PR
         # https://github.com/marketplace/actions/github-action-for-creating-pull-requests
         uses: devops-infra/action-pull-request@v0.5.5
@@ -48,7 +53,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           source_branch: "upgrade/${{ inputs.component }}/${{ inputs.new_version }}"
-          target_branch: "${{ github.ref }}"
+          target_branch: "${{ env.TARGET_BRANCH }}"
           title: "Upgrade ${{ inputs.component }} to ${{ inputs.new_version }}"
           assignee: ${{ github.actor }}
           body: |
