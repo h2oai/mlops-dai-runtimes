@@ -1,0 +1,60 @@
+name: "Create a PR with new version of a component (like mojoRuntimeVersion)"
+
+on:
+  pull_request:
+    branches: [ "Just_for_GHA_registration_purposes" ]
+  workflow_dispatch:
+    inputs:
+      component:
+        description: "Name of the component that you want to upgrade"
+        required: true
+        type: string
+        default: "mojoRuntimeVersion"
+      new_version:
+        description: "New version of that component"
+        required: true
+        type: string
+      note:
+        description: "Anything worth mentioning in the pull-request description"
+        required: false
+        type: string
+        default: ""
+
+run-name: "Switching ${{ inputs.component }} to ${{ inputs.new_version }}"
+
+jobs:
+  upgrade:
+    if: |
+      github.event_name == 'workflow_dispatch' 
+    runs-on: ubuntu-latest
+    permissions: write-all
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: create branch
+      run: |
+        grep -q '^${{ inputs.component }}$$' gradle.properties
+        git checkout -b upgrade/${{ inputs.component }}/${{ inputs.new_version }}
+        sed -n '/^${{ inputs.component }}$$/s:^${{ inputs.component }}.*:${{ inputs.component }} = ${{ inputs.new_version }}:' gradle.properties
+        git commit -am 'Switch ${{ inputs.component }} to ${{ inputs.new_version }}'
+        git push -u origin upgrade/${{ inputs.component }}/${{ inputs.new_version }}
+    - name: Create PR
+      # https://github.com/marketplace/actions/github-action-for-creating-pull-requests
+      uses: devops-infra/action-pull-request@v0.5.5
+      id: create_release_pr
+      with:
+        github_token: ${{ github.token }}
+        source_branch: "upgrade/${{ inputs.component }}/${{ inputs.new_version }}"
+        target_branch: "master"
+        title: Upgrade ${{ inputs.component }} to ${{ inputs.release_version }}
+        assignee: ${{ github.actor }}
+        body: |
+          Automated upgrade to new component version.
+          -----
+          ${{ inputs.note }}
+        label: CI
+        draft: true
+        get_diff: false
+        ignore_users: "dependabot"
+        allow_no_diff: true
