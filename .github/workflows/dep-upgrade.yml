@@ -48,8 +48,8 @@ jobs:
         with:
           github_token: ${{ github.token }}
           source_branch: "upgrade/${{ inputs.component }}/${{ inputs.new_version }}"
-          target_branch: "master"
-          title: Upgrade ${{ inputs.component }} to ${{ inputs.release_version }}
+#          target_branch: "master"
+          title: "Upgrade ${{ inputs.component }} to ${{ inputs.new_version }}"
           assignee: ${{ github.actor }}
           body: |
             Automated upgrade to new component version.
