@@ -36,6 +36,8 @@ jobs:
           grep -q '^${{ inputs.component }}' gradle.properties
           git checkout -b upgrade/${{ inputs.component }}/${{ inputs.new_version }}
           sed -n '/^${{ inputs.component }} =/s:^${{ inputs.component }}.*:${{ inputs.component }} = ${{ inputs.new_version }}:' gradle.properties
+          git config user.email "ops@h2o.ai"
+          git config user.name "H2O.ai"
           git commit -am 'Switch ${{ inputs.component }} to ${{ inputs.new_version }}'
           git push -u origin upgrade/${{ inputs.component }}/${{ inputs.new_version }}
       - name: Create PR
