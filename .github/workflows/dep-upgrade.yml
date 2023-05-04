@@ -1,8 +1,7 @@
-name: "Create a PR with new version of a component (like mojoRuntimeVersion)"
+name: "Create component upgrade PR"
 
 on:
   pull_request:
-    branches: [ "Just_for_GHA_registration_purposes" ]
   workflow_dispatch:
     inputs:
       component:
@@ -20,7 +19,7 @@ on:
         type: string
         default: ""
 
-run-name: "Switching ${{ inputs.component }} to ${{ inputs.new_version }}"
+#run-name: "Switching ${{ inputs.component }} to ${{ inputs.new_version }}"
 
 jobs:
   upgrade:
@@ -33,9 +32,9 @@ jobs:
       run: |
         echo hello
         echo world
-    - uses: actions/checkout@master
-      with:
-        fetch-depth: 0
+#    - uses: actions/checkout@master
+#      with:
+#        fetch-depth: 0
     - name: create branch
       run: |
         grep -q '^${{ inputs.component }}$$' gradle.properties
