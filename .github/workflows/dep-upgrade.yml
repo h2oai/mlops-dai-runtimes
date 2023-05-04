@@ -29,6 +29,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
   steps:
+    - name: just a test
+      run: |
+        echo hello
+        echo world
     - uses: actions/checkout@master
       with:
         fetch-depth: 0
