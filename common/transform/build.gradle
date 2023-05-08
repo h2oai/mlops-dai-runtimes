@@ -4,8 +4,15 @@ dependencies {
     implementation project(':common:rest-java-model')
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
+
     implementation group: 'com.google.guava', name: 'guava'
     implementation group: 'org.slf4j', name: 'slf4j-api'
+    // FIXME(MM): this should not be required, since the dependency should be provided
+    // by mojo2-runtime-impl. The problem is that mojo2 does not expose that dependency
+    // as compile time dependency for consumers.
+    implementation group: 'com.opencsv', name: 'opencsv', version: '5.7.1'
+    testImplementation group: 'joda-time', name: 'joda-time', version: '2.9.9'
+    // end of fixme
 
     testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.4.0'
