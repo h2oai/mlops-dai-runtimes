@@ -1,14 +1,16 @@
 openapi: 3.0.0
 info:
-  title: Scoring API - v1
-  description: This is a definition of the REST API for scoring from H2O. This API is intended to be used within DAI and eventually across all H2O scoring systems
+  title: Scoring API - v1 extension
+  description: >-
+    This is an V1 extension of the REST API for scoring from H2O.
+    This API is intended to be used within DAI and eventually across all H2O scoring systems
   termsOfService: ""
   contact:
     email: support@h2o.ai
   license:
     name: License
     url: https://www.h2o.ai
-  version: 1.3.0-oas3
+  version: 1.2.0-ext
 servers:
   - url: /
 paths:
