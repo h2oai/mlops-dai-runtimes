@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
-import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
+import ai.h2o.mojos.deploy.common.rest.v1ext.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import ai.h2o.mojos.runtime.api.PipelineConfig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +47,12 @@ class ModelsApiControllerTest {
     MojoPipeline mojoPipeline = Mockito.mock(MojoPipeline.class);
     MockedStatic<MojoPipelineService> theMock = Mockito.mockStatic(MojoPipelineService.class);
     theMock.when(() -> MojoPipelineService
-        .loadPipeline(new File(tmpModel.getAbsolutePath()))).thenReturn(mojoPipeline);
+        .loadPipeline(new File(tmpModel.getAbsolutePath()), generateTestPipelineConfig()))
+      .thenReturn(mojoPipeline);
+  }
+
+  private static PipelineConfig generateTestPipelineConfig() {
+    return PipelineConfig.builder().withPredictionInterval(true).build();
   }
 
   @Test
