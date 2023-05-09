@@ -12,6 +12,66 @@ info:
 servers:
   - url: /
 paths:
+  /model/id:
+    get:
+      tags:
+        - metadata
+      summary: Returns model id
+      description: Returns unique id of the model loaded in the server and used for scoring
+      operationId: getModelId
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+      security:
+        - api_key: [ ]
+  /model/schema:
+    get:
+      tags:
+        - metadata
+      summary: Describe a model
+      description: "Returns information about the model used for scoring, e.g., input schema."
+      operationId: getModelInfo
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '../v1/swagger.yaml#/definitions/Model'
+  /model/sample_request:
+    get:
+      tags:
+        - metadata
+      summary: Sample scoring request
+      description: Builds a sample scoring request that would pass all validations
+      operationId: getSampleRequest
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreRequest'
+  /model/capabilities:
+    get:
+      tags:
+        - metadata
+      summary: List capabilities supported by the scorer.
+      description: Returns the capabilities supported by the scorer.
+      operationId: getCapabilities
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../v1/swagger.yaml#/definitions/CapabilityType'
   /model/score:
     get:
       tags:
@@ -59,6 +119,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScoreResponse'
+        "400":
+          description: Invalid payload
+          content: {}
+        "501":
+          description: Implementation not supported
+          content: {}
+      x-codegen-request-body-name: payload
+  /model/contribution:
+    post:
+      tags:
+        - contribution
+      summary: Contribution score or Shapley values on given rows
+      description: Computes contribution score with the rows sent in the body of the post request
+      operationId: getContribution
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '../v1/swagger.yaml#/definitions/ContributionRequest'
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '../v1/swagger.yaml#/definitions/ContributionResponse'
         "400":
           description: Invalid payload
           content: {}
