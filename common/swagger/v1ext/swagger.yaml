@@ -29,7 +29,7 @@ paths:
               schema:
                 type: string
       security:
-        - api_key: [ ]
+        - api_key: []
   /model/schema:
     get:
       tags:
@@ -101,7 +101,7 @@ paths:
           content: {}
         "501":
           description: Implementation not supported
-          content: { }
+          content: {}
     post:
       tags:
       - scoring
