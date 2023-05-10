@@ -181,6 +181,15 @@ definitions:
     type: array
     items:
       type: string
+  PredictionInterval:
+    type: object
+    properties:
+      fields:
+        $ref: '#/definitions/Row'
+      rows:
+        type: array
+        items:
+          $ref: '#/definitions/Row'
 
   ContributionRequest:
     type: object
@@ -279,6 +288,10 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Row'
+      requestPredictionIntervals:
+        type: boolean
+        description: |
+          If set to `true`, the scorer will try to fill field `predictionIntervals` in response if it is supported.
   ScoreResponse:
     type: object
     properties:
@@ -309,6 +322,14 @@ definitions:
           An object with features and shapley values that was requested by the client.
           This field will not be populated if the Shapley values are not available for a model.
         $ref: '#/definitions/ContributionResponse'
+      predictionIntervals:
+        type: object
+        description: >
+          Prediction interval consist of an array of interval bound names
+          and rows of array of bounds per bound name. Setting `requestPredictionIntervals`
+          to true will enable populating the field. The field will be empty or an error
+          response returned if prediction intervals are not returned or supported by the model.
+        $ref: '#/definitions/PredictionInterval'
   DataField:
     type: object
     properties:
