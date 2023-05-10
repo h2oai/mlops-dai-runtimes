@@ -291,7 +291,7 @@ definitions:
       requestPredictionIntervals:
         type: boolean
         description: |
-          If set to `true`. The scorer will try to fill field `predictionIntervals` in response if it is supported.
+          If set to `true`, the scorer will try to fill field `predictionIntervals` in response if it is supported.
   ScoreResponse:
     type: object
     properties:
