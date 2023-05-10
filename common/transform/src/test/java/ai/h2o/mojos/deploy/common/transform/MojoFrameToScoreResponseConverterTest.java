@@ -20,6 +20,7 @@ import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -278,7 +279,7 @@ class MojoFrameToScoreResponseConverterTest {
     ScoreResponse result =
         converter.apply(
         buildMojoFrame(
-          new String[]{"result", "result.lower", "result.upper"},
+          new String[]{"result.upper", "result", "result.lower"},
           types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
         scoreRequest);
 
@@ -286,18 +287,23 @@ class MojoFrameToScoreResponseConverterTest {
     assertThat(result.getScore())
         .containsExactly(
           Stream.of(expValues)
-          .map(input -> Arrays.asList(input).subList(0, 1))
+          .map(input -> Arrays.asList(input).subList(1, 2))
           .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
     assertThat(result.getFields())
       .containsExactly("result")
       .inOrder();
     assertThat(result.getPredictionIntervals().getFields())
-      .containsExactly("result.lower", "result.upper")
+      .containsExactly("result.upper", "result.lower")
       .inOrder();
     assertThat(result.getPredictionIntervals().getRows())
         .containsExactly(
           Stream.of(expValues)
-          .map(input -> Arrays.asList(input).subList(1, 3))
+          .map(input -> {
+            List<String> intervalRow = new ArrayList<>(2);
+            intervalRow.add(input[0]);
+            intervalRow.add(input[2]);
+            return intervalRow;
+          })
           .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
   }
 
@@ -315,7 +321,7 @@ class MojoFrameToScoreResponseConverterTest {
     ScoreResponse result =
         converter.apply(
         buildMojoFrame(
-          new String[]{"result", "result.lower", "result.upper"},
+          new String[]{"result.upper", "result", "result.lower"},
           types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
         scoreRequest);
 
@@ -323,7 +329,7 @@ class MojoFrameToScoreResponseConverterTest {
     assertThat(result.getScore())
         .containsExactly(
           Stream.of(expValues)
-          .map(input -> Arrays.asList(input).subList(0, 1))
+          .map(input -> Arrays.asList(input).subList(1, 2))
           .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
     assertThat(result.getFields())
       .containsExactly("result")
@@ -346,7 +352,7 @@ class MojoFrameToScoreResponseConverterTest {
     ScoreResponse result =
         converter.apply(
         buildMojoFrame(
-          new String[]{"result", "result.lower", "result.upper"},
+          new String[]{"result.upper", "result", "result.lower"},
           types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
         scoreRequest);
 
@@ -356,7 +362,7 @@ class MojoFrameToScoreResponseConverterTest {
           Stream.of(expValues)
           .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
     assertThat(result.getFields())
-      .containsExactly("result", "result.lower", "result.upper")
+      .containsExactly("result.upper", "result", "result.lower")
       .inOrder();
     assertThat(result.getPredictionIntervals())
       .isNull();
