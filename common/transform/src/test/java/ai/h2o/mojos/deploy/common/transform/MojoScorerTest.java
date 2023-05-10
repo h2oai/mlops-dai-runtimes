@@ -103,7 +103,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
             .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
             .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -124,7 +124,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
             .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
             .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -146,7 +146,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
             .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
             .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -231,7 +231,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -253,7 +253,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -275,7 +275,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -296,7 +296,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -318,7 +318,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -340,7 +340,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -361,7 +361,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -383,7 +383,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -405,7 +405,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -427,7 +427,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -449,7 +449,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
@@ -472,7 +472,7 @@ class MojoScorerTest {
     given(scoreRequestConverter.apply(any(), any()))
         .willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any(), any()))
+    given(scoreResponseConverter.apply(any(), any()))
         .willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();

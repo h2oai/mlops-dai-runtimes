@@ -45,7 +45,7 @@ public class MojoScorer {
 
   private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
   private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
-  private static final boolean supportPredictionInterval = isPredictionIntervalSupport();
+  public static final boolean supportPredictionInterval = isPredictionIntervalSupport();
   private static final MojoPipeline pipeline =
       supportPredictionInterval
         ? loadMojoPipelineFromFile(buildPipelineConfigWithPredictionInterval())
@@ -112,7 +112,7 @@ public class MojoScorer {
             .apply(request, pipeline.getInputFrameBuilder());
     MojoFrame responseFrame = doScore(requestFrame);
     ScoreResponse response = scoreResponseConverter.apply(
-        responseFrame, request, supportPredictionInterval);
+        responseFrame, request);
     response.id(pipeline.getUuid());
 
     ShapleyType requestShapleyType = request.getRequestShapleyValueType();
@@ -258,7 +258,7 @@ public class MojoScorer {
     }
     MojoFrame responseFrame = doScore(requestFrame);
     ScoreResponse response = scoreResponseConverter.apply(
-        responseFrame, new ScoreRequest(), supportPredictionInterval);
+        responseFrame, new ScoreRequest());
     response.id(pipeline.getUuid());
     return response;
   }
