@@ -64,7 +64,7 @@ public final class MojoScorer {
             responseFrame.getNcols(),
             Arrays.toString(responseFrame.getColumnNames())));
 
-    ScoreResponse response = responseConverter.apply(responseFrame, request);
+    ScoreResponse response = responseConverter.apply(responseFrame, request, false);
     response.id(mojoPipeline.getUuid());
     return response;
   }

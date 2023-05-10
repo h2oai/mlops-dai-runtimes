@@ -19,9 +19,12 @@ import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -41,7 +44,7 @@ class MojoFrameToScoreResponseConverterTest {
             .toMojoFrame();
 
     // When
-    ScoreResponse result = converter.apply(mojoFrame, scoreRequest);
+    ScoreResponse result = converter.apply(mojoFrame, scoreRequest, false);
 
     // Then
     assertThat(result.getScore()).isEmpty();
@@ -57,7 +60,8 @@ class MojoFrameToScoreResponseConverterTest {
     ScoreRequest scoreRequest = new ScoreRequest();
 
     // When
-    ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
+    ScoreResponse result = converter.apply(
+        buildMojoFrame(fields, types, values), scoreRequest, false);
 
     // Then
     assertThat(result.getScore()).containsExactly(asRow("value"));
@@ -74,7 +78,8 @@ class MojoFrameToScoreResponseConverterTest {
     scoreRequest.setNoFieldNamesInOutput(true);
 
     // When
-    ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
+    ScoreResponse result = converter.apply(
+        buildMojoFrame(fields, types, values), scoreRequest, false);
 
     // Then
     assertThat(result.getScore()).containsExactly(asRow("value"));
@@ -93,7 +98,8 @@ class MojoFrameToScoreResponseConverterTest {
     scoreRequest.addRowsItem(asRow("inputValue"));
 
     // When
-    ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
+    ScoreResponse result = converter.apply(
+        buildMojoFrame(fields, types, values), scoreRequest, false);
 
     // Then
     assertThat(result.getScore()).containsExactly(asRow("inputValue", "outputValue"));
@@ -112,7 +118,8 @@ class MojoFrameToScoreResponseConverterTest {
     scoreRequest.addRowsItem(asRow("inputValue1", "omittedValue", "inputValue3"));
 
     // When
-    ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
+    ScoreResponse result = converter.apply(
+        buildMojoFrame(fields, types, values), scoreRequest, false);
 
     // Then
     assertThat(result.getScore())
@@ -135,7 +142,8 @@ class MojoFrameToScoreResponseConverterTest {
     scoreRequest.setIdField("id");
 
     // When
-    ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
+    ScoreResponse result = converter.apply(
+        buildMojoFrame(fields, types, values), scoreRequest, false);
 
     // Then
     assertThat(result.getScore()).containsExactly(asRow("inputValue", "testId", "outputValue"));
@@ -155,7 +163,8 @@ class MojoFrameToScoreResponseConverterTest {
     scoreRequest.setIdField("id");
 
     // When
-    ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
+    ScoreResponse result = converter.apply(
+        buildMojoFrame(fields, types, values), scoreRequest, false);
 
     // Then
     assertThat(result.getScore()).hasSize(1);
@@ -177,7 +186,8 @@ class MojoFrameToScoreResponseConverterTest {
     ScoreRequest scoreRequest = new ScoreRequest();
 
     // When
-    ScoreResponse result = converter.apply(buildMojoFrame(fields, types, values), scoreRequest);
+    ScoreResponse result = converter.apply(
+        buildMojoFrame(fields, types, values), scoreRequest, false);
 
     // Then
     assertThat(result.getScore())
@@ -197,24 +207,17 @@ class MojoFrameToScoreResponseConverterTest {
     // When
     ScoreResponse result =
         converter.apply(
-            buildMojoFrame(
-                Stream.of(types).map(Object::toString).toArray(String[]::new), types, values),
-            scoreRequest);
+        buildMojoFrame(
+          Stream.of(types).map(Object::toString).toArray(String[]::new), types, values),
+        scoreRequest, false);
 
     // Then
     assertThat(result.getScore())
         .containsExactly(Stream.of(values)
-                .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
+        .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
     assertThat(result.getFields())
-        .containsExactly("Str", "Float32", "Float64", "Bool", "Int32", "Int64")
-        .inOrder();
-  }
-
-  @SuppressWarnings("unused")
-  private static Stream<Arguments> provideValues_convertMoreTypesResponse_succeeds() {
-    return Stream.of(
-        Arguments.of((Object) new String[][] {{"str", "1.1", "2.2", "1", "123", "123456789"}}),
-        Arguments.of((Object) new String[][] {{null, null, null, null, null, null}}));
+      .containsExactly("Str", "Float32", "Float64", "Bool", "Int32", "Int64")
+      .inOrder();
   }
 
   @ParameterizedTest
@@ -231,8 +234,8 @@ class MojoFrameToScoreResponseConverterTest {
                 Stream.of(types).map(Object::toString).toArray(String[]::new),
                 types,
                 values,
-                (rb, type, col, value) -> setJavaValue(rb, type, col, value)),
-            scoreRequest);
+              MojoFrameToScoreResponseConverterTest::setJavaValue),
+            scoreRequest, false);
 
     // Then
     assertThat(result.getScore())
@@ -241,6 +244,191 @@ class MojoFrameToScoreResponseConverterTest {
     assertThat(result.getFields())
         .containsExactly("Str", "Float32", "Float64", "Bool", "Int32", "Int64")
         .inOrder();
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideValues_predictionIntervalEnabledResponse_succeeds")
+  void convertMoreTypesResponse_enablePredictionIntervalSameType_succeeds(
+      Object[][] values, String[][] expValues) {
+    // Given
+    Type[] types = {Float64, Float64, Float64};
+    ScoreRequest scoreRequest = new ScoreRequest().requestPredictionIntervals(true);
+
+    // When
+    ScoreResponse result =
+        converter.apply(
+        buildMojoFrame(
+          new String[]{"result", "result.lower", "result.upper"},
+          types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
+        scoreRequest, true);
+
+    // Then
+    assertThat(result.getScore())
+        .containsExactly(
+          Stream.of(expValues)
+          .map(input -> Arrays.asList(input).subList(0, 1))
+          .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
+    assertThat(result.getFields())
+      .containsExactly("result")
+      .inOrder();
+    assertThat(result.getPredictionIntervals().getFields())
+      .containsExactly("result.lower", "result.upper")
+      .inOrder();
+    assertThat(result.getPredictionIntervals().getRows())
+        .containsExactly(
+          Stream.of(expValues)
+          .map(input -> Arrays.asList(input).subList(1, 3))
+          .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideValues_predictionIntervalEnabledResponse_succeeds")
+  void convertMoreTypesResponse_disablePredictionIntervalSameType_succeeds(
+      Object[][] values, String[][] expValues) {
+    // Given
+    Type[] types = {Float64, Float64, Float64};
+    ScoreRequest scoreRequest = new ScoreRequest();
+
+    // When
+    ScoreResponse result =
+        converter.apply(
+        buildMojoFrame(
+          new String[]{"result", "result.lower", "result.upper"},
+          types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
+        scoreRequest, true);
+
+    // Then
+    assertThat(result.getScore())
+        .containsExactly(
+          Stream.of(expValues)
+          .map(input -> Arrays.asList(input).subList(0, 1))
+          .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
+    assertThat(result.getFields())
+      .containsExactly("result")
+      .inOrder();
+    assertThat(result.getPredictionIntervals())
+      .isNull();
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideValues_predictionIntervalEnabledResponse_succeeds")
+  void convertMoreTypesResponse_disablePredictionIntervalNotSupportSameType_succeeds(
+      Object[][] values, String[][] expValues) {
+    // Given
+    Type[] types = {Float64, Float64, Float64};
+    ScoreRequest scoreRequest = new ScoreRequest();
+
+    // When
+    ScoreResponse result =
+        converter.apply(
+        buildMojoFrame(
+          new String[]{"result", "result.lower", "result.upper"},
+          types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
+        scoreRequest, false);
+
+    // Then
+    assertThat(result.getScore())
+        .containsExactly(
+          Stream.of(expValues)
+          .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
+    assertThat(result.getFields())
+      .containsExactly("result", "result.lower", "result.upper")
+      .inOrder();
+    assertThat(result.getPredictionIntervals())
+      .isNull();
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideValue_predictionIntervalEnabledResponse_fails")
+  void convertMoreTypesResponse_enablePredictionIntervalDiffType_fails(
+      Object[][] values, Type[] types) {
+    // Given
+    ScoreRequest scoreRequest = new ScoreRequest().requestPredictionIntervals(true);
+
+    // When & Then
+    try {
+      converter.apply(
+          buildMojoFrame(
+          Stream.of(types).map(Object::toString).toArray(String[]::new),
+          types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
+          scoreRequest, true);
+    } catch (Exception e) {
+      assertThat(e instanceof IllegalStateException).isTrue();
+    }
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideValue_predictionIntervalEnabledResponse_fails")
+  void convertMoreTypesResponse_disablePredictionIntervalDiffType_fails(
+      Object[][] values, Type[] types) {
+    // Given
+    ScoreRequest scoreRequest = new ScoreRequest();
+
+    // When & Then
+    try {
+      converter.apply(
+          buildMojoFrame(
+          Stream.of(types).map(Object::toString).toArray(String[]::new),
+          types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
+          scoreRequest, true);
+    } catch (Exception e) {
+      assertThat(e instanceof IllegalStateException).isTrue();
+    }
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideValue_predictionIntervalEnabledResponse_fails")
+  void convertMoreTypesResponse_disablePredictionIntervalNotSupportDiffType_succeeds(
+      Object[][] values, Type[] types) {
+    // Given
+    ScoreRequest scoreRequest = new ScoreRequest();
+
+    // When
+    ScoreResponse result =
+        converter.apply(
+        buildMojoFrame(
+          Stream.of(types).map(Object::toString).toArray(String[]::new),
+          types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
+        scoreRequest, false);
+
+    // Then
+    assertThat(result.getFields())
+      .containsExactly(Stream.of(types).map(Object::toString).toArray())
+      .inOrder();
+    assertThat(result.getPredictionIntervals())
+      .isNull();
+  }
+
+  private static Stream<Arguments> provideValues_predictionIntervalEnabledResponse_succeeds() {
+    return Stream.of(
+      Arguments.of(
+        new Double[][]{{3.5, -1.0, 2.0}, {3.3, 11.9, 10.3}},
+        new String[][]{{"3.5", "-1.0", "2.0"}, {"3.3", "11.9", "10.3"}}),
+      Arguments.of(
+        new Double[][]{{2.7, 3.4, 5.9}, {1.1, 2.2, 3.3}},
+        new String[][]{{"2.7", "3.4", "5.9"}, {"1.1", "2.2", "3.3"}})
+    );
+  }
+
+  private static Stream<Arguments> provideValue_predictionIntervalEnabledResponse_fails() {
+    return Stream.of(
+      Arguments.of(new Double[][]{{12.2, 11.221},{1.1, 99.1}}, new Type[]{Float64, Float64}),
+      Arguments.of(new Double[][]{{10.1}, {121.1}}, new Type[]{Float64}),
+      Arguments.of(new Double[][]{}, new Type[]{}),
+      Arguments.of(new Object[][]{
+        {"abc", null, 12}, {"bbc", 12.4f, 15}}, new Type[]{Str, Float32, Int32}),
+      Arguments.of(new Object[][]{
+        {90L, 1.21f, 12}, {11L, 12.4f, 15}}, new Type[]{Int64, Float32, Int32}),
+      Arguments.of(new Object[][]{
+        {false, true, false}, {true, null, false}}, new Type[]{Bool, Bool, Bool})
+    );
+  }
+
+  @SuppressWarnings("unused")
+  private static Stream<Arguments> provideValues_convertMoreTypesResponse_succeeds() {
+    return Stream.of(
+      Arguments.of((Object) new String[][] {{"str", "1.1", "2.2", "1", "123", "123456789"}}),
+      Arguments.of((Object) new String[][] {{null, null, null, null, null, null}}));
   }
 
   @SuppressWarnings("unused")
@@ -297,6 +485,13 @@ class MojoFrameToScoreResponseConverterTest {
     Row row = new Row();
     row.ensureCapacity(values.length);
     row.addAll(asList(values));
+    return row;
+  }
+
+  private static Row asRow(List<String> values) {
+    Row row = new Row();
+    row.ensureCapacity(values.size());
+    row.addAll(values);
     return row;
   }
 

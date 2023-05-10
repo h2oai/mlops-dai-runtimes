@@ -45,8 +45,11 @@ public class MojoScorer {
 
   private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
   private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
-  private static final MojoPipeline pipeline = loadMojoPipelineFromFile();
-
+  private static final boolean supportPredictionInterval = isPredictionIntervalSupport();
+  private static final MojoPipeline pipeline =
+      supportPredictionInterval
+        ? loadMojoPipelineFromFile(buildPipelineConfigWithPredictionInterval())
+        : loadMojoPipelineFromFile();
   private final ShapleyLoadOption enabledShapleyTypes;
   private final boolean shapleyEnabled;
   private static MojoPipeline pipelineTransformedShapley;
@@ -97,11 +100,19 @@ public class MojoScorer {
    * @return response {@link ScoreResponse}
    */
   public ScoreResponse score(ScoreRequest request) {
+    if (Boolean.TRUE.equals(request.isRequestPredictionIntervals())
+        && !supportPredictionInterval) {
+      throw new IllegalArgumentException(
+        "requestPredictionIntervals set to true, but model does not support it"
+      );
+    }
+
     scoreRequestTransformer.accept(request, getModelInfo().getSchema().getInputFields());
     MojoFrame requestFrame = scoreRequestConverter
             .apply(request, pipeline.getInputFrameBuilder());
     MojoFrame responseFrame = doScore(requestFrame);
-    ScoreResponse response = scoreResponseConverter.apply(responseFrame, request);
+    ScoreResponse response = scoreResponseConverter.apply(
+        responseFrame, request, supportPredictionInterval);
     response.id(pipeline.getUuid());
 
     ShapleyType requestShapleyType = request.getRequestShapleyValueType();
@@ -246,7 +257,8 @@ public class MojoScorer {
       requestFrame = csvConverter.apply(csvStream, pipeline.getInputFrameBuilder());
     }
     MojoFrame responseFrame = doScore(requestFrame);
-    ScoreResponse response = scoreResponseConverter.apply(responseFrame, new ScoreRequest());
+    ScoreResponse response = scoreResponseConverter.apply(
+        responseFrame, new ScoreRequest(), supportPredictionInterval);
     response.id(pipeline.getUuid());
     return response;
   }
@@ -357,6 +369,32 @@ public class MojoScorer {
   }
 
   private static MojoPipeline loadMojoPipelineFromFile() {
+    File mojoFile = getMojoFile();
+    try {
+      MojoPipeline mojoPipeline = MojoPipelineService.loadPipeline(mojoFile);
+      log.info("Mojo pipeline successfully loaded ({}).", mojoPipeline.getUuid());
+      return mojoPipeline;
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to load mojo from " + mojoFile, e);
+    } catch (LicenseException e) {
+      throw new RuntimeException("License file not found", e);
+    }
+  }
+
+  private static MojoPipeline loadMojoPipelineFromFile(PipelineConfig pipelineConfig) {
+    File mojoFile = getMojoFile();
+    try {
+      MojoPipeline mojoPipeline = MojoPipelineService.loadPipeline(mojoFile, pipelineConfig);
+      log.info("Mojo pipeline successfully loaded ({}).", mojoPipeline.getUuid());
+      return mojoPipeline;
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to load mojo from " + mojoFile, e);
+    } catch (LicenseException e) {
+      throw new RuntimeException("License file not found", e);
+    }
+  }
+
+  private static File getMojoFile() {
     Preconditions.checkArgument(
         !Strings.isNullOrEmpty(MOJO_PIPELINE_PATH),
         "Path to mojo pipeline not specified, set the %s property.",
@@ -373,23 +411,19 @@ public class MojoScorer {
     if (!mojoFile.isFile()) {
       throw new RuntimeException("Could not load mojo from file: " + mojoFile);
     }
-    try {
-      MojoPipeline mojoPipeline = loadMojoPipelineFromFile(mojoFile);
-      log.info("Mojo pipeline successfully loaded ({}).", mojoPipeline.getUuid());
-      return mojoPipeline;
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to load mojo from " + mojoFile, e);
-    } catch (LicenseException e) {
-      throw new RuntimeException("License file not found", e);
-    }
+    return mojoFile;
   }
 
-  private static MojoPipeline loadMojoPipelineFromFile(File mojoFile) throws IOException, LicenseException {
+  private static boolean isPredictionIntervalSupport() {
+    File mojoFile = getMojoFile();
     try {
-      return MojoPipelineService.loadPipeline(mojoFile, buildPipelineConfigWithPredictionInterval());
+      MojoPipelineService.loadPipeline(mojoFile, buildPipelineConfigWithPredictionInterval());
+      return true;
     } catch (IllegalArgumentException e) {
-      log.debug("Disable Prediction interval as it is not supported for the given model", e);
-      return MojoPipelineService.loadPipeline(mojoFile);
+      log.debug("Prediction interval is not supported for the given model", e);
+      return false;
+    } catch (IOException | LicenseException e) {
+      throw new RuntimeException("Unable to load mojo from " + mojoFile, e);
     }
   }
 
