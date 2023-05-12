@@ -166,7 +166,7 @@ pipeline {
                 timeout(time: 30, unit: 'MINUTES') {
                     script {
                         def gitCommitHash = env.GIT_COMMIT
-                        def imageTags = "${versionText},${gitCommitHash}"
+                        def imageTags = isMasterBranch() || isReleaseBranch() ? "${versionText},${gitCommitHash}" : "${gitCommitHash}"
                         withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
                             withDockerCredentials("harbor.h2o.ai", "TO_") {
                                 sh "./gradlew jib \
@@ -202,7 +202,7 @@ pipeline {
                 timeout(time: 30, unit: 'MINUTES') {
                     script {
                         def gitCommitHash = env.GIT_COMMIT
-                        def imageTags = "${versionText},${gitCommitHash}"
+                        def imageTags = isMasterBranch() || isReleaseBranch() ? "${versionText},${gitCommitHash}" : "${gitCommitHash}"
                         withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
                             withDockerCredentials(DOCKERHUB_CREDS, "TO_") {
                                 sh "./gradlew jib \
@@ -237,7 +237,7 @@ pipeline {
                 timeout(time: 30, unit: 'MINUTES') {
                     script {
                         def gitCommitHash = env.GIT_COMMIT
-                        def imageTags = "${versionText},${gitCommitHash}"
+                        def imageTags = isMasterBranch() || isReleaseBranch() ? "${versionText},${gitCommitHash}" : "${gitCommitHash}"
                         withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
                             withGCRCredentials(VORVAN_CRED) {
                                 def gcrCreds = readFile("${GCR_JSON_KEY}")
