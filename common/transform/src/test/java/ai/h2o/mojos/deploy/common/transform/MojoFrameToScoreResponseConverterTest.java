@@ -374,29 +374,8 @@ class MojoFrameToScoreResponseConverterTest {
       Object[][] values, Type[] types) {
     // Given
     final MojoFrameToScoreResponseConverter converter
-        = new MojoFrameToScoreResponseConverter(true);
+        = new MojoFrameToScoreResponseConverter(false);
     ScoreRequest scoreRequest = new ScoreRequest().requestPredictionIntervals(true);
-
-    // When & Then
-    try {
-      converter.apply(
-          buildMojoFrame(
-          Stream.of(types).map(Object::toString).toArray(String[]::new),
-          types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
-          scoreRequest);
-    } catch (Exception e) {
-      assertThat(e instanceof IllegalStateException).isTrue();
-    }
-  }
-
-  @ParameterizedTest
-  @MethodSource("provideValue_predictionIntervalEnabledResponse_fails")
-  void convertMoreTypesResponse_disablePredictionIntervalDiffType_fails(
-      Object[][] values, Type[] types) {
-    // Given
-    final MojoFrameToScoreResponseConverter converter
-        = new MojoFrameToScoreResponseConverter(true);
-    ScoreRequest scoreRequest = new ScoreRequest();
 
     // When & Then
     try {

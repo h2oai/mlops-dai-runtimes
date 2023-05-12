@@ -13,6 +13,7 @@ import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import ai.h2o.mojos.deploy.local.rest.error.ErrorUtil;
 import com.google.common.base.Strings;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class ModelsApiController implements ModelApi {
     this.scorer = scorer;
     this.sampleRequestBuilder = sampleRequestBuilder;
     this.supportedCapabilities = assembleSupportedCapabilities(
-        scorer.getEnabledShapleyTypes()
+        scorer.getEnabledShapleyTypes(), scorer.isPredictionIntervalSupport()
     );
   }
 
@@ -159,20 +160,28 @@ public class ModelsApiController implements ModelApi {
   }
 
   private static List<CapabilityType> assembleSupportedCapabilities(
-      ShapleyLoadOption enabledShapleyTypes) {
+      ShapleyLoadOption enabledShapleyTypes, boolean supportPredictionInterval) {
+    List<CapabilityType> result = new ArrayList<>();
+    if (supportPredictionInterval) {
+      result.add(CapabilityType.SCORE_PREDICTION_INTERVAL);
+    }
     switch (enabledShapleyTypes) {
       case ALL:
-        return Arrays.asList(
+        result.addAll(Arrays.asList(
             CapabilityType.SCORE,
             CapabilityType.CONTRIBUTION_ORIGINAL,
-            CapabilityType.CONTRIBUTION_TRANSFORMED);
+            CapabilityType.CONTRIBUTION_TRANSFORMED));
+        break;
       case ORIGINAL:
-        return Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_ORIGINAL);
+        result.addAll(Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_ORIGINAL));
+        break;
       case TRANSFORMED:
-        return Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_TRANSFORMED);
+        result.addAll(Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_TRANSFORMED));
+        break;
       case NONE:
       default:
-        return Arrays.asList(CapabilityType.SCORE);
+        result.add(CapabilityType.SCORE);
     }
+    return result;
   }
 }

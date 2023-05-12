@@ -94,10 +94,11 @@ public class MojoFrameToScoreResponseConverter
    */
   private void fillWithPredictionInterval(
       MojoFrame mojoFrame, ScoreRequest scoreRequest, ScoreResponse scoreResponse) {
-    if (Boolean.TRUE.equals(scoreRequest.isRequestPredictionIntervals())) {
-      if (!supportPredictionInterval || !isPredictionIntervalAvailable(mojoFrame)) {
+    if (Boolean.TRUE.equals(scoreRequest.isRequestPredictionIntervals())
+        && mojoFrame.getNcols() > 1) {
+      if (!supportPredictionInterval) {
         throw new IllegalStateException(
-          "Unexpected error, prediction interval should not be supported");
+          "Unexpected error, prediction interval should be supported, but actually not");
       }
       int targetIdx = getTargetColIdx(Arrays.asList(mojoFrame.getColumnNames()));
       PredictionInterval predictionInterval = new PredictionInterval();
@@ -138,10 +139,6 @@ public class MojoFrameToScoreResponseConverter
     if (mojoFrame.getNcols() > 0) {
       List<String> targetColumns = Arrays.asList(mojoFrame.getColumnNames());
       if (supportPredictionInterval) {
-        if (!isPredictionIntervalAvailable(mojoFrame)) {
-          throw new IllegalStateException(
-            "Unexpected error, prediction interval should not be supported");
-        }
         int targetIdx = getTargetColIdx(targetColumns);
         if (targetIdx < 0) {
           throw new IllegalStateException(
@@ -166,10 +163,6 @@ public class MojoFrameToScoreResponseConverter
     if (mojoFrame.getNcols() > 0) {
       List<String> targetColumns = Arrays.asList(mojoFrame.getColumnNames());
       if (supportPredictionInterval) {
-        if (!isPredictionIntervalAvailable(mojoFrame)) {
-          throw new IllegalStateException(
-            "Unexpected error, prediction interval should not be supported");
-        }
         int targetIdx = getTargetColIdx(targetColumns);
         if (targetIdx < 0) {
           throw new IllegalStateException(
@@ -182,19 +175,6 @@ public class MojoFrameToScoreResponseConverter
     } else {
       return Collections.emptyList();
     }
-  }
-
-  /**
-   * True if MOJO response frame has expected structure when prediction interval is
-   * available from MOJO response frame, false otherwise.
-   */
-  private boolean isPredictionIntervalAvailable(MojoFrame mojoFrame) {
-    return mojoFrame.getColumnNames().length == 3
-      && mojoFrame.getColumnType(0).equals(mojoFrame.getColumnType(1))
-      && mojoFrame.getColumnType(1).equals(mojoFrame.getColumnType(2))
-      && mojoFrame.getColumnType(0).isnumeric
-      && Arrays.stream(mojoFrame.getColumnNames()).anyMatch(field -> field.endsWith(LOWER_BOUND))
-      && Arrays.stream(mojoFrame.getColumnNames()).anyMatch(field -> field.endsWith(UPPER_BOUND));
   }
 
   /**

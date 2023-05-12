@@ -45,7 +45,7 @@ public class MojoScorer {
 
   private static final String MOJO_PIPELINE_PATH_PROPERTY = "mojo.path";
   private static final String MOJO_PIPELINE_PATH = System.getProperty(MOJO_PIPELINE_PATH_PROPERTY);
-  public static final boolean supportPredictionInterval = isPredictionIntervalSupport();
+  public static final boolean supportPredictionInterval = checkIfPredictionIntervalSupport();
   private static final MojoPipeline pipeline =
       supportPredictionInterval
         ? loadMojoPipelineFromFile(buildPipelineConfigWithPredictionInterval())
@@ -332,6 +332,10 @@ public class MojoScorer {
     return enabledShapleyTypes;
   }
 
+  public boolean isPredictionIntervalSupport() {
+    return supportPredictionInterval;
+  }
+
   /**
    * Method to load mojo pipelines for shapley scoring based on configuration
    *
@@ -414,7 +418,7 @@ public class MojoScorer {
     return mojoFile;
   }
 
-  private static boolean isPredictionIntervalSupport() {
+  private static boolean checkIfPredictionIntervalSupport() {
     File mojoFile = getMojoFile();
     try {
       MojoPipelineService.loadPipeline(mojoFile, buildPipelineConfigWithPredictionInterval());
