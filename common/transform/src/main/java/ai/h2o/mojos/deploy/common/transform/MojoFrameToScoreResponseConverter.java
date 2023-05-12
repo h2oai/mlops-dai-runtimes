@@ -94,17 +94,20 @@ public class MojoFrameToScoreResponseConverter
    */
   private void fillWithPredictionInterval(
       MojoFrame mojoFrame, ScoreRequest scoreRequest, ScoreResponse scoreResponse) {
-    if (Boolean.TRUE.equals(scoreRequest.isRequestPredictionIntervals())
-        && mojoFrame.getNcols() > 1) {
+    if (Boolean.TRUE.equals(scoreRequest.isRequestPredictionIntervals())) {
       if (!supportPredictionInterval) {
         throw new IllegalStateException(
           "Unexpected error, prediction interval should be supported, but actually not");
       }
-      int targetIdx = getTargetColIdx(Arrays.asList(mojoFrame.getColumnNames()));
-      PredictionInterval predictionInterval = new PredictionInterval();
-      predictionInterval.setFields(getPredictionIntervalFields(mojoFrame, targetIdx));
-      predictionInterval.setRows(getPredictionIntervalRows(mojoFrame, targetIdx));
-      scoreResponse.setPredictionIntervals(predictionInterval);
+      if (mojoFrame.getNcols() > 1) {
+        int targetIdx = getTargetColIdx(Arrays.asList(mojoFrame.getColumnNames()));
+        PredictionInterval predictionInterval = new PredictionInterval();
+        predictionInterval.setFields(getPredictionIntervalFields(mojoFrame, targetIdx));
+        predictionInterval.setRows(getPredictionIntervalRows(mojoFrame, targetIdx));
+        scoreResponse.setPredictionIntervals(predictionInterval);
+      } else {
+        scoreResponse.setPredictionIntervals(new PredictionInterval());
+      }
     }
   }
 
