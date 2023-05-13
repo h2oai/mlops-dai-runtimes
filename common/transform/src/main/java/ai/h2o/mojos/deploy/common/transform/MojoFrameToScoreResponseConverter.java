@@ -106,7 +106,8 @@ public class MojoFrameToScoreResponseConverter
         predictionInterval.setRows(getPredictionIntervalRows(mojoFrame, targetIdx));
         scoreResponse.setPredictionIntervals(predictionInterval);
       } else {
-        scoreResponse.setPredictionIntervals(new PredictionInterval());
+        scoreResponse.setPredictionIntervals(
+            new PredictionInterval().fields(new Row()).rows(Collections.emptyList()));
       }
     }
   }
