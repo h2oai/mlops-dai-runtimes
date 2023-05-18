@@ -17,6 +17,7 @@ import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.api.BasePipelineListener;
 import ai.h2o.mojos.runtime.api.MojoColumnMeta;
 import ai.h2o.mojos.runtime.api.MojoPipelineService;
+import ai.h2o.mojos.runtime.api.PipelineConfig;
 import ai.h2o.mojos.runtime.frame.MojoColumn;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
@@ -35,6 +36,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -46,6 +48,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class MojoScorerTest {
   private static final String MOJO_PIPELINE_PATH = "src/test/resources/multinomial-pipeline.mojo";
   private static final String TEST_UUID = "TEST_UUID";
+  private static MockedStatic<MojoPipelineService> pipelineSettings = null;
 
   @Mock private ScoreRequestToMojoFrameConverter scoreRequestConverter;
   @Mock private MojoFrameToScoreResponseConverter scoreResponseConverter;
@@ -62,11 +65,17 @@ class MojoScorerTest {
   }
 
   private static void mockDummyPipeline() {
+    if (pipelineSettings != null) {
+      pipelineSettings.close();
+    }
     MojoPipeline dummyPipeline =
             new DummyPipeline(TEST_UUID, MojoFrameMeta.getEmpty(), MojoFrameMeta.getEmpty());
-    MockedStatic<MojoPipelineService> theMock = Mockito.mockStatic(MojoPipelineService.class);
-    theMock.when(() -> MojoPipelineService
-            .loadPipeline(new File(MOJO_PIPELINE_PATH))).thenReturn(dummyPipeline);
+    pipelineSettings = Mockito.mockStatic(MojoPipelineService.class);
+    pipelineSettings.when(() -> MojoPipelineService
+      .loadPipeline(new File(MOJO_PIPELINE_PATH))).thenReturn(dummyPipeline);
+    pipelineSettings.when(() -> MojoPipelineService
+        .loadPipeline(Mockito.eq(new File(MOJO_PIPELINE_PATH)), any(PipelineConfig.class)))
+      .thenReturn(dummyPipeline);
   }
 
   @AfterAll

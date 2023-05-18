@@ -13,6 +13,7 @@ import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.api.MojoPipelineService;
+import ai.h2o.mojos.runtime.api.PipelineConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +47,8 @@ class ModelsApiControllerTest {
     MojoPipeline mojoPipeline = Mockito.mock(MojoPipeline.class);
     MockedStatic<MojoPipelineService> theMock = Mockito.mockStatic(MojoPipelineService.class);
     theMock.when(() -> MojoPipelineService
-        .loadPipeline(new File(tmpModel.getAbsolutePath()))).thenReturn(mojoPipeline);
+        .loadPipeline(Mockito.eq(new File(tmpModel.getAbsolutePath())), any(PipelineConfig.class)))
+      .thenReturn(mojoPipeline);
   }
 
   @Test
@@ -56,6 +58,7 @@ class ModelsApiControllerTest {
 
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.NONE);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -75,6 +78,7 @@ class ModelsApiControllerTest {
         CapabilityType.CONTRIBUTION_TRANSFORMED);
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.ALL);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -93,6 +97,7 @@ class ModelsApiControllerTest {
         CapabilityType.CONTRIBUTION_ORIGINAL);
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.ORIGINAL);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -111,6 +116,7 @@ class ModelsApiControllerTest {
         CapabilityType.CONTRIBUTION_TRANSFORMED);
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -126,6 +132,7 @@ class ModelsApiControllerTest {
     // Given
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
     when(scorer.score(any())).thenThrow(new IllegalStateException("Test Exception"));
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
@@ -145,6 +152,7 @@ class ModelsApiControllerTest {
     // Given
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -163,6 +171,7 @@ class ModelsApiControllerTest {
     // Given
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
