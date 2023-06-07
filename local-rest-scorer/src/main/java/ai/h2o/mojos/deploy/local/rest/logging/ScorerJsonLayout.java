@@ -7,18 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ScorerJsonLayout extends JsonLayout {
-  public static enum RequestType {
-    POST("POST"),
-    GET("GET"),
-    PATCH("PATCH"),
-    PUT("PUT");
-
-    private final String value;
-    private RequestType(String value) {
-      this.value = value;
-    }
-  }
-
   public static final String ENDPOINT = "Endpoint";
   public static final String ERROR = "Error";
   public static final String MESSAGE = "Message";
