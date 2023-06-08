@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 class ScorerConfiguration {
   @Bean
   public MojoFrameToScoreResponseConverter responseConverter() {
-    return new MojoFrameToScoreResponseConverter();
+    return new MojoFrameToScoreResponseConverter(MojoScorer.supportPredictionInterval);
   }
 
   @Bean

@@ -2,17 +2,22 @@ package ai.h2o.mojos.deploy.local.rest.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
+import ai.h2o.mojos.deploy.common.rest.model.Model;
+import ai.h2o.mojos.deploy.common.rest.model.ModelSchema;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.api.MojoPipelineService;
+import ai.h2o.mojos.runtime.api.PipelineConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +35,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
+import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
+import uk.org.webcompere.systemstubs.jupiter.SystemStub;
+import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
 @ExtendWith(MockitoExtension.class)
+@ExtendWith(SystemStubsExtension.class)
 class ModelsApiControllerTest {
+  @SystemStub
+  private EnvironmentVariables environmentVariables;
   @Mock private SampleRequestBuilder sampleRequestBuilder;
 
   @BeforeAll
@@ -46,7 +57,8 @@ class ModelsApiControllerTest {
     MojoPipeline mojoPipeline = Mockito.mock(MojoPipeline.class);
     MockedStatic<MojoPipelineService> theMock = Mockito.mockStatic(MojoPipelineService.class);
     theMock.when(() -> MojoPipelineService
-        .loadPipeline(new File(tmpModel.getAbsolutePath()))).thenReturn(mojoPipeline);
+        .loadPipeline(Mockito.eq(new File(tmpModel.getAbsolutePath())), any(PipelineConfig.class)))
+      .thenReturn(mojoPipeline);
   }
 
   @Test
@@ -56,6 +68,7 @@ class ModelsApiControllerTest {
 
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.NONE);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -75,6 +88,7 @@ class ModelsApiControllerTest {
         CapabilityType.CONTRIBUTION_TRANSFORMED);
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.ALL);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -93,6 +107,7 @@ class ModelsApiControllerTest {
         CapabilityType.CONTRIBUTION_ORIGINAL);
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.ORIGINAL);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -111,6 +126,7 @@ class ModelsApiControllerTest {
         CapabilityType.CONTRIBUTION_TRANSFORMED);
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -122,10 +138,45 @@ class ModelsApiControllerTest {
   }
 
   @Test
+  void verifyScore_modelId_ReturnsExpected() {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
+    environmentVariables.set("MODEL_ID", "test-model-id");
+
+    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
+
+    // When
+    ResponseEntity<ScoreResponse> response = controller.getScore(new ScoreRequest());
+
+    // Then
+    assertEquals("test-model-id", response.getBody().getId());
+  }
+
+  @Test
+  void verifySchema_modelId_ReturnsExpected() {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
+    environmentVariables.set("MODEL_ID", "test-model-id");
+
+    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
+
+    // When
+    ResponseEntity<Model> response = controller.getModelInfo();
+
+    // Then
+    assertEquals("test-model-id", response.getBody().getId());
+  }
+
+  @Test
   void verifyScore_Fails_ReturnsException() {
     // Given
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
     when(scorer.score(any())).thenThrow(new IllegalStateException("Test Exception"));
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
@@ -133,46 +184,11 @@ class ModelsApiControllerTest {
     // When & Then
     try {
       controller.getScore(new ScoreRequest());
+      fail("exception is expected, but fail to raise");
     } catch (Exception ex) {
       assertTrue(ex instanceof ResponseStatusException);
       assertTrue(ex.getCause() instanceof IllegalStateException);
       assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ((ResponseStatusException) ex).getStatus());
-    }
-  }
-
-  @Test
-  void verifyScoreByFile_Fails_ReturnsException() throws IOException {
-    // Given
-    MojoScorer scorer = mock(MojoScorer.class);
-    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
-
-    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
-
-    // When & Then
-    try {
-      controller.getScore(new ScoreRequest());
-    } catch (Exception ex) {
-      assertTrue(ex instanceof ResponseStatusException);
-      assertTrue(ex.getCause() instanceof IllegalStateException);
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseStatusException) ex).getStatus());
-    }
-  }
-
-  @Test
-  void verifyScoreContribution_Fails_ReturnsException() {
-    // Given
-    MojoScorer scorer = mock(MojoScorer.class);
-    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
-
-    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
-
-    // When & Then
-    try {
-      controller.getScore(new ScoreRequest());
-    } catch (Exception ex) {
-      assertTrue(ex instanceof ResponseStatusException);
-      assertTrue(ex.getCause() instanceof IllegalStateException);
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseStatusException) ex).getStatus());
     }
   }
 }

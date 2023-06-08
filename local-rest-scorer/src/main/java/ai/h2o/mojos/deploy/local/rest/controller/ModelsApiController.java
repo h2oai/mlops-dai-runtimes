@@ -13,6 +13,7 @@ import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import ai.h2o.mojos.deploy.local.rest.error.ErrorUtil;
 import com.google.common.base.Strings;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,22 +50,18 @@ public class ModelsApiController implements ModelApi {
     this.scorer = scorer;
     this.sampleRequestBuilder = sampleRequestBuilder;
     this.supportedCapabilities = assembleSupportedCapabilities(
-        scorer.getEnabledShapleyTypes()
+        scorer.getEnabledShapleyTypes(), scorer.isPredictionIntervalSupport()
     );
   }
 
   @Override
   public ResponseEntity<Model> getModelInfo() {
-    return ResponseEntity.ok(scorer.getModelInfo());
+    return ResponseEntity.ok(scorer.getModelInfo().id(getScorerModelId()));
   }
 
   @Override
   public ResponseEntity<String> getModelId() {
-    try {
-      return ResponseEntity.ok(System.getenv(MODEL_ID));
-    } catch (Exception ignored) {
-      return ResponseEntity.ok(scorer.getModelId());
-    }
+    return ResponseEntity.ok(getScorerModelId());
   }
 
   @Override
@@ -77,6 +74,7 @@ public class ModelsApiController implements ModelApi {
     try {
       log.info("Got scoring request");
       ScoreResponse scoreResponse = scorer.score(request);
+      scoreResponse.id(getScorerModelId());
       return ResponseEntity.ok(scoreResponse);
     } catch (IllegalArgumentException e) {
       log.error("Invalid scoring request due to: {}", e.getMessage());
@@ -158,21 +156,38 @@ public class ModelsApiController implements ModelApi {
     return ResponseEntity.ok(sampleRequestBuilder.build(scorer.getPipeline().getInputMeta()));
   }
 
+  private String getScorerModelId() {
+    try {
+      String res = System.getenv(MODEL_ID);
+      return res;
+    } catch (Exception ignored) {
+      return scorer.getModelId();
+    }
+  }
+
   private static List<CapabilityType> assembleSupportedCapabilities(
-      ShapleyLoadOption enabledShapleyTypes) {
+      ShapleyLoadOption enabledShapleyTypes, boolean supportPredictionInterval) {
+    List<CapabilityType> result = new ArrayList<>();
+    if (supportPredictionInterval) {
+      result.add(CapabilityType.SCORE_PREDICTION_INTERVAL);
+    }
     switch (enabledShapleyTypes) {
       case ALL:
-        return Arrays.asList(
+        result.addAll(Arrays.asList(
             CapabilityType.SCORE,
             CapabilityType.CONTRIBUTION_ORIGINAL,
-            CapabilityType.CONTRIBUTION_TRANSFORMED);
+            CapabilityType.CONTRIBUTION_TRANSFORMED));
+        break;
       case ORIGINAL:
-        return Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_ORIGINAL);
+        result.addAll(Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_ORIGINAL));
+        break;
       case TRANSFORMED:
-        return Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_TRANSFORMED);
+        result.addAll(Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_TRANSFORMED));
+        break;
       case NONE:
       default:
-        return Arrays.asList(CapabilityType.SCORE);
+        result.add(CapabilityType.SCORE);
     }
+    return result;
   }
 }
