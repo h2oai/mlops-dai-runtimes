@@ -20,7 +20,16 @@ swaggerSources {
             dependsOn validation
         }
     }
+    modelV2 {
+        inputFile = file('../swagger/v2/swagger.yaml')
+        code {
+            language = 'java'
+            configFile = file('../swagger/v2/swagger_codegen.json')
+            components = [models: true]
+            dependsOn validation
+        }
+    }
 }
 
-compileJava.dependsOn swaggerSources.model.code
-sourceSets.main.java.srcDir "${swaggerSources.model.code.outputDir}/src/main/java"
+compileJava.dependsOn swaggerSources.model.code, swaggerSources.modelV2.code
+sourceSets.main.java.srcDirs "${swaggerSources.model.code.outputDir}/src/main/java", "${swaggerSources.modelV2.code.outputDir}/src/main/java"

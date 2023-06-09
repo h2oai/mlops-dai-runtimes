@@ -5,7 +5,7 @@ plugins {
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
-    implementation group: 'io.swagger', name: 'swagger-annotations'
+    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
@@ -21,6 +21,15 @@ swaggerSources {
             dependsOn validation
         }
     }
+    apiV2 {
+        inputFile = file('../swagger/v2/swagger.yaml')
+        code {
+            language = 'spring'
+            configFile = file('../swagger/v2/swagger_codegen.json')
+            components = [models: true, apis: true]
+            dependsOn validation
+        }
+    }
 }
 
 jar {
@@ -32,5 +41,5 @@ bootJar {
     enabled=false
 }
 
-compileJava.dependsOn swaggerSources.api.code
-sourceSets.main.java.srcDir "${swaggerSources.api.code.outputDir}/src/main/java"
+compileJava.dependsOn swaggerSources.api.code, swaggerSources.apiV2.code
+sourceSets.main.java.srcDirs "${swaggerSources.api.code.outputDir}/src/main/java", "${swaggerSources.apiV2.code.outputDir}/src/main/java"
