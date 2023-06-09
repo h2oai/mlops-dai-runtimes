@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
-import ai.h2o.mojos.deploy.common.rest.model.ModelSchema;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
@@ -27,6 +26,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.SetEnvironmentVariable;
 
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -35,15 +35,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
-import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
-import uk.org.webcompere.systemstubs.jupiter.SystemStub;
-import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
 @ExtendWith(MockitoExtension.class)
-@ExtendWith(SystemStubsExtension.class)
 class ModelsApiControllerTest {
-  @SystemStub
-  private EnvironmentVariables environmentVariables;
   @Mock private SampleRequestBuilder sampleRequestBuilder;
 
   @BeforeAll
@@ -138,12 +132,13 @@ class ModelsApiControllerTest {
   }
 
   @Test
+  @SetEnvironmentVariable(key = "MODEL_ID", value = "test-model-id")
   void verifyScore_modelId_ReturnsExpected() {
     // Given
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
     when(scorer.isPredictionIntervalSupport()).thenReturn(false);
-    environmentVariables.set("MODEL_ID", "test-model-id");
+    when(scorer.score(any(ScoreRequest.class))).thenReturn(new ScoreResponse());
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
@@ -155,12 +150,13 @@ class ModelsApiControllerTest {
   }
 
   @Test
+  @SetEnvironmentVariable(key = "MODEL_ID", value = "test-model-id")
   void verifySchema_modelId_ReturnsExpected() {
     // Given
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
     when(scorer.isPredictionIntervalSupport()).thenReturn(false);
-    environmentVariables.set("MODEL_ID", "test-model-id");
+    when(scorer.getModelInfo()).thenReturn(new Model());
 
     ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
 
