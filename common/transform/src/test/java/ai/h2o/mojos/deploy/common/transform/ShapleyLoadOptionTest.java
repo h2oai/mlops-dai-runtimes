@@ -1,43 +1,30 @@
 package ai.h2o.mojos.deploy.common.transform;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
-import uk.org.webcompere.systemstubs.jupiter.SystemStub;
-import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
+import org.junitpioneer.jupiter.ClearEnvironmentVariable;
+import org.junitpioneer.jupiter.ClearSystemProperty;
+import org.junitpioneer.jupiter.SetEnvironmentVariable;
+import org.junitpioneer.jupiter.SetSystemProperty;
 
-@ExtendWith(SystemStubsExtension.class)
 class ShapleyLoadOptionTest {
 
-  @SystemStub
-  private EnvironmentVariables environmentVariables;
-
-  @BeforeEach
-  void verifyEnvironment() {
-    assertNull(System.getenv("SHAPLEY_ENABLE"));
-    assertNull(System.getenv("SHAPLEY_TYPES_ENABLED"));
-    assertNull(System.getProperty("shapley.enable"));
-    assertNull(System.getProperty("shapley.types.enabled"));
-  }
-
   @AfterEach
+  @ClearEnvironmentVariable(key = "SHAPLEY_ENABLE")
+  @ClearEnvironmentVariable(key = "SHAPLEY_TYPES_ENABLED")
+  @ClearSystemProperty(key = "shapley.enable")
+  @ClearSystemProperty(key = "shapley.types.enabled")
   void clearProperties() {
-    System.clearProperty("shapley.enable");
-    System.clearProperty("shapley.types.enabled");
-
-    environmentVariables.set("SHAPLEY_ENABLE", null);
-    environmentVariables.set("SHAPLEY_TYPES_ENABLED", null);
   }
 
   @Test
+  @ClearEnvironmentVariable(key = "SHAPLEY_ENABLE")
+  @ClearEnvironmentVariable(key = "SHAPLEY_TYPES_ENABLED")
+  @ClearSystemProperty(key = "shapley.enable")
+  @ClearSystemProperty(key = "shapley.types.enabled")
   void loadOptionFromConfiguration_NoConfig_ReturnsDefault() {
-    // Given
-
     // When
     ShapleyLoadOption option = ShapleyLoadOption.fromEnvironment();
 
@@ -46,10 +33,10 @@ class ShapleyLoadOptionTest {
   }
 
   @Test
+  @SetEnvironmentVariable(key = "SHAPLEY_ENABLE", value = "true")
+  @ClearSystemProperty(key = "shapley.enable")
+  @ClearSystemProperty(key = "shapley.types.enabled")
   void loadOptionFromConfiguration_EnabledEnvironmentVariable_ReturnsAll() {
-    // Given
-    environmentVariables.set("SHAPLEY_ENABLE", "true");
-
     // When
     ShapleyLoadOption option = ShapleyLoadOption.fromEnvironment();
 
@@ -58,10 +45,11 @@ class ShapleyLoadOptionTest {
   }
 
   @Test
+  @ClearEnvironmentVariable(key = "SHAPLEY_ENABLE")
+  @ClearEnvironmentVariable(key = "SHAPLEY_TYPES_ENABLED")
+  @ClearSystemProperty(key = "shapley.types.enabled")
+  @SetSystemProperty(key = "shapley.enable", value = "true")
   void loadOptionFromConfiguration_EnabledSystemProperty_ReturnsAll() {
-    // Given
-    System.setProperty("shapley.enable", "true");
-
     // When
     ShapleyLoadOption option = ShapleyLoadOption.fromEnvironment();
 
@@ -70,10 +58,10 @@ class ShapleyLoadOptionTest {
   }
 
   @Test
+  @SetEnvironmentVariable(key = "SHAPLEY_TYPES_ENABLED", value = "ALL")
+  @ClearSystemProperty(key = "shapley.enable")
+  @ClearSystemProperty(key = "shapley.types.enabled")
   void loadOptionFromConfiguration_TypeInEnvironmentAll_ReturnsAll() {
-    // Given
-    environmentVariables.set("SHAPLEY_TYPES_ENABLED", "ALL");
-
     // When
     ShapleyLoadOption option = ShapleyLoadOption.fromEnvironment();
 
@@ -82,10 +70,10 @@ class ShapleyLoadOptionTest {
   }
 
   @Test
+  @SetEnvironmentVariable(key = "SHAPLEY_TYPES_ENABLED", value = "TRANSFORMED")
+  @ClearSystemProperty(key = "shapley.enable")
+  @ClearSystemProperty(key = "shapley.types.enabled")
   void loadOptionFromConfiguration_TypeInEnvironmentTranformed_ReturnsTransformed() {
-    // Given
-    environmentVariables.set("SHAPLEY_TYPES_ENABLED", "TRANSFORMED");
-
     // When
     ShapleyLoadOption option = ShapleyLoadOption.fromEnvironment();
 
@@ -94,10 +82,10 @@ class ShapleyLoadOptionTest {
   }
 
   @Test
+  @SetEnvironmentVariable(key = "SHAPLEY_TYPES_ENABLED", value = "ORIGINAL")
+  @ClearSystemProperty(key = "shapley.enable")
+  @ClearSystemProperty(key = "shapley.types.enabled")
   void loadOptionFromConfiguration_TypeInEnvironmentOriginal_ReturnsOriginal() {
-    // Given
-    environmentVariables.set("SHAPLEY_TYPES_ENABLED", "ORIGINAL");
-
     // When
     ShapleyLoadOption option = ShapleyLoadOption.fromEnvironment();
 
@@ -106,10 +94,11 @@ class ShapleyLoadOptionTest {
   }
 
   @Test
+  @ClearEnvironmentVariable(key = "SHAPLEY_ENABLE")
+  @ClearEnvironmentVariable(key = "SHAPLEY_TYPES_ENABLED")
+  @ClearSystemProperty(key = "shapley.enable")
+  @SetSystemProperty(key = "shapley.types.enabled", value = "ALL")
   void loadOptionFromConfiguration_TypeInPropertiesAll_ReturnsAll() {
-    // Given
-    System.setProperty("shapley.types.enabled", "ALL");
-
     // When
     ShapleyLoadOption option = ShapleyLoadOption.fromEnvironment();
 
@@ -118,10 +107,11 @@ class ShapleyLoadOptionTest {
   }
 
   @Test
+  @ClearEnvironmentVariable(key = "SHAPLEY_ENABLE")
+  @ClearEnvironmentVariable(key = "SHAPLEY_TYPES_ENABLED")
+  @ClearSystemProperty(key = "shapley.enable")
+  @SetSystemProperty(key = "shapley.types.enabled", value = "TRANSFORMED")
   void loadOptionFromConfiguration_TypeInPropertiesTransformed_ReturnsTransformed() {
-    // Given
-    System.setProperty("shapley.types.enabled", "TRANSFORMED");
-
     // When
     ShapleyLoadOption option = ShapleyLoadOption.fromEnvironment();
 
@@ -130,10 +120,11 @@ class ShapleyLoadOptionTest {
   }
 
   @Test
+  @ClearEnvironmentVariable(key = "SHAPLEY_ENABLE")
+  @ClearEnvironmentVariable(key = "SHAPLEY_TYPES_ENABLED")
+  @ClearSystemProperty(key = "shapley.enable")
+  @SetSystemProperty(key = "shapley.types.enabled", value = "ORIGINAL")
   void loadOptionFromConfiguration_TypeInPropertiesOriginal_ReturnsOriginal() {
-    // Given
-    System.setProperty("shapley.types.enabled", "TRANSFORMED");
-
     // When
     ShapleyLoadOption option = ShapleyLoadOption.fromEnvironment();
 
