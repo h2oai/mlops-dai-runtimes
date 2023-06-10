@@ -9,7 +9,6 @@ import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
 import org.junitpioneer.jupiter.SetSystemProperty;
 
-
 class ShapleyLoadOptionTest {
 
   @AfterEach
