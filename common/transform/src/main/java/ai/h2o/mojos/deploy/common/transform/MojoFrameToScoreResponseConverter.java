@@ -101,19 +101,17 @@ public class MojoFrameToScoreResponseConverter
         throw new IllegalStateException(
           "Unexpected error, prediction interval should be supported, but actually not");
       }
+      PredictionInterval predictionInterval =
+          new PredictionInterval().fields(new Row()).rows(Collections.emptyList());
       if (mojoFrame.getNcols() > 1) {
         int targetIdx = getTargetColIdx(Arrays.asList(mojoFrame.getColumnNames()));
-        PredictionInterval predictionInterval = new PredictionInterval();
         // Need to ensure target column is singular (regression).
         if (targetIdx >= 0) {
           predictionInterval.setFields(getPredictionIntervalFields(mojoFrame, targetIdx));
           predictionInterval.setRows(getPredictionIntervalRows(mojoFrame, targetIdx));
         }
-        scoreResponse.setPredictionIntervals(predictionInterval);
-      } else {
-        scoreResponse.setPredictionIntervals(
-            new PredictionInterval().fields(new Row()).rows(Collections.emptyList()));
       }
+      scoreResponse.setPredictionIntervals(predictionInterval);
     }
   }
 
