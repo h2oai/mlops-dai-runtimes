@@ -56,16 +56,12 @@ public class ModelsApiController implements ModelApi {
 
   @Override
   public ResponseEntity<Model> getModelInfo() {
-    return ResponseEntity.ok(scorer.getModelInfo());
+    return ResponseEntity.ok(scorer.getModelInfo().id(getScorerModelId()));
   }
 
   @Override
   public ResponseEntity<String> getModelId() {
-    try {
-      return ResponseEntity.ok(System.getenv(MODEL_ID));
-    } catch (Exception ignored) {
-      return ResponseEntity.ok(scorer.getModelId());
-    }
+    return ResponseEntity.ok(getScorerModelId());
   }
 
   @Override
@@ -78,6 +74,7 @@ public class ModelsApiController implements ModelApi {
     try {
       log.info("Got scoring request");
       ScoreResponse scoreResponse = scorer.score(request);
+      scoreResponse.id(getScorerModelId());
       return ResponseEntity.ok(scoreResponse);
     } catch (IllegalArgumentException e) {
       log.error("Invalid scoring request due to: {}", e.getMessage());
@@ -157,6 +154,15 @@ public class ModelsApiController implements ModelApi {
   @Override
   public ResponseEntity<ScoreRequest> getSampleRequest() {
     return ResponseEntity.ok(sampleRequestBuilder.build(scorer.getPipeline().getInputMeta()));
+  }
+
+  private String getScorerModelId() {
+    try {
+      String res = System.getenv(MODEL_ID);
+      return res;
+    } catch (Exception ignored) {
+      return scorer.getModelId();
+    }
   }
 
   private static List<CapabilityType> assembleSupportedCapabilities(
