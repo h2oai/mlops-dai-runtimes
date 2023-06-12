@@ -20,6 +20,7 @@ import ai.h2o.mojos.runtime.api.PipelineConfig;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
@@ -186,5 +188,21 @@ class ModelsApiControllerTest {
       assertTrue(ex.getCause() instanceof IllegalStateException);
       assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ((ResponseStatusException) ex).getStatus());
     }
+  }
+
+  @Test
+  void verifyScoreMedia_ReturnsUnimplemented() {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    ScoreMediaRequest request = mock(ScoreMediaRequest.class);
+    List<Resource> files = new ArrayList<>();
+    ModelsApiControllerV1Exp controller = new ModelsApiController(scorer, sampleRequestBuilder);
+
+    // When
+    ResponseEntity<ScoreResponse> response =
+      controller.getScoreMedia(request, files);
+
+    // Then
+    assertEquals(response.getStatusCode(), HttpStatus.NOT_IMPLEMENTED);
   }
 }

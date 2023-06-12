@@ -160,6 +160,40 @@ paths:
           description: Implementation not supported
           content: {}
       x-codegen-request-body-name: payload
+  /model/media-score:
+    post:
+      tags:
+        - scoring
+      summary: Score model with provided media files
+      description: Computes score of provided data making use of provided media files.
+      operationId: getMediaScore
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                mediaScoreRequest:
+                  $ref: '#/components/schemas/MediaScoreRequest'
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              required:
+                - mediaScoreRequest
+                - files
+      responses:
+        '200':
+          description: Successful scoring operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreResponse'
+        '501':
+          description: Implementation not supported
+        '400':
+          description: Invalid payload
 components:
   schemas:
     Model:
@@ -365,6 +399,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Row'
+    MediaScoreRequest:
+      allOf:
+        - $ref: '#/components/schemas/ScoreRequest'
+        - properties:
+            mediaFields:
+              description: >
+                An array holding the names of all fields which are expected to contain media files.
+                Contents of these fields will be replaced by corresponding uploaded files where the
+                expected values in the column must be the file names of the uploaded files.
+              type: array
+              items:
+                type: string
   securitySchemes:
     api_key:
       type: apiKey
