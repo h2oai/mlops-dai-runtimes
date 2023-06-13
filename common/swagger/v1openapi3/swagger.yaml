@@ -1,15 +1,16 @@
 openapi: '3.0.0'
 info:
-  title: Scoring API - v2
+  title: Scoring API - v1.2.0-openapi3
   description: >-
     This is a definition of the REST API for scoring from H2O. 
     This API is intended to be used within DAI and eventually across all H2O scoring systems.
+    This API combines both v1 and v1Exp in OPENAPI 3.0 spec.
   contact:
     email: support@h2o.ai
   license:
     name: License
     url: 'http://www.h2o.ai'
-  version: 1.3.0
+  version: 1.2.0-openapi3
 servers:
   - url: /
 paths:
@@ -173,15 +174,15 @@ paths:
             schema:
               type: object
               properties:
-                mediaScoreRequest:
-                  $ref: '#/components/schemas/MediaScoreRequest'
+                scoreMediaRequest:
+                  $ref: '#/components/schemas/scoreMediaRequest'
                 files:
                   type: array
                   items:
                     type: string
                     format: binary
               required:
-                - mediaScoreRequest
+                - scoreMediaRequest
                 - files
       responses:
         '200':
@@ -399,7 +400,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Row'
-    MediaScoreRequest:
+    scoreMediaRequest:
       allOf:
         - $ref: '#/components/schemas/ScoreRequest'
         - properties:
