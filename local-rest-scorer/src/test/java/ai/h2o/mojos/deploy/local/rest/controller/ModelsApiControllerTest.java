@@ -11,6 +11,7 @@ import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.v1exp.model.ScoreMediaRequest;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
@@ -193,16 +194,17 @@ class ModelsApiControllerTest {
   @Test
   void verifyScoreMedia_ReturnsUnimplemented() {
     // Given
-    MojoScorer scorer = mock(MojoScorer.class);
     ScoreMediaRequest request = mock(ScoreMediaRequest.class);
     List<Resource> files = new ArrayList<>();
-    ModelsApiControllerV1Exp controller = new ModelsApiController(scorer, sampleRequestBuilder);
+    ModelsMediaController controller = new ModelsMediaController();
 
-    // When
-    ResponseEntity<ScoreResponse> response =
-      controller.getScoreMedia(request, files);
-
-    // Then
-    assertEquals(response.getStatusCode(), HttpStatus.NOT_IMPLEMENTED);
+    // When & Then
+    try {
+      controller.getMediaScore(request, files);
+      fail("exception is expected, but fail to raise");
+    } catch (Exception ex) {
+      assertTrue(ex instanceof ResponseStatusException);
+      assertEquals(HttpStatus.NOT_IMPLEMENTED, ((ResponseStatusException) ex).getStatus());
+    }
   }
 }

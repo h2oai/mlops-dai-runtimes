@@ -20,7 +20,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -155,13 +154,6 @@ public class ModelsApiController implements ModelApi {
   @Override
   public ResponseEntity<ScoreRequest> getSampleRequest() {
     return ResponseEntity.ok(sampleRequestBuilder.build(scorer.getPipeline().getInputMeta()));
-  }
-
-  @Override
-  public ResponseEntity<ScoreResponse> getScoreMedia(
-    ScoreMediaRequest scoreMediaRequest, List<Resource> files) {
-    log.info("Received score media request");
-    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
   }
 
   private String getScorerModelId() {
