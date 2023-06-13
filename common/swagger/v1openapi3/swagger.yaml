@@ -1,15 +1,16 @@
 openapi: '3.0.0'
 info:
-  title: Scoring API - v2
+  title: Scoring API - v1.2.0-openapi3
   description: >-
     This is a definition of the REST API for scoring from H2O. 
     This API is intended to be used within DAI and eventually across all H2O scoring systems.
+    This API combines both v1 and v1Exp in OPENAPI 3.0 spec.
   contact:
     email: support@h2o.ai
   license:
     name: License
     url: 'http://www.h2o.ai'
-  version: 1.3.0
+  version: 1.2.0-openapi3
 servers:
   - url: /
 paths:
@@ -160,6 +161,40 @@ paths:
           description: Implementation not supported
           content: {}
       x-codegen-request-body-name: payload
+  /model/media-score:
+    post:
+      tags:
+        - scoring
+      summary: Score model with provided media files
+      description: Computes score of provided data making use of provided media files.
+      operationId: getMediaScore
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                scoreMediaRequest:
+                  $ref: '#/components/schemas/scoreMediaRequest'
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              required:
+                - scoreMediaRequest
+                - files
+      responses:
+        '200':
+          description: Successful scoring operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreResponse'
+        '501':
+          description: Implementation not supported
+        '400':
+          description: Invalid payload
 components:
   schemas:
     Model:
@@ -365,6 +400,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Row'
+    scoreMediaRequest:
+      allOf:
+        - $ref: '#/components/schemas/ScoreRequest'
+        - properties:
+            mediaFields:
+              description: >
+                An array holding the names of all fields which are expected to contain media files.
+                Contents of these fields will be replaced by corresponding uploaded files where the
+                expected values in the column must be the file names of the uploaded files.
+              type: array
+              items:
+                type: string
   securitySchemes:
     api_key:
       type: apiKey

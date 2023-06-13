@@ -21,11 +21,11 @@ swaggerSources {
             dependsOn validation
         }
     }
-    apiV2 {
-        inputFile = file('../swagger/v2/swagger.yaml')
+    apiV1Exp {
+        inputFile = file('../swagger/v1exp/swagger.yaml')
         code {
             language = 'spring'
-            configFile = file('../swagger/v2/swagger_codegen.json')
+            configFile = file('../swagger/v1exp/swagger_codegen.json')
             components = [models: true, apis: true]
             dependsOn validation
         }
@@ -41,5 +41,5 @@ bootJar {
     enabled=false
 }
 
-compileJava.dependsOn swaggerSources.api.code, swaggerSources.apiV2.code
-sourceSets.main.java.srcDirs "${swaggerSources.api.code.outputDir}/src/main/java", "${swaggerSources.apiV2.code.outputDir}/src/main/java"
+compileJava.dependsOn swaggerSources.api.code, swaggerSources.apiV1Exp.code
+sourceSets.main.java.srcDirs "${swaggerSources.api.code.outputDir}/src/main/java", "${swaggerSources.apiV1Exp.code.outputDir}/src/main/java"
