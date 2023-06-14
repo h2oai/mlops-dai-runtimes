@@ -26,15 +26,15 @@ paths:
             schema:
               type: object
               properties:
-                mediaScoreRequest:
-                  $ref: '#/components/schemas/MediaScoreRequest'
+                scoreMediaRequest:
+                  $ref: '#/components/schemas/scoreMediaRequest'
                 files:
                   type: array
                   items:
                     type: string
                     format: binary
               required:
-                - mediaScoreRequest
+                - scoreMediaRequest
                 - files
       responses:
         '200':
@@ -49,7 +49,7 @@ paths:
           description: Invalid payload
 components:
   schemas:
-    MediaScoreRequest:
+    scoreMediaRequest:
       allOf:
         - $ref: '../v1/swagger.yaml#/definitions/ScoreRequest'
         - properties:
