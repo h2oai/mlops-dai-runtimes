@@ -31,7 +31,7 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
         MDC.MDCCloseable requestType =
             MDC.putCloseable(ScorerJsonLayout.REQUEST_TYPE, request.getMethod());
         MDC.MDCCloseable modelId = MDC.putCloseable(
-            ScorerJsonLayout.MODEL_ID, getFromEnvironment(MODEL_ID));
+            ScorerJsonLayout.EXPERIMENT_ID, getFromEnvironment(MODEL_ID));
         MDC.MDCCloseable scorerType =
             MDC.putCloseable(ScorerJsonLayout.SCORER_TYPE, getScorerType()); ) {
       filterChain.doFilter(request, response);

@@ -10,7 +10,7 @@ public class ScorerJsonLayout extends JsonLayout {
   public static final String ENDPOINT = "Endpoint";
   public static final String ERROR = "Error";
   public static final String MESSAGE = "Message";
-  public static final String MODEL_ID = "ModelId";
+  public static final String EXPERIMENT_ID = "ExperimentId";
   public static final String NUM_ROWS = "NumberOfRows";
   public static final String REQUEST_TYPE = "RequestType";
   public static final String RESPONSE_CODE = "ResponseCode";
@@ -33,7 +33,7 @@ public class ScorerJsonLayout extends JsonLayout {
     add(SCORER_TYPE, containsMdc(event, SCORER_TYPE), getFromMdc(event, SCORER_TYPE), map);
     add(ENDPOINT, containsMdc(event, ENDPOINT), getFromMdc(event, ENDPOINT), map);
     add(REQUEST_TYPE, containsMdc(event, REQUEST_TYPE), getFromMdc(event, REQUEST_TYPE), map);
-    add(MODEL_ID, containsMdc(event, MODEL_ID), getFromMdc(event, MODEL_ID), map);
+    add(EXPERIMENT_ID, containsMdc(event, EXPERIMENT_ID), getFromMdc(event, EXPERIMENT_ID), map);
     add(NUM_ROWS, containsMdc(event, NUM_ROWS), getFromMdc(event, NUM_ROWS), map);
     add(RESPONSE_CODE, containsMdc(event, RESPONSE_CODE), getFromMdc(event, RESPONSE_CODE), map);
     addCustomDataToJsonMap(map, event);
