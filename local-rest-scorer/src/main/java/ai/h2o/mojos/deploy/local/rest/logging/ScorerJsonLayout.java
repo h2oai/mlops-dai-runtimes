@@ -17,6 +17,7 @@ public class ScorerJsonLayout extends JsonLayout {
   public static final String SCORER_TYPE = "ScorerType";
   public static final String TIMESTAMP = "Timestamp";
   public static final String LOG_LEVEL = "LogLevel";
+  public static final String REQUEST_ID = "RequestId";
 
   public ScorerJsonLayout() {
     super();
@@ -36,6 +37,7 @@ public class ScorerJsonLayout extends JsonLayout {
     add(EXPERIMENT_ID, containsMdc(event, EXPERIMENT_ID), getFromMdc(event, EXPERIMENT_ID), map);
     add(NUM_ROWS, containsMdc(event, NUM_ROWS), getFromMdc(event, NUM_ROWS), map);
     add(RESPONSE_CODE, containsMdc(event, RESPONSE_CODE), getFromMdc(event, RESPONSE_CODE), map);
+    add(REQUEST_ID, containsMdc(event, REQUEST_ID), getFromMdc(event, REQUEST_ID), map);
     addCustomDataToJsonMap(map, event);
     return map;
   }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Optional;
+import java.util.UUID;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +34,9 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
         MDC.MDCCloseable modelId = MDC.putCloseable(
             ScorerJsonLayout.EXPERIMENT_ID, getFromEnvironment(MODEL_ID));
         MDC.MDCCloseable scorerType =
-            MDC.putCloseable(ScorerJsonLayout.SCORER_TYPE, getScorerType()); ) {
+            MDC.putCloseable(ScorerJsonLayout.SCORER_TYPE, getScorerType());
+        MDC.MDCCloseable requestId =
+            MDC.putCloseable(ScorerJsonLayout.REQUEST_ID, UUID.randomUUID().toString());) {
       filterChain.doFilter(request, response);
       if (HttpServletResponse.SC_OK == response.getStatus()) {
         try (MDC.MDCCloseable responseCode = MDC.putCloseable(
