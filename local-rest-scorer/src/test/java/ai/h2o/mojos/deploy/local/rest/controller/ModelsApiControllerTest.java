@@ -11,6 +11,7 @@ import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
+import ai.h2o.mojos.deploy.common.rest.v1exp.model.ScoreMediaRequest;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
@@ -20,6 +21,7 @@ import ai.h2o.mojos.runtime.api.PipelineConfig;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
@@ -185,6 +188,23 @@ class ModelsApiControllerTest {
       assertTrue(ex instanceof ResponseStatusException);
       assertTrue(ex.getCause() instanceof IllegalStateException);
       assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ((ResponseStatusException) ex).getStatus());
+    }
+  }
+
+  @Test
+  void verifyScoreMedia_ReturnsUnimplemented() {
+    // Given
+    ScoreMediaRequest request = mock(ScoreMediaRequest.class);
+    List<Resource> files = new ArrayList<>();
+    ModelsMediaController controller = new ModelsMediaController();
+
+    // When & Then
+    try {
+      controller.getMediaScore(request, files);
+      fail("exception is expected, but fail to raise");
+    } catch (Exception ex) {
+      assertTrue(ex instanceof ResponseStatusException);
+      assertEquals(HttpStatus.NOT_IMPLEMENTED, ((ResponseStatusException) ex).getStatus());
     }
   }
 }
