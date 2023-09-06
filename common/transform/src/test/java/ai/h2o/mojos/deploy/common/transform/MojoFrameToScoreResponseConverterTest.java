@@ -9,6 +9,7 @@ import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Int64;
 import static ai.h2o.mojos.runtime.frame.MojoColumn.Type.Str;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
@@ -212,6 +213,25 @@ class MojoFrameToScoreResponseConverterTest {
     assertThat(result.getFields()).containsExactly("field");
   }
 
+  @Test
+  void convertMoreTypesResponse_MojoColumnsDifferSchema_fails() {
+    // Given
+    final MojoFrameToScoreResponseConverter converter
+        = new MojoFrameToScoreResponseConverter(true, Collections.singletonList("not_exists"));
+    Type[] types = {Float64, Float64, Float64};
+    Double[][] values = new Double[][]{{3.5, -1.0, 2.0}, {3.3, 11.9, 10.3}};
+    ScoreRequest scoreRequest = new ScoreRequest();
+
+    // When & Then
+    assertThrows(IllegalArgumentException.class, () -> {
+      converter.apply(
+          buildMojoFrame(
+            new String[]{"result.upper", "result", "result.lower"},
+            types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
+          scoreRequest);
+    });
+  }
+
   @ParameterizedTest
   @MethodSource("provideValues_convertMoreTypesResponse_succeeds")
   void convertMoreTypesResponse_succeeds(String[][] values) {
@@ -271,9 +291,9 @@ class MojoFrameToScoreResponseConverterTest {
       Object[][] values, String[][] expValues) {
     // Given
     final MojoFrameToScoreResponseConverter converter
-        = new MojoFrameToScoreResponseConverter(true);
+        = new MojoFrameToScoreResponseConverter(true, Collections.emptyList());
     Type[] types = {Float64, Float64, Float64};
-    ScoreRequest scoreRequest = new ScoreRequest().requestPredictionIntervals(true);
+    ScoreRequest scoreRequest = new ScoreRequest();
 
     // When
     ScoreResponse result =
@@ -287,10 +307,10 @@ class MojoFrameToScoreResponseConverterTest {
     assertThat(result.getScore())
         .containsExactly(
           Stream.of(expValues)
-          .map(input -> Arrays.asList(input).subList(1, 2))
+          .map(Arrays::asList)
           .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
     assertThat(result.getFields())
-      .containsExactly("result")
+      .containsExactly("result.upper", "result", "result.lower")
       .inOrder();
     assertThat(result.getPredictionIntervals().getFields())
       .containsExactly("result.upper", "result.lower")
@@ -308,61 +328,32 @@ class MojoFrameToScoreResponseConverterTest {
   }
 
   @ParameterizedTest
-  @MethodSource("provideValues_predictionIntervalEnabledResponse_succeeds")
-  void convertMoreTypesResponse_disablePredictionIntervalSameType_succeeds(
+  @MethodSource("provideValues_predictionIntervalDiffSchema_succeeds")
+  void convertMoreTypesResponse_enablePredictionIntervalDifferSchema_succeeds(
       Object[][] values, String[][] expValues) {
     // Given
     final MojoFrameToScoreResponseConverter converter
-        = new MojoFrameToScoreResponseConverter(true);
+        = new MojoFrameToScoreResponseConverter(
+          true, Arrays.asList("result.upper", "result.lower"));
     Type[] types = {Float64, Float64, Float64};
     ScoreRequest scoreRequest = new ScoreRequest();
 
     // When
     ScoreResponse result =
         converter.apply(
-        buildMojoFrame(
-          new String[]{"result.upper", "result", "result.lower"},
-          types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
-        scoreRequest);
+          buildMojoFrame(
+            new String[]{"result.upper", "result", "result.lower"},
+            types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
+          scoreRequest);
 
     // Then
     assertThat(result.getScore())
         .containsExactly(
           Stream.of(expValues)
-          .map(input -> Arrays.asList(input).subList(1, 2))
-          .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
+            .map(Arrays::asList)
+            .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
     assertThat(result.getFields())
-      .containsExactly("result")
-      .inOrder();
-    assertThat(result.getPredictionIntervals())
-      .isNull();
-  }
-
-  @ParameterizedTest
-  @MethodSource("provideValues_predictionIntervalEnabledResponse_succeeds")
-  void convertMoreTypesResponse_disablePredictionIntervalNotSupportSameType_succeeds(
-      Object[][] values, String[][] expValues) {
-    // Given
-    final MojoFrameToScoreResponseConverter converter
-        = new MojoFrameToScoreResponseConverter();
-    Type[] types = {Float64, Float64, Float64};
-    ScoreRequest scoreRequest = new ScoreRequest();
-
-    // When
-    ScoreResponse result =
-        converter.apply(
-        buildMojoFrame(
-          new String[]{"result.upper", "result", "result.lower"},
-          types, values, MojoFrameToScoreResponseConverterTest::setJavaValue),
-        scoreRequest);
-
-    // Then
-    assertThat(result.getScore())
-        .containsExactly(
-          Stream.of(expValues)
-          .map(MojoFrameToScoreResponseConverterTest::asRow).toArray());
-    assertThat(result.getFields())
-      .containsExactly("result.upper", "result", "result.lower")
+      .containsExactly("result.upper", "result.lower")
       .inOrder();
     assertThat(result.getPredictionIntervals())
       .isNull();
@@ -374,8 +365,8 @@ class MojoFrameToScoreResponseConverterTest {
       Object[][] values, Type[] types) {
     // Given
     final MojoFrameToScoreResponseConverter converter
-        = new MojoFrameToScoreResponseConverter(false);
-    ScoreRequest scoreRequest = new ScoreRequest().requestPredictionIntervals(true);
+        = new MojoFrameToScoreResponseConverter(false, Collections.emptyList());
+    ScoreRequest scoreRequest = new ScoreRequest();
 
     // When & Then
     try {
@@ -422,6 +413,17 @@ class MojoFrameToScoreResponseConverterTest {
       Arguments.of(
         new Double[][]{{2.7, 3.4, 5.9}, {1.1, 2.2, 3.3}},
         new String[][]{{"2.7", "3.4", "5.9"}, {"1.1", "2.2", "3.3"}})
+    );
+  }
+
+  private static Stream<Arguments> provideValues_predictionIntervalDiffSchema_succeeds() {
+    return Stream.of(
+      Arguments.of(
+        new Double[][]{{3.5, -1.0, 2.0}, {3.3, 11.9, 10.3}},
+        new String[][]{{"3.5", "2.0"}, {"3.3", "10.3"}}),
+      Arguments.of(
+        new Double[][]{{2.7, 3.4, 5.9}, {1.1, 2.2, 3.3}},
+        new String[][]{{"2.7", "5.9"}, {"1.1", "3.3"}})
     );
   }
 

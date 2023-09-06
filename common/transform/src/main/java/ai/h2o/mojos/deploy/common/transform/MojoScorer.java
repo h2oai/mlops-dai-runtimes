@@ -24,6 +24,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,7 @@ public class MojoScorer {
       supportPredictionInterval
         ? loadMojoPipelineFromFile(buildPipelineConfigWithPredictionInterval())
         : loadMojoPipelineFromFile();
+  public static final List<String> modelOutputFieldNames = getModelOutputFieldNames(pipeline);
   private final ShapleyLoadOption enabledShapleyTypes;
   private final boolean shapleyEnabled;
   private static MojoPipeline pipelineTransformedShapley;
@@ -100,13 +103,6 @@ public class MojoScorer {
    * @return response {@link ScoreResponse}
    */
   public ScoreResponse score(ScoreRequest request) {
-    if (Boolean.TRUE.equals(request.isRequestPredictionIntervals())
-        && !supportPredictionInterval) {
-      throw new IllegalArgumentException(
-        "requestPredictionIntervals set to true, but model does not support it"
-      );
-    }
-
     scoreRequestTransformer.accept(request, getModelInfo().getSchema().getInputFields());
     MojoFrame requestFrame = scoreRequestConverter
             .apply(request, pipeline.getInputFrameBuilder());
@@ -416,6 +412,17 @@ public class MojoScorer {
       throw new RuntimeException("Could not load mojo from file: " + mojoFile);
     }
     return mojoFile;
+  }
+
+  private static List<String> getModelOutputFieldNames(MojoPipeline pipeline) {
+    return getOutputFields(pipeline.getOutputMeta());
+  }
+
+  private static List<String> getOutputFields(MojoFrameMeta outputMeta) {
+    return IntStream
+        .range(0, outputMeta.size())
+        .mapToObj(outputMeta::getColumnName)
+        .collect(Collectors.toList());
   }
 
   private static boolean checkIfPredictionIntervalSupport() {

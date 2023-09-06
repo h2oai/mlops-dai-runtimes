@@ -8,6 +8,7 @@ import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,10 +20,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Converts the resulting predicted {@link MojoFrame} into the API response object {@link
@@ -30,17 +28,22 @@ import org.slf4j.LoggerFactory;
  */
 public class MojoFrameToScoreResponseConverter
     implements BiFunction<MojoFrame, ScoreRequest, ScoreResponse> {
-  private static final Logger log =
-      LoggerFactory.getLogger(MojoFrameToScoreResponseConverter.class);
 
   // If true then pipeline support prediction interval, otherwise false.
   // Note: assumption is that pipeline supports Prediction interval.
   // However for some h2o3 model, even classification model may still set
   // this to be true.
   private Boolean supportPredictionInterval;
+  private List<String> outputFieldNames;
 
-  public MojoFrameToScoreResponseConverter(boolean supportPredictionInterval) {
+  /**
+   * Converts the resulting predicted {@link MojoFrame} into the API response object {@link
+   * ScoreResponse}.
+   */
+  public MojoFrameToScoreResponseConverter(
+      boolean supportPredictionInterval, List<String> outputFieldNames) {
     this.supportPredictionInterval = supportPredictionInterval;
+    this.outputFieldNames = outputFieldNames;
   }
 
   public MojoFrameToScoreResponseConverter() {
@@ -56,6 +59,14 @@ public class MojoFrameToScoreResponseConverter
   @Override
   public ScoreResponse apply(
       MojoFrame mojoFrame, ScoreRequest scoreRequest) {
+    Preconditions.checkArgument(
+        new HashSet<>(Arrays.asList(mojoFrame.getColumnNames()))
+          .containsAll(getTargetFields(mojoFrame)),
+        String.format(
+          "MOJO response frame columns [%s] does not contain all requested output fields [%s]",
+          String.join(",", mojoFrame.getColumnNames()), String.join(",", getTargetFields(mojoFrame))
+        )
+    );
     Set<String> includedFields = getSetOfIncludedFields(scoreRequest);
     List<Row> outputRows =
         Stream.generate(Row::new).limit(mojoFrame.getNrows()).collect(Collectors.toList());
@@ -66,11 +77,11 @@ public class MojoFrameToScoreResponseConverter
     response.setScore(outputRows);
 
     if (!Boolean.TRUE.equals(scoreRequest.isNoFieldNamesInOutput())) {
-      List<String> outputFieldNames = getFilteredInputFieldNames(scoreRequest, includedFields);
-      outputFieldNames.addAll(getTargetField(mojoFrame));
-      response.setFields(outputFieldNames);
+      List<String> outputNames = getFilteredInputFieldNames(scoreRequest, includedFields);
+      outputNames.addAll(getTargetFields(mojoFrame));
+      response.setFields(outputNames);
     }
-    fillWithPredictionInterval(mojoFrame, scoreRequest, response);
+    fillWithPredictionInterval(mojoFrame, response);
     return response;
   }
 
@@ -90,28 +101,20 @@ public class MojoFrameToScoreResponseConverter
   }
 
   /**
-   * Populate Prediction Interval value into response field.
-   * Only when score request set requestPredictionIntervals be true
-   * and MOJO pipeline support prediction interval.
+   * Populate Prediction Interval value into response field if possible.
    */
   private void fillWithPredictionInterval(
-      MojoFrame mojoFrame, ScoreRequest scoreRequest, ScoreResponse scoreResponse) {
-    if (Boolean.TRUE.equals(scoreRequest.isRequestPredictionIntervals())) {
-      if (!supportPredictionInterval) {
-        throw new IllegalStateException(
-          "Unexpected error, prediction interval should be supported, but actually not");
+      MojoFrame mojoFrame, ScoreResponse scoreResponse) {
+    if (supportPredictionInterval && mojoFrame.getNcols() > 1) {
+      int targetIdx = getTargetColIdx(getTargetFields(mojoFrame));
+      // Need to ensure target column is singular (regression).
+      if (targetIdx >= 0) {
+        PredictionInterval predictionInterval =
+            new PredictionInterval().fields(new Row()).rows(Collections.emptyList());
+        predictionInterval.setFields(getPredictionIntervalFields(mojoFrame, targetIdx));
+        predictionInterval.setRows(getPredictionIntervalRows(mojoFrame, targetIdx));
+        scoreResponse.setPredictionIntervals(predictionInterval);
       }
-      PredictionInterval predictionInterval =
-          new PredictionInterval().fields(new Row()).rows(Collections.emptyList());
-      if (mojoFrame.getNcols() > 1) {
-        int targetIdx = getTargetColIdx(Arrays.asList(mojoFrame.getColumnNames()));
-        // Need to ensure target column is singular (regression).
-        if (targetIdx >= 0) {
-          predictionInterval.setFields(getPredictionIntervalFields(mojoFrame, targetIdx));
-          predictionInterval.setRows(getPredictionIntervalRows(mojoFrame, targetIdx));
-        }
-      }
-      scoreResponse.setPredictionIntervals(predictionInterval);
     }
   }
 
@@ -141,25 +144,12 @@ public class MojoFrameToScoreResponseConverter
    * column from MOJO frame, otherwise all columns names
    * will be extracted.
    */
-  private List<String> getTargetField(
+  private List<String> getTargetFields(
       MojoFrame mojoFrame) {
-    if (mojoFrame.getNcols() > 0) {
-      List<String> targetColumns = Arrays.asList(mojoFrame.getColumnNames());
-      if (supportPredictionInterval) {
-        int targetIdx = getTargetColIdx(targetColumns);
-        if (targetIdx < 0) {
-          log.debug(
-              "singular target column does not exist in MOJO response frame,"
-              + " this could be a classification model."
-          );
-        } else {
-          return targetColumns.subList(targetIdx, targetIdx + 1);
-        }
-      }
-      return targetColumns;
-    } else {
-      return Collections.emptyList();
+    if (outputFieldNames != null && !outputFieldNames.isEmpty()) {
+      return outputFieldNames;
     }
+    return Arrays.asList(mojoFrame.getColumnNames());
   }
 
   /**
@@ -169,23 +159,12 @@ public class MojoFrameToScoreResponseConverter
    * columns indices will be extracted.
    */
   private List<Integer> getTargetFieldIndices(MojoFrame mojoFrame) {
-    if (mojoFrame.getNcols() > 0) {
-      List<String> targetColumns = Arrays.asList(mojoFrame.getColumnNames());
-      if (supportPredictionInterval) {
-        int targetIdx = getTargetColIdx(targetColumns);
-        if (targetIdx < 0) {
-          log.debug(
-              "singular target column does not exist in MOJO response frame,"
-              + " this could be a classification model."
-          );
-        } else {
-          return Collections.singletonList(targetIdx);
-        }
-      }
-      return IntStream.range(0, mojoFrame.getNcols()).boxed().collect(Collectors.toList());
-    } else {
-      return Collections.emptyList();
-    }
+    List<String> targetColumns = getTargetFields(mojoFrame);
+    List<String> frameColumns = Arrays.asList(mojoFrame.getColumnNames());
+    return targetColumns
+        .stream()
+        .map(frameColumns::indexOf)
+        .collect(Collectors.toList());
   }
 
   /**

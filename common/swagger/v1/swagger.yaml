@@ -288,10 +288,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Row'
-      requestPredictionIntervals:
-        type: boolean
-        description: |
-          If set to `true`, the scorer will try to fill field `predictionIntervals` in response if it is supported.
   ScoreResponse:
     type: object
     properties:
@@ -326,9 +322,8 @@ definitions:
         type: object
         description: >
           Prediction interval consist of an array of interval bound names
-          and rows of array of bounds per bound name. Setting `requestPredictionIntervals`
-          to true will enable populating the field. The field will be empty or an error
-          response returned if prediction intervals are not returned or supported by the model.
+          and rows of array of bounds per bound name. The field will be empty
+          if not supported by the model.
         $ref: '#/definitions/PredictionInterval'
   DataField:
     type: object
