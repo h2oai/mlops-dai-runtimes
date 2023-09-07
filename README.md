@@ -1,7 +1,6 @@
 # Driverless AI Deployment Templates
 
 This repository contains different deployment templates for Driverless AI (DAI) scorers.
-c
 
 The structure is as follows:
 * `common`: Code shared by multiple deployment templates
