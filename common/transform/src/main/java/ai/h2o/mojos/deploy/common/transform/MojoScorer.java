@@ -235,7 +235,7 @@ public class MojoScorer {
 
   // note this will be provided by mojo pipeline in the future
   private ScoringType scoringType(int outputColumnSize) {
-    if (outputColumnSize > 2) {
+    if (outputColumnSize > 2 && !isPredictionIntervalSupport()) {
       return ScoringType.CLASSIFICATION;
     } else if (outputColumnSize == 2) {
       return ScoringType.BINOMIAL;
