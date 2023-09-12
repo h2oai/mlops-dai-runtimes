@@ -103,6 +103,13 @@ public class MojoScorer {
    * @return response {@link ScoreResponse}
    */
   public ScoreResponse score(ScoreRequest request) {
+    if (Boolean.TRUE.equals(request.isRequestPredictionIntervals())
+        && !supportPredictionInterval) {
+      throw new IllegalArgumentException(
+        "requestPredictionIntervals set to true, but model does not support it"
+      );
+    }
+
     scoreRequestTransformer.accept(request, getModelInfo().getSchema().getInputFields());
     MojoFrame requestFrame = scoreRequestConverter
             .apply(request, pipeline.getInputFrameBuilder());
