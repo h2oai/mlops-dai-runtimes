@@ -1,0 +1,251 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a definition of the REST API for scoring from H2O. This API is intended to be used within DAI and eventually across all H2O scoring systems",
+    "version": "1.0.0",
+    "title": "Scoring API - v1",
+    "termsOfService": "",
+    "contact": {
+      "email": "support@h2o.ai"
+    },
+    "license": {
+      "name": "License",
+      "url": "http://www.h2o.ai"
+    }
+  },
+  "host": "localhost",
+  "basePath": "/",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/model/id": {
+      "get": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "Returns model id",
+        "description": "Returns unique id of the model loaded in the server and used for scoring",
+        "operationId": "getModelId",
+        "produces": [
+          "text/plain"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/model/score": {
+      "post": {
+        "tags": [
+          "scoring"
+        ],
+        "summary": "Score on given rows",
+        "description": "Computes score of the rows sent in the body of the post request",
+        "operationId": "getScore",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "payload",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ScoreRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/ScoreResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid payload"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "Model": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "scoringType": {
+              "type": "string",
+              "enum": [
+                "REGRESSION",
+                "CLASSIFICATION",
+                "BINOMIAL"
+              ]
+            },
+            "scoringResponLabels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "schema": {
+          "$ref": "#/definitions/ModelSchema"
+        }
+      }
+    },
+    "Row": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "Parameter": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "description": "An array holding the names of fields in the order of appearance in the `rows` property. The length of `fields` has to match length of each row in `rows`. No duplicates are allowed.\n",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "includeFieldsInOutput": {
+          "description": "An array holding the list of field names to be copied from the input request row to the corresponding scoring output. It is an error to specify a field name not present in the `fields` property, except when it is equal to the `idField` property. In the latter case, the row id would be generated and returned in the response. Note that the order of items in `includeFieldsInOutput` is ignored and the specified fields are returned in the order of appearance in the input request row.\n",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "noFieldNamesInOutput": {
+          "description": "If set to `true`. The scorer will not fill response column names in the `fields` field. This is can be useful to maintain compatibility with older scorer versions or to save bandwidth.\n",
+          "type": "boolean"
+        },
+        "idField": {
+          "description": "Name of the field that holds a row id, e.g., a value that uniquely identifies each row of the request. The caller may specify a name of the field that is not present in fields. In which case, the scorer is allowed to generate a UUID to identify each row (e.g., for logging and monitoring purposes). To retrieve such a generated id as a part of the response, simply name it in the `includeFieldsInOutput`.\n",
+          "type": "string"
+        }
+      }
+    },
+    "ScoreRequest": {
+      "type": "object",
+      "properties": {
+        "parameters": {
+          "description": "An object holding the fields and other optional parameters.\n",
+          "$ref": "#/definitions/Parameter"
+        },
+        "instances": {
+          "description": "An array of rows consisting the actual input data for scoring, one scoring request per row.\n",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Row"
+          }
+        }
+      }
+    },
+    "ScoreResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "A unique id of the model used for scoring.\n",
+          "type": "string"
+        },
+        "fields": {
+          "description": "An array holding the names of fields in the order of appearance in the rows of the  `score` property. This field is not populated if requested by setting the `noFieldNamesInOutput` request field to `true`.\n",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "predictions": {
+          "description": "An array of rows consisting the actual scoring output. The order of rows corresponds to the order of the input request rows. Each row contains any copied input fields first (in the order of appearance in the input row). If the `idField` was specified and also listed in the `includeFieldsInOutput` but not provided in `fields`, a unique id will be generated and positioned right after all the other fields copied from the input. The scoring output follows.\n",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Row"
+          }
+        }
+      }
+    },
+    "DataField": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "dataType": {
+          "type": "string",
+          "enum": [
+            "Bool",
+            "Int32",
+            "Int64",
+            "Float32",
+            "Float64",
+            "Str",
+            "Time64"
+          ]
+        },
+        "example": {
+          "type": "string"
+        }
+      }
+    },
+    "ModelSchema": {
+      "type": "object",
+      "properties": {
+        "inputFields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DataField"
+          }
+        },
+        "targetFields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DataField"
+          }
+        },
+        "outputFields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DataField"
+          }
+        }
+      }
+    }
+  }
+}

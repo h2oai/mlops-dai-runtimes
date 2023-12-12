@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ai.h2o.mojos.deploy.common.rest.model.DataField;
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 public class ScoreRequestTransformerTest {
@@ -40,9 +38,16 @@ public class ScoreRequestTransformerTest {
     // Given
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setFields(Collections.singletonList("test"));
-    List<Row> rows = new ArrayList<>(Arrays.asList(
-        new Row(), new Row(), new Row(), new Row(), new Row(), new Row(), new Row()
-    ));
+    List<List<String>> rows =
+        new ArrayList<>(
+            Arrays.asList(
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>()));
     rows.get(0).addAll(Collections.singletonList("true"));
     rows.get(1).addAll(Collections.singletonList("False"));
     rows.get(2).addAll(Collections.singletonList("TrUE"));
@@ -60,9 +65,11 @@ public class ScoreRequestTransformerTest {
     scoreRequestTransformer.accept(scoreRequest, dataFields);
 
     // Then
-    List<Row> expected = new ArrayList<>(Arrays.asList(
-        new Row(), new Row(), new Row(), new Row(), new Row(), new Row(), new Row()
-    ));
+    List<List<String>> expected =
+        new ArrayList<>(
+            Arrays.asList(
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
     expected.get(0).addAll(Collections.singletonList("1"));
     expected.get(1).addAll(Collections.singletonList("0"));
     expected.get(2).addAll(Collections.singletonList("1"));
@@ -78,7 +85,7 @@ public class ScoreRequestTransformerTest {
     // Given
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setFields(Collections.singletonList("test"));
-    List<Row> rows = new ArrayList<>(Arrays.asList(new Row(), new Row()));
+    List<List<String>> rows = new ArrayList<>(Arrays.asList(new Row(), new Row()));
     rows.get(0).addAll(Collections.singletonList("unchangedFeature1"));
     rows.get(1).addAll(Collections.singletonList("unchangedFeature2"));
     scoreRequest.setRows(rows);
@@ -91,7 +98,8 @@ public class ScoreRequestTransformerTest {
     scoreRequestTransformer.accept(scoreRequest, dataFields);
 
     // Then
-    List<Row> expected = new ArrayList<>(Arrays.asList(new Row(), new Row()));
+    List<List<String>> expected =
+        new ArrayList<>(Arrays.asList(new ArrayList<>(), new ArrayList<>()));
     expected.get(0).addAll(Collections.singletonList("unchangedFeature1"));
     expected.get(1).addAll(Collections.singletonList("unchangedFeature2"));
     assertEquals(expected, scoreRequest.getRows());

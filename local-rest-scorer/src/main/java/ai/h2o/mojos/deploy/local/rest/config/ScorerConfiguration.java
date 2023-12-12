@@ -64,12 +64,12 @@ class ScorerConfiguration {
       ScoreRequestTransformer scoreRequestTransformer,
       CsvToMojoFrameConverter csvConverter) {
     return new MojoScorer(
-            requestConverter,
-            responseConverter,
-            contributionRequestConverter,
-            contributionResponseConverter,
-            modelInfoConverter,
-            scoreRequestTransformer,
-            csvConverter);
+        requestConverter,
+        responseConverter,
+        contributionRequestConverter,
+        contributionResponseConverter,
+        modelInfoConverter,
+        scoreRequestTransformer,
+        csvConverter);
   }
 }

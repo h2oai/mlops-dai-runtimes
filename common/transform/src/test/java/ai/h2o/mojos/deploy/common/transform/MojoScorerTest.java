@@ -23,7 +23,6 @@ import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
-
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -32,11 +31,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -50,13 +47,20 @@ class MojoScorerTest {
   private static final String TEST_UUID = "TEST_UUID";
   private static MockedStatic<MojoPipelineService> pipelineSettings = null;
 
-  @Mock private ScoreRequestToMojoFrameConverter scoreRequestConverter;
-  @Mock private MojoFrameToScoreResponseConverter scoreResponseConverter;
-  @Mock private MojoFrameToContributionResponseConverter contributionResponseConverter;
-  @Mock private ContributionRequestToMojoFrameConverter contributionRequestConverter;
-  @Mock private MojoPipelineToModelInfoConverter modelInfoConverter;
-  @Mock private ScoreRequestTransformer scoreRequestTransformer;
-  @Mock private CsvToMojoFrameConverter csvConverter;
+  @Mock
+  private ScoreRequestToMojoFrameConverter scoreRequestConverter;
+  @Mock
+  private MojoFrameToScoreResponseConverter scoreResponseConverter;
+  @Mock
+  private MojoFrameToContributionResponseConverter contributionResponseConverter;
+  @Mock
+  private ContributionRequestToMojoFrameConverter contributionRequestConverter;
+  @Mock
+  private MojoPipelineToModelInfoConverter modelInfoConverter;
+  @Mock
+  private ScoreRequestTransformer scoreRequestTransformer;
+  @Mock
+  private CsvToMojoFrameConverter csvConverter;
 
   @BeforeAll
   static void setup() {
@@ -69,13 +73,17 @@ class MojoScorerTest {
       pipelineSettings.close();
     }
     MojoPipeline dummyPipeline =
-            new DummyPipeline(TEST_UUID, MojoFrameMeta.getEmpty(), MojoFrameMeta.getEmpty());
+        new DummyPipeline(TEST_UUID, MojoFrameMeta.getEmpty(), MojoFrameMeta.getEmpty());
     pipelineSettings = Mockito.mockStatic(MojoPipelineService.class);
-    pipelineSettings.when(() -> MojoPipelineService
-      .loadPipeline(new File(MOJO_PIPELINE_PATH))).thenReturn(dummyPipeline);
-    pipelineSettings.when(() -> MojoPipelineService
-        .loadPipeline(Mockito.eq(new File(MOJO_PIPELINE_PATH)), any(PipelineConfig.class)))
-      .thenReturn(dummyPipeline);
+    pipelineSettings
+        .when(() -> MojoPipelineService.loadPipeline(new File(MOJO_PIPELINE_PATH)))
+        .thenReturn(dummyPipeline);
+    pipelineSettings
+        .when(
+            () ->
+                MojoPipelineService.loadPipeline(
+                    Mockito.eq(new File(MOJO_PIPELINE_PATH)), any(PipelineConfig.class)))
+        .thenReturn(dummyPipeline);
   }
 
   @AfterAll
@@ -100,11 +108,9 @@ class MojoScorerTest {
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-            .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-            .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -121,17 +127,14 @@ class MojoScorerTest {
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-            .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-            .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
     // When & Then
-    assertThrows(
-            IllegalArgumentException.class, () -> scorer.score(request));
+    assertThrows(IllegalArgumentException.class, () -> scorer.score(request));
   }
 
   @Test
@@ -143,17 +146,14 @@ class MojoScorerTest {
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-            .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-            .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
     // When & Then
-    assertThrows(
-            IllegalArgumentException.class, () -> scorer.score(request));
+    assertThrows(IllegalArgumentException.class, () -> scorer.score(request));
   }
 
   @Test
@@ -168,8 +168,7 @@ class MojoScorerTest {
     MojoScorer scorer = dummyScorer();
 
     // When & Then
-    assertThrows(IllegalArgumentException.class, () -> scorer
-            .computeContribution(request));
+    assertThrows(IllegalArgumentException.class, () -> scorer.computeContribution(request));
   }
 
   @Test
@@ -183,8 +182,7 @@ class MojoScorerTest {
     MojoScorer scorer = dummyScorer();
 
     // When & Then
-    assertThrows(IllegalArgumentException.class, () -> scorer
-            .computeContribution(request));
+    assertThrows(IllegalArgumentException.class, () -> scorer.computeContribution(request));
   }
 
   @Test
@@ -199,8 +197,7 @@ class MojoScorerTest {
     MojoScorer scorer = dummyScorer();
 
     // When & Then
-    assertThrows(IllegalArgumentException.class, () -> scorer
-            .computeContribution(request));
+    assertThrows(IllegalArgumentException.class, () -> scorer.computeContribution(request));
   }
 
   @Test
@@ -215,8 +212,7 @@ class MojoScorerTest {
     MojoScorer scorer = dummyScorer();
 
     // When & Then
-    assertThrows(IllegalArgumentException.class, () -> scorer
-            .computeContribution(request));
+    assertThrows(IllegalArgumentException.class, () -> scorer.computeContribution(request));
   }
 
   @Test
@@ -228,11 +224,9 @@ class MojoScorerTest {
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -250,11 +244,9 @@ class MojoScorerTest {
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -272,11 +264,9 @@ class MojoScorerTest {
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.ORIGINAL);
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -293,11 +283,9 @@ class MojoScorerTest {
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -315,11 +303,9 @@ class MojoScorerTest {
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -337,11 +323,9 @@ class MojoScorerTest {
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.ORIGINAL);
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -358,11 +342,9 @@ class MojoScorerTest {
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -380,11 +362,9 @@ class MojoScorerTest {
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -402,17 +382,14 @@ class MojoScorerTest {
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.ORIGINAL);
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
     // When & Then
-    assertThrows(
-        IllegalArgumentException.class, () -> scorer.score(request));
+    assertThrows(IllegalArgumentException.class, () -> scorer.score(request));
   }
 
   @Test
@@ -424,11 +401,9 @@ class MojoScorerTest {
     request.addFieldsItem("field1");
     request.addRowsItem(toRow("text"));
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -446,17 +421,14 @@ class MojoScorerTest {
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.TRANSFORMED);
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
     // When & Then
-    assertThrows(
-        IllegalArgumentException.class, () -> scorer.score(request));
+    assertThrows(IllegalArgumentException.class, () -> scorer.score(request));
   }
 
   @Test
@@ -469,11 +441,9 @@ class MojoScorerTest {
     request.addRowsItem(toRow("text"));
     request.setRequestShapleyValueType(ShapleyType.ORIGINAL);
     MojoFrame dummyMojoFrame = generateDummyTransformedMojoFrame();
-    given(scoreRequestConverter.apply(any(), any()))
-        .willReturn(dummyMojoFrame);
+    given(scoreRequestConverter.apply(any(), any())).willReturn(dummyMojoFrame);
     ScoreResponse dummyResponse = generateDummyResponse();
-    given(scoreResponseConverter.apply(any(), any()))
-        .willReturn(dummyResponse);
+    given(scoreResponseConverter.apply(any(), any())).willReturn(dummyResponse);
 
     MojoScorer scorer = dummyScorer();
 
@@ -492,7 +462,7 @@ class MojoScorerTest {
     columns.add(MojoColumnMeta.newOutput("Prediction.0", MojoColumn.Type.Float64));
     final MojoFrameMeta meta = new MojoFrameMeta(columns);
     final MojoFrameBuilder frameBuilder =
-            new MojoFrameBuilder(meta, Collections.emptyList(), Collections.emptyMap());
+        new MojoFrameBuilder(meta, Collections.emptyList(), Collections.emptyMap());
     MojoRowBuilder mojoRowBuilder = frameBuilder.getMojoRowBuilder();
     mojoRowBuilder.setValue("Prediction.0", "0.64");
     frameBuilder.addRow(mojoRowBuilder);
@@ -504,8 +474,8 @@ class MojoScorerTest {
 
   private ScoreResponse generateDummyResponse() {
     ScoreResponse response = new ScoreResponse();
-    List<Row> outputRows =
-            Stream.generate(Row::new).limit(4).collect(Collectors.toList());
+    List<List<String>> outputRows =
+        Stream.generate(ArrayList<String>::new).limit(4).collect(Collectors.toList());
     response.setScore(outputRows);
     response.setFields(Arrays.asList("field1"));
     return response;
@@ -520,7 +490,9 @@ class MojoScorerTest {
     return model;
   }
 
-  /** Dummy pipeline {@link MojoPipeline} just to mock the static methods used inside scoring. */
+  /**
+   * Dummy pipeline {@link MojoPipeline} just to mock the static methods used inside scoring.
+   */
   private static class DummyPipeline extends MojoPipeline {
     private final MojoFrameMeta inputMeta;
     private final MojoFrameMeta outputMeta;
@@ -529,10 +501,6 @@ class MojoScorerTest {
       super(uuid, null, null);
       this.inputMeta = inputMeta;
       this.outputMeta = outputMeta;
-    }
-
-    static DummyPipeline ofMeta(MojoFrameMeta inputMeta, MojoFrameMeta outputMeta) {
-      return new DummyPipeline(TEST_UUID, inputMeta, outputMeta);
     }
 
     @Override
@@ -579,19 +547,17 @@ class MojoScorerTest {
 
     @Override
     public void printPipelineInfo(PrintStream out) {
-
     }
   }
 
   public MojoScorer dummyScorer() {
     return new MojoScorer(
-      scoreRequestConverter,
-      scoreResponseConverter,
-      contributionRequestConverter,
-      contributionResponseConverter,
-      modelInfoConverter,
-      scoreRequestTransformer,
-      csvConverter
-    );
+        scoreRequestConverter,
+        scoreResponseConverter,
+        contributionRequestConverter,
+        contributionResponseConverter,
+        modelInfoConverter,
+        scoreRequestTransformer,
+        csvConverter);
   }
 }

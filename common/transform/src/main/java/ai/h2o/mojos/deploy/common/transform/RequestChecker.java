@@ -2,7 +2,6 @@ package ai.h2o.mojos.deploy.common.transform;
 
 import static java.util.Arrays.asList;
 
-import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import java.util.List;
@@ -37,7 +36,7 @@ public class RequestChecker {
     if (fields == null || fields.isEmpty()) {
       return "List of input fields cannot be empty";
     }
-    List<Row> rows = scoreRequest.getRows();
+    List<List<String>> rows = scoreRequest.getRows();
     if (rows == null || rows.isEmpty()) {
       return "List of input data rows cannot be empty";
     }
@@ -48,7 +47,7 @@ public class RequestChecker {
           expectedFields.toString(), fields.toString());
     }
     int i = 0;
-    for (Row row : scoreRequest.getRows()) {
+    for (List<String> row : scoreRequest.getRows()) {
       if (row.size() != fields.size()) {
         return String.format("Not enough elements in row %d (zero-indexed)", i);
       }

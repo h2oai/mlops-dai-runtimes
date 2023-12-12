@@ -4,7 +4,7 @@
 
 import ai.h2o.ci.Utils
 
-JAVA_IMAGE = 'harbor.h2o.ai/dockerhub-proxy/library/openjdk:8u222-jdk-slim'
+JAVA_IMAGE = 'harbor.h2o.ai/dockerhub-proxy/library/openjdk:17-jdk-slim'
 NODE_LABEL = 'docker'
 DOCKERHUB_CREDS = 'dockerhub'
 HARBOR_URL = "http://harbor.h2o.ai/"
@@ -43,9 +43,9 @@ pipeline {
             description: 'Whether to also push distribution ZIP archive to S3.',
         )
         booleanParam(
-                name: 'PUSH_TO_VORVAN',
-                defaultValue: false,
-                description: 'Whether to also push Docker images to h2o.ai maintained gcr.io repo Vorvan.',
+            name: 'PUSH_TO_VORVAN',
+            defaultValue: false,
+            description: 'Whether to also push Docker images to h2o.ai maintained gcr.io repo Vorvan.',
         )
     }
 
@@ -76,7 +76,7 @@ pipeline {
                     script {
                         versionText = getVersion()
                         echo "Version: ${versionText}"
-                        sh "./gradlew check"
+                        sh "./gradlew --init-script init.gradle check"
                     }
                 }
             }
@@ -100,7 +100,7 @@ pipeline {
             steps {
                 timeout(time: 60, unit: 'MINUTES') {
                     script {
-                        sh "./gradlew distributionZip"
+                        sh "./gradlew --init-script init.gradle distributionZip"
                         if (isReleaseVersion(versionText)) {
                             utilsLib.appendBuildDescription("Release ${versionText}")
                         }
@@ -169,7 +169,7 @@ pipeline {
                         def imageTags = isMasterBranch() || isReleaseBranch() ? "${versionText},${gitCommitHash}" : "${gitCommitHash}"
                         withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
                             withDockerCredentials("harbor.h2o.ai", "TO_") {
-                                sh "./gradlew jib \
+                                sh "./gradlew --init-script init.gradle jib \
                                 -Djib.to.auth.username=${TO_DOCKER_USERNAME} \
                                 -Djib.to.auth.password=${TO_DOCKER_PASSWORD} \
                                 -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
@@ -205,7 +205,7 @@ pipeline {
                         def imageTags = isMasterBranch() || isReleaseBranch() ? "${versionText},${gitCommitHash}" : "${gitCommitHash}"
                         withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
                             withDockerCredentials(DOCKERHUB_CREDS, "TO_") {
-                                sh "./gradlew jib \
+                                sh "./gradlew --init-script init.gradle jib \
                                 -Djib.to.auth.username=${TO_DOCKER_USERNAME} \
                                 -Djib.to.auth.password=${TO_DOCKER_PASSWORD} \
                                 -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
@@ -242,7 +242,7 @@ pipeline {
                             withGCRCredentials(VORVAN_CRED) {
                                 def gcrCreds = readFile("${GCR_JSON_KEY}")
                                 withEnv(['TO_DOCKER_USERNAME=_json_key', "TO_DOCKER_PASSWORD=${gcrCreds}"]) {
-                                    sh "./gradlew jib \
+                                    sh "./gradlew --init-script init.gradle jib \
                                     -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
                                     -Djib.from.auth.password=${FROM_DOCKER_PASSWORD} \
                                     -Djib.to.tags=${imageTags} \
@@ -264,8 +264,8 @@ pipeline {
  */
 def getVersion() {
     def version = sh(
-            script: "./gradlew -q -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false printVersion",
-            returnStdout: true).trim()
+            script: "./gradlew --init-script init.gradle -q -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false printVersion",
+            returnStdout: true).trim().tokenize("\n").last()
     if (!version) {
         error "Version must be set"
     }

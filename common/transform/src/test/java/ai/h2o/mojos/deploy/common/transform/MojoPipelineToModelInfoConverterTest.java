@@ -137,7 +137,9 @@ class MojoPipelineToModelInfoConverterTest {
     return result;
   }
 
-  /** Dummy test {@link MojoPipeline} just to be able to test the transformation. */
+  /**
+   * Dummy test {@link MojoPipeline} just to be able to test the transformation.
+   */
   private static class DummyPipeline extends MojoPipeline {
     private final MojoFrameMeta inputMeta;
     private final MojoFrameMeta outputMeta;
@@ -199,7 +201,6 @@ class MojoPipelineToModelInfoConverterTest {
 
     @Override
     public void printPipelineInfo(PrintStream out) {
-
     }
   }
 }

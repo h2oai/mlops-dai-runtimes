@@ -49,23 +49,25 @@ public class MojoFrameToScoreResponseConverter
 
   /**
    * Transform MOJO response frame into ScoreResponse.
+   *
    * @param mojoFrame mojo response frame.
    * @param scoreRequest score request.
    * @return score response.
    */
   @Override
-  public ScoreResponse apply(
-      MojoFrame mojoFrame, ScoreRequest scoreRequest) {
+  public ScoreResponse apply(MojoFrame mojoFrame, ScoreRequest scoreRequest) {
     Set<String> includedFields = getSetOfIncludedFields(scoreRequest);
-    List<Row> outputRows =
-        Stream.generate(Row::new).limit(mojoFrame.getNrows()).collect(Collectors.toList());
+    List<List<String>> outputRows =
+        Stream.generate(ArrayList<String>::new)
+            .limit(mojoFrame.getNrows())
+            .collect(Collectors.toList());
     copyFilteredInputFields(scoreRequest, includedFields, outputRows);
     fillOutputRows(mojoFrame, outputRows);
 
     ScoreResponse response = new ScoreResponse();
     response.setScore(outputRows);
 
-    if (!Boolean.TRUE.equals(scoreRequest.isNoFieldNamesInOutput())) {
+    if (!Boolean.TRUE.equals(scoreRequest.getNoFieldNamesInOutput())) {
       List<String> outputFieldNames = getFilteredInputFieldNames(scoreRequest, includedFields);
       outputFieldNames.addAll(getTargetField(mojoFrame));
       response.setFields(outputFieldNames);
@@ -75,31 +77,27 @@ public class MojoFrameToScoreResponseConverter
   }
 
   /**
-   * Populate target column rows into outputRows.
-   * When prediction interval is returned from MOJO
-   * response frame, only one column rows will
-   * be populated into the outputRows to ensure
-   * backward compatible.
+   * Populate target column rows into outputRows. When prediction interval is returned from MOJO
+   * response frame, only one column rows will be populated into the outputRows to ensure backward
+   * compatible.
    */
-  private void fillOutputRows(
-      MojoFrame mojoFrame, List<Row> outputRows) {
-    List<Row> targetRows = getTargetRows(mojoFrame);
+  private void fillOutputRows(MojoFrame mojoFrame, List<List<String>> outputRows) {
+    List<List<String>> targetRows = getTargetRows(mojoFrame);
     for (int rowIdx = 0; rowIdx < mojoFrame.getNrows(); rowIdx++) {
       outputRows.get(rowIdx).addAll(targetRows.get(rowIdx));
     }
   }
 
   /**
-   * Populate Prediction Interval value into response field.
-   * Only when score request set requestPredictionIntervals be true
-   * and MOJO pipeline support prediction interval.
+   * Populate Prediction Interval value into response field. Only when score request set
+   * requestPredictionIntervals be true and MOJO pipeline support prediction interval.
    */
   private void fillWithPredictionInterval(
       MojoFrame mojoFrame, ScoreRequest scoreRequest, ScoreResponse scoreResponse) {
-    if (Boolean.TRUE.equals(scoreRequest.isRequestPredictionIntervals())) {
+    if (Boolean.TRUE.equals(scoreRequest.getRequestPredictionIntervals())) {
       if (!supportPredictionInterval) {
         throw new IllegalStateException(
-          "Unexpected error, prediction interval should be supported, but actually not");
+            "Unexpected error, prediction interval should be supported, but actually not");
       }
       PredictionInterval predictionInterval =
           new PredictionInterval().fields(new Row()).rows(Collections.emptyList());
@@ -116,16 +114,14 @@ public class MojoFrameToScoreResponseConverter
   }
 
   /**
-   * Extract target column rows from MOJO response frame.
-   * Note: To ensure backward compatibility,
-   * if prediction interval is enabled then extracts only one
-   * column rows from response columns.
+   * Extract target column rows from MOJO response frame. Note: To ensure backward compatibility, if
+   * prediction interval is enabled then extracts only one column rows from response columns.
    */
-  private List<Row> getTargetRows(MojoFrame mojoFrame) {
-    List<Row> taretRows = Stream
-        .generate(Row::new)
-        .limit(mojoFrame.getNrows())
-        .collect(Collectors.toList());
+  private List<List<String>> getTargetRows(MojoFrame mojoFrame) {
+    List<List<String>> taretRows =
+        Stream.generate(ArrayList<String>::new)
+            .limit(mojoFrame.getNrows())
+            .collect(Collectors.toList());
     for (int row = 0; row < mojoFrame.getNrows(); row++) {
       for (int col : getTargetFieldIndices(mojoFrame)) {
         String cell = mojoFrame.getColumn(col).getDataAsStrings()[row];
@@ -136,13 +132,10 @@ public class MojoFrameToScoreResponseConverter
   }
 
   /**
-   * Extract target columns from MOJO response frame.
-   * When prediction interval is enabled, extracts only one
-   * column from MOJO frame, otherwise all columns names
-   * will be extracted.
+   * Extract target columns from MOJO response frame. When prediction interval is enabled, extracts
+   * only one column from MOJO frame, otherwise all columns names will be extracted.
    */
-  private List<String> getTargetField(
-      MojoFrame mojoFrame) {
+  private List<String> getTargetField(MojoFrame mojoFrame) {
     if (mojoFrame.getNcols() > 0) {
       List<String> targetColumns = Arrays.asList(mojoFrame.getColumnNames());
       if (supportPredictionInterval) {
@@ -150,8 +143,7 @@ public class MojoFrameToScoreResponseConverter
         if (targetIdx < 0) {
           log.debug(
               "singular target column does not exist in MOJO response frame,"
-              + " this could be a classification model."
-          );
+                  + " this could be a classification model.");
         } else {
           return targetColumns.subList(targetIdx, targetIdx + 1);
         }
@@ -163,10 +155,9 @@ public class MojoFrameToScoreResponseConverter
   }
 
   /**
-   * Extract target columns indices from MOJO response frame.
-   * When prediction interval is enabled, extracts only one
-   * column index from MOJO frame, otherwise all
-   * columns indices will be extracted.
+   * Extract target columns indices from MOJO response frame. When prediction interval is enabled,
+   * extracts only one column index from MOJO frame, otherwise all columns indices will be
+   * extracted.
    */
   private List<Integer> getTargetFieldIndices(MojoFrame mojoFrame) {
     if (mojoFrame.getNcols() > 0) {
@@ -176,8 +167,7 @@ public class MojoFrameToScoreResponseConverter
         if (targetIdx < 0) {
           log.debug(
               "singular target column does not exist in MOJO response frame,"
-              + " this could be a classification model."
-          );
+                  + " this could be a classification model.");
         } else {
           return Collections.singletonList(targetIdx);
         }
@@ -189,15 +179,14 @@ public class MojoFrameToScoreResponseConverter
   }
 
   /**
-   * Extract prediction interval columns rows from MOJO response frame.
-   * Note: Assumption is prediction interval should already be enabled
-   * and response frame has expected structure.
+   * Extract prediction interval columns rows from MOJO response frame. Note: Assumption is
+   * prediction interval should already be enabled and response frame has expected structure.
    */
-  private List<Row> getPredictionIntervalRows(MojoFrame mojoFrame, int targetIdx) {
-    List<Row> predictionIntervalRows = Stream
-        .generate(Row::new)
-        .limit(mojoFrame.getNrows())
-        .collect(Collectors.toList());
+  private List<List<String>> getPredictionIntervalRows(MojoFrame mojoFrame, int targetIdx) {
+    List<List<String>> predictionIntervalRows =
+        Stream.generate(ArrayList<String>::new)
+            .limit(mojoFrame.getNrows())
+            .collect(Collectors.toList());
     for (int row = 0; row < mojoFrame.getNrows(); row++) {
       for (int col = 0; col < mojoFrame.getNcols(); col++) {
         if (col == targetIdx) {
@@ -211,9 +200,8 @@ public class MojoFrameToScoreResponseConverter
   }
 
   /**
-   * Extract prediction interval columns names from MOJO response frame.
-   * Note: Assumption is prediction interval should already be enabled
-   * and response frame has expected structure.
+   * Extract prediction interval columns names from MOJO response frame. Note: Assumption is
+   * prediction interval should already be enabled and response frame has expected structure.
    */
   private Row getPredictionIntervalFields(MojoFrame mojoFrame, int targetIdx) {
     Row row = new Row();
@@ -225,9 +213,8 @@ public class MojoFrameToScoreResponseConverter
   }
 
   /**
-   * Extract target column index from list of column names.
-   * Note: Assumption is a singular target column should be found.
-   * Otherwise, the output indicates this a classification model.
+   * Extract target column index from list of column names. Note: Assumption is a singular target
+   * column should be found. Otherwise, the output indicates this a classification model.
    */
   private int getTargetColIdx(List<String> mojoColumns) {
     if (mojoColumns.size() == 1) {
@@ -247,15 +234,15 @@ public class MojoFrameToScoreResponseConverter
   }
 
   private static void copyFilteredInputFields(
-      ScoreRequest scoreRequest, Set<String> includedFields, List<Row> outputRows) {
+      ScoreRequest scoreRequest, Set<String> includedFields, List<List<String>> outputRows) {
     if (includedFields.isEmpty()) {
       return;
     }
     boolean generateRowIds = shouldGenerateRowIds(scoreRequest, includedFields);
-    List<Row> inputRows = scoreRequest.getRows();
+    List<List<String>> inputRows = scoreRequest.getRows();
     for (int row = 0; row < outputRows.size(); row++) {
-      Row inputRow = inputRows.get(row);
-      Row outputRow = outputRows.get(row);
+      List<String> inputRow = inputRows.get(row);
+      List<String> outputRow = outputRows.get(row);
       List<String> inputFields = scoreRequest.getFields();
       for (int col = 0; col < inputFields.size(); col++) {
         if (includedFields.contains(inputFields.get(col))) {
