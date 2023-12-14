@@ -21,6 +21,8 @@ dependencyManagement {
         dependency group: 'com.google.truth.extensions', name: 'truth-java8-extension', version: truthVersion
         dependency group: 'com.google.cloud', name: 'google-cloud-storage', version: googleStorageVersion
         dependency group: 'io.springfox', name: 'springfox-boot-starter', version: springFoxVersion
+        // https://nvd.nist.gov/vuln/detail/CVE-2022-1471
+        dependency group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion
         dependency group: 'io.swagger', name: 'swagger-annotations', version: swaggerCoreSpringVersion
         dependency group: 'io.swagger.core.v3', name: 'swagger-annotations', version: swaggerCoreVersion
         dependency group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
@@ -30,9 +32,11 @@ dependencyManagement {
             entry 'junit-jupiter-engine'
             entry 'junit-jupiter-params'
         }
+        dependency group: 'org.junit-pioneer', name: 'junit-pioneer', version: jupiterPioneerVersion
         dependencySet(group: 'org.mockito', version: mockitoVersion) {
             entry 'mockito-core'
             entry 'mockito-junit-jupiter'
+            entry 'mockito-inline'
         }
         dependency group: 'commons-cli', name: 'commons-cli', version: apacheCommonsCliVersion
         dependency group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
@@ -49,7 +53,6 @@ dependencyManagement {
         dependency group: 'org.scala-lang', name: 'scala-library', version: scalaVersion
         dependency group: 'ai.h2o', name: 'sparkling-water-scoring_2.12', version: sparklingWaterVersion
         dependency group: 'com.typesafe', name:'config', version: configVersion
-        dependency group: 'uk.org.webcompere', name: 'system-stubs-jupiter', version: jupiterSystemStubsVersion
 
     }
 }
