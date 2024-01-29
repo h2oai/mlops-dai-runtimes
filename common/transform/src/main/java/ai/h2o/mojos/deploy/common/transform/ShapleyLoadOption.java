@@ -1,8 +1,6 @@
 package ai.h2o.mojos.deploy.common.transform;
 
-/**
- * Enum defining options for loading the mojo to enable Shapley predictions.
- */
+/** Enum defining options for loading the mojo to enable Shapley predictions. */
 public enum ShapleyLoadOption {
   ALL,
   NONE,
@@ -16,6 +14,7 @@ public enum ShapleyLoadOption {
 
   /**
    * Checks whether Shapley scoring is permitted.
+   *
    * @param option {@link ShapleyLoadOption}
    * @return {@link Boolean}
    */
@@ -33,6 +32,7 @@ public enum ShapleyLoadOption {
 
   /**
    * Checks whether requested type of Shapley value scoring is permitted.
+   *
    * @param requested {@link String}
    * @return {@link Boolean}
    */
@@ -45,12 +45,11 @@ public enum ShapleyLoadOption {
 
   /**
    * Extracts configuration from system properties or environment variables.
+   *
    * @return {@link ShapleyLoadOption}
    */
   public static ShapleyLoadOption fromEnvironment() {
-    return shapleyEnabledFromEnvironment()
-        ? ALL
-        : shapleyTypeFromEnvironment();
+    return shapleyEnabledFromEnvironment() ? ALL : shapleyTypeFromEnvironment();
   }
 
   private static boolean shapleyEnabledFromEnvironment() {

@@ -28,15 +28,16 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class MojoFrameToContributionResponseConverterTest {
-  private final MojoFrameToContributionResponseConverter converter
-            = new MojoFrameToContributionResponseConverter();
+  private final MojoFrameToContributionResponseConverter converter =
+      new MojoFrameToContributionResponseConverter();
 
   @Test
   void convertEmptyRowsResponse_succeeds() {
     // Given
-    MojoFrame mojoFrame = new MojoFrameBuilder(
-          MojoFrameMeta.getEmpty(), Collections.emptyList(), Collections.emptyMap())
-                        .toMojoFrame();
+    MojoFrame mojoFrame =
+        new MojoFrameBuilder(
+                MojoFrameMeta.getEmpty(), Collections.emptyList(), Collections.emptyMap())
+            .toMojoFrame();
 
     // When
     ContributionResponse result = converter.contributionResponseWithNoOutputGroup(mojoFrame);
@@ -55,38 +56,45 @@ class MojoFrameToContributionResponseConverterTest {
     MojoColumn.Type[] types = {Str, Float32, Float64, Bool, Int32, Int64};
 
     // When
-    ContributionResponse result = converter.contributionResponseWithNoOutputGroup(buildMojoFrame(
-        Stream.of(types).map(Object::toString).toArray(String[]::new), types, contributions));
+    ContributionResponse result =
+        converter.contributionResponseWithNoOutputGroup(
+            buildMojoFrame(
+                Stream.of(types).map(Object::toString).toArray(String[]::new),
+                types,
+                contributions));
 
     // Then
     assertThat(result.getContributionGroups().size()).isEqualTo(1);
     assertThat(result.getContributionGroups().get(0).getContributions())
-        .containsExactly(Stream.of(contributions)
-        .map(MojoFrameToContributionResponseConverterTest::asRow).toArray());
+        .containsExactly(
+            Stream.of(contributions)
+                .map(MojoFrameToContributionResponseConverterTest::asRow)
+                .toArray());
     assertThat(result.getFeatures())
-     .containsExactly("Str", "Float32", "Float64", "Bool", "Int32", "Int64")
+        .containsExactly("Str", "Float32", "Float64", "Bool", "Int32", "Int64")
         .inOrder();
   }
 
   @SuppressWarnings("unused")
   private static Stream<Arguments> provideValues_convertMoreTypesResponse_succeeds() {
     return Stream.of(
-       Arguments.of((Object) new String[][] {{"str", "1.1", "2.2", "1", "123", "123456789"}}),
-       Arguments.of((Object) new String[][] {{null, null, null, null, null, null}}));
+        Arguments.of((Object) new String[][] {{"str", "1.1", "2.2", "1", "123", "123456789"}}),
+        Arguments.of((Object) new String[][] {{null, null, null, null, null, null}}));
   }
 
   @Test
   void convertEmptyRowsResponse_withEmptyOutputGroup_succeeds() {
     // Given
-    MojoFrame mojoFrame = new MojoFrameBuilder(
-        MojoFrameMeta.getEmpty(), Collections.emptyList(), Collections.emptyMap())
+    MojoFrame mojoFrame =
+        new MojoFrameBuilder(
+                MojoFrameMeta.getEmpty(), Collections.emptyList(), Collections.emptyMap())
             .toMojoFrame();
 
     List<String> outputGroupNames = new ArrayList<>();
 
     // When
-    ContributionResponse result = converter
-            .contributionResponseWithOutputGroup(mojoFrame, outputGroupNames);
+    ContributionResponse result =
+        converter.contributionResponseWithOutputGroup(mojoFrame, outputGroupNames);
 
     // Then
     assertThat(result.getContributionGroups().size()).isEqualTo(0);
@@ -101,14 +109,15 @@ class MojoFrameToContributionResponseConverterTest {
     String[][] contributions = {{"23.6"}};
 
     // When
-    ContributionResponse result = converter
-            .contributionResponseWithNoOutputGroup(buildMojoFrame(features, types, contributions));
+    ContributionResponse result =
+        converter.contributionResponseWithNoOutputGroup(
+            buildMojoFrame(features, types, contributions));
 
     // Then
     assertThat(result.getContributionGroups().size()).isEqualTo(1);
     assertThat(result.getContributionGroups().get(0).getContributions().size()).isEqualTo(1);
     assertThat(result.getContributionGroups().get(0).getContributions())
-            .containsExactly(asRow("23.6"));
+        .containsExactly(asRow("23.6"));
     assertThat(result.getContributionGroups().get(0).getOutputGroup()).isNull();
     assertThat(result.getFeatures()).containsExactly("feature");
   }
@@ -123,15 +132,15 @@ class MojoFrameToContributionResponseConverterTest {
     List<String> outputGroupNames = Collections.singletonList("test");
 
     // When
-    ContributionResponse result = converter
-            .contributionResponseWithOutputGroup(
-                    buildMojoFrame(features, types, contributions), outputGroupNames);
+    ContributionResponse result =
+        converter.contributionResponseWithOutputGroup(
+            buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
     assertThat(result.getContributionGroups().size()).isEqualTo(1);
     assertThat(result.getContributionGroups().get(0).getContributions().size()).isEqualTo(1);
     assertThat(result.getContributionGroups().get(0).getContributions())
-            .containsExactly(asRow("122.2"));
+        .containsExactly(asRow("122.2"));
     assertThat(result.getContributionGroups().get(0).getOutputGroup()).isEqualTo("test");
     assertThat(result.getFeatures()).containsExactly("feature");
   }
@@ -145,7 +154,8 @@ class MojoFrameToContributionResponseConverterTest {
     List<String> outputGroupNames = Arrays.asList("test1", "test2");
 
     // When
-    ContributionResponse result = converter.contributionResponseWithOutputGroup(
+    ContributionResponse result =
+        converter.contributionResponseWithOutputGroup(
             buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
@@ -153,12 +163,12 @@ class MojoFrameToContributionResponseConverterTest {
 
     assertThat(result.getContributionGroups().get(0).getContributions().size()).isEqualTo(1);
     assertThat(result.getContributionGroups().get(0).getContributions())
-            .containsExactly(asRow("122.2"));
+        .containsExactly(asRow("122.2"));
     assertThat(result.getContributionGroups().get(0).getOutputGroup()).isEqualTo("test1");
 
     assertThat(result.getContributionGroups().get(1).getContributions().size()).isEqualTo(1);
     assertThat(result.getContributionGroups().get(1).getContributions())
-            .containsExactly(asRow("34.6"));
+        .containsExactly(asRow("34.6"));
     assertThat(result.getContributionGroups().get(1).getOutputGroup()).isEqualTo("test2");
 
     assertThat(result.getFeatures()).containsExactly("feature");
@@ -174,7 +184,8 @@ class MojoFrameToContributionResponseConverterTest {
     List<String> outputGroupNames = Arrays.asList("test1", "test2");
 
     // When
-    ContributionResponse result = converter.contributionResponseWithOutputGroup(
+    ContributionResponse result =
+        converter.contributionResponseWithOutputGroup(
             buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
@@ -182,12 +193,12 @@ class MojoFrameToContributionResponseConverterTest {
 
     assertThat(result.getContributionGroups().get(0).getContributions().size()).isEqualTo(2);
     assertThat(result.getContributionGroups().get(0).getContributions())
-            .containsExactly(asRow("122.2"), asRow("90.2"));
+        .containsExactly(asRow("122.2"), asRow("90.2"));
     assertThat(result.getContributionGroups().get(0).getOutputGroup()).isEqualTo("test1");
 
     assertThat(result.getContributionGroups().get(1).getContributions().size()).isEqualTo(2);
     assertThat(result.getContributionGroups().get(1).getContributions())
-            .containsExactly(asRow("34.6"), asRow("45.6"));
+        .containsExactly(asRow("34.6"), asRow("45.6"));
     assertThat(result.getContributionGroups().get(1).getOutputGroup()).isEqualTo("test2");
 
     assertThat(result.getFeatures()).containsExactly("feature");
@@ -199,49 +210,48 @@ class MojoFrameToContributionResponseConverterTest {
     String[] features = {"feature1.test1", "feature1.test2", "feature2.test1", "feature2.test2"};
     MojoColumn.Type[] types = {Float32, Float32, Float32, Float32};
     String[][] contributions = {
-            {"122.2", "34.6", "90.9", "78.0"},
-            {"90.2", "45.6", "56.9", "56.0"}};
+      {"122.2", "34.6", "90.9", "78.0"},
+      {"90.2", "45.6", "56.9", "56.0"}
+    };
 
     List<String> outputGroupNames = Arrays.asList("test1", "test2");
 
     // When
-    ContributionResponse result = converter
-            .contributionResponseWithOutputGroup(
-                    buildMojoFrame(features, types, contributions), outputGroupNames);
+    ContributionResponse result =
+        converter.contributionResponseWithOutputGroup(
+            buildMojoFrame(features, types, contributions), outputGroupNames);
 
     // Then
     assertThat(result.getContributionGroups().size()).isEqualTo(2);
 
     assertThat(result.getContributionGroups().get(0).getContributions().size()).isEqualTo(2);
     assertThat(result.getContributionGroups().get(0).getContributions())
-            .containsExactly(asRow("122.2", "90.9"), asRow("90.2", "56.9"));
+        .containsExactly(asRow("122.2", "90.9"), asRow("90.2", "56.9"));
     assertThat(result.getContributionGroups().get(0).getOutputGroup()).isEqualTo("test1");
 
     assertThat(result.getContributionGroups().get(1).getContributions().size()).isEqualTo(2);
     assertThat(result.getContributionGroups().get(1).getContributions())
-            .containsExactly(asRow("34.6", "78.0"), asRow("45.6", "56.0"));
+        .containsExactly(asRow("34.6", "78.0"), asRow("45.6", "56.0"));
     assertThat(result.getContributionGroups().get(1).getOutputGroup()).isEqualTo("test2");
 
     assertThat(result.getFeatures()).containsExactly("feature1", "feature2");
   }
 
-  private static MojoFrame buildMojoFrame(String[] fields,
-                                          MojoColumn.Type[] types,
-                                          String[][] values) {
+  private static MojoFrame buildMojoFrame(
+      String[] fields, MojoColumn.Type[] types, String[][] values) {
     return buildMojoFrame(fields, types, values, (rb, type, col, value) -> rb.setValue(col, value));
   }
 
   private static <T> MojoFrame buildMojoFrame(
-        String[] fields, MojoColumn.Type[] types,
-        T[][] values,
-        MojoFrameToScoreResponseConverterTest.RowBuilderSetter<T> setter) {
-    final List<MojoColumnMeta> columns = MojoColumnMeta.toColumns(
-            fields,
-            types,
-            MojoColumn.Kind.Output);
+      String[] fields,
+      MojoColumn.Type[] types,
+      T[][] values,
+      MojoFrameToScoreResponseConverterTest.RowBuilderSetter<T> setter) {
+    final List<MojoColumnMeta> columns =
+        MojoColumnMeta.toColumns(fields, types, MojoColumn.Kind.Output);
     final MojoFrameMeta meta = new MojoFrameMeta(columns);
     final MojoFrameBuilder frameBuilder =
-            new MojoFrameBuilder(meta, Collections.emptyList(), Collections.emptyMap());
+        new MojoFrameBuilder(meta, Collections.emptyList(), Collections.emptyMap());
     for (T[] row : values) {
       MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
       int col = 0;

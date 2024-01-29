@@ -5,6 +5,7 @@ plugins {
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
+    runtimeOnly    group: 'org.springframework.boot', name: 'spring-boot-properties-migrator'
     implementation project(':common:rest-spring-api')
     implementation project(':common:transform')
     implementation group: 'ai.h2o', name: 'h2o-genmodel'
@@ -14,23 +15,26 @@ dependencies {
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
     implementation group: 'io.springfox', name: 'springfox-boot-starter', version: springFoxVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat'
 
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
-    implementation group: 'org.yaml', name: 'snakeyaml'
+    implementation group: 'jakarta.servlet', name: 'jakarta.servlet-api'
 
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'
-    testImplementation group: 'org.mockito', name: 'mockito-inline'
-    testImplementation group: 'org.mockito', name : 'mockito-core'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params'
-    testImplementation group: 'org.junit-pioneer', name: 'junit-pioneer'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: mockitoInlineVersion
+    testImplementation group: 'org.mockito', name : 'mockito-core', version: mockitoVersion
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: jupiterVersion
+    testImplementation group: 'org.junit-pioneer', name: 'junit-pioneer', version: jupiterPioneerVersion
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
 }
 
 test {
     useJUnitPlatform()
+
+    jvmArgs '--add-opens=java.base/java.util=ALL-UNNAMED'
+    jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
 }
 
 bootRun {

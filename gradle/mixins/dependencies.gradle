@@ -21,12 +21,11 @@ dependencyManagement {
         dependency group: 'com.google.truth.extensions', name: 'truth-java8-extension', version: truthVersion
         dependency group: 'com.google.cloud', name: 'google-cloud-storage', version: googleStorageVersion
         dependency group: 'io.springfox', name: 'springfox-boot-starter', version: springFoxVersion
-        // https://nvd.nist.gov/vuln/detail/CVE-2022-1471
-        dependency group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion
-        dependency group: 'io.swagger', name: 'swagger-annotations', version: swaggerCoreSpringVersion
+        dependency group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat', version: springBootPluginVersion
         dependency group: 'io.swagger.core.v3', name: 'swagger-annotations', version: swaggerCoreVersion
+        dependency group: 'io.swagger.parser.v3', name: 'swagger-parser', version: swaggerParserVersion
         dependency group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
-        dependency group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationVersion
+        dependency group: 'org.openapitools', name: 'jackson-databind-nullable', version: openApiJacksonNullableVersion
         dependencySet(group: 'org.junit.jupiter', version: jupiterVersion) {
             entry 'junit-jupiter-api'
             entry 'junit-jupiter-engine'
@@ -38,14 +37,14 @@ dependencyManagement {
             entry 'mockito-junit-jupiter'
             entry 'mockito-inline'
         }
+        dependency group: 'org.junit-pioneer', name: 'junit-pioneer', version: jupiterPioneerVersion
         dependency group: 'commons-cli', name: 'commons-cli', version: apacheCommonsCliVersion
         dependency group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-
-        dependencySet(group: 'org.apache.logging.log4j', version: log4jVersion) {
-            entry 'log4j-api'
-            entry 'log4j-core'
-            entry 'log4j-slf4j-impl'
+        dependencySet(group: 'ch.qos.logback', version: logbackVersion) {
+            entry 'logback-classic'
+            entry 'logback-core'
         }
+        dependency group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: jakartaServletVersion
 
         dependency group: 'org.apache.spark', name: 'spark-core_2.12', version: sparkVersion
         dependency group: 'org.apache.spark', name: 'spark-sql_2.12', version: sparkVersion

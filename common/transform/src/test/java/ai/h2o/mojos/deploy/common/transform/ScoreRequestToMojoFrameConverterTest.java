@@ -119,8 +119,8 @@ class ScoreRequestToMojoFrameConverterTest {
     String[] values = {"value1", "value2", "value3"};
     ScoreRequest request = new ScoreRequest();
     request.addFieldsItem("field1");
-    request.rows(Stream.of(values)
-            .map(ScoreRequestToMojoFrameConverterTest::asRow).collect(toList()));
+    request.rows(
+        Stream.of(values).map(ScoreRequestToMojoFrameConverterTest::asRow).collect(toList()));
 
     // When
     MojoFrame result =

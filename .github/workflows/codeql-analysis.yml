@@ -35,7 +35,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -63,8 +63,7 @@ jobs:
     - if: matrix.language == 'java'
       name: Build Java
       uses: gradle/gradle-build-action@v2
-      with:
-        arguments: assemble
+      run: ./gradlew --init-script init.gradle assemble
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
