@@ -13,7 +13,6 @@ import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +24,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class ModelsApiController implements ModelApi {
 
-  private static final String UNIMPLEMENTED_MESSAGE
-          = "Shapley values are not implemented yet";
-  private static final List<CapabilityType> SUPPORTED_CAPABILITIES
-      = Arrays.asList(CapabilityType.SCORE);
+  private static final String UNIMPLEMENTED_MESSAGE = "Shapley values are not implemented yet";
+  private static final List<CapabilityType> SUPPORTED_CAPABILITIES =
+      Arrays.asList(CapabilityType.SCORE);
   private static final Logger log = LoggerFactory.getLogger(ModelsApiController.class);
 
   private final MojoScorer scorer;
@@ -101,8 +99,7 @@ public class ModelsApiController implements ModelApi {
   }
 
   @Override
-  public ResponseEntity<ContributionResponse> getContribution(
-          ContributionRequest request) {
+  public ResponseEntity<ContributionResponse> getContribution(ContributionRequest request) {
     // TODO: to be implemented in the future
     log.info(" Unsupported operation: " + UNIMPLEMENTED_MESSAGE);
     return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();

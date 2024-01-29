@@ -9,27 +9,24 @@ import static org.mockito.Mockito.when;
 
 import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
 import ai.h2o.mojos.deploy.common.rest.model.Model;
+import ai.h2o.mojos.deploy.common.rest.model.ScoreMediaRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreResponse;
-import ai.h2o.mojos.deploy.common.rest.v1exp.model.ScoreMediaRequest;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import ai.h2o.mojos.deploy.common.transform.SampleRequestBuilder;
 import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.api.MojoPipelineService;
 import ai.h2o.mojos.runtime.api.PipelineConfig;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
-
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -37,11 +34,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class ModelsApiControllerTest {
-  @Mock private SampleRequestBuilder sampleRequestBuilder;
+  @Mock
+  private SampleRequestBuilder sampleRequestBuilder;
 
   @BeforeAll
   static void setup() throws IOException {
@@ -53,9 +52,12 @@ class ModelsApiControllerTest {
   private static void mockMojoPipeline(File tmpModel) {
     MojoPipeline mojoPipeline = Mockito.mock(MojoPipeline.class);
     MockedStatic<MojoPipelineService> theMock = Mockito.mockStatic(MojoPipelineService.class);
-    theMock.when(() -> MojoPipelineService
-        .loadPipeline(Mockito.eq(new File(tmpModel.getAbsolutePath())), any(PipelineConfig.class)))
-      .thenReturn(mojoPipeline);
+    theMock
+        .when(
+            () ->
+                MojoPipelineService.loadPipeline(
+                    Mockito.eq(new File(tmpModel.getAbsolutePath())), any(PipelineConfig.class)))
+        .thenReturn(mojoPipeline);
   }
 
   @Test
@@ -79,10 +81,11 @@ class ModelsApiControllerTest {
   @Test
   void verifyCapabilities_AllShapleyEnabled_ReturnsExpected() {
     // Given
-    List<CapabilityType> expectedCapabilities = Arrays.asList(
-        CapabilityType.SCORE,
-        CapabilityType.CONTRIBUTION_ORIGINAL,
-        CapabilityType.CONTRIBUTION_TRANSFORMED);
+    List<CapabilityType> expectedCapabilities =
+        Arrays.asList(
+            CapabilityType.SCORE,
+            CapabilityType.CONTRIBUTION_ORIGINAL,
+            CapabilityType.CONTRIBUTION_TRANSFORMED);
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.ALL);
     when(scorer.isPredictionIntervalSupport()).thenReturn(false);
@@ -99,9 +102,8 @@ class ModelsApiControllerTest {
   @Test
   void verifyCapabilities_OriginalShapleyEnabled_ReturnsExpected() {
     // Given
-    List<CapabilityType> expectedCapabilities = Arrays.asList(
-        CapabilityType.SCORE,
-        CapabilityType.CONTRIBUTION_ORIGINAL);
+    List<CapabilityType> expectedCapabilities =
+        Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_ORIGINAL);
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.ORIGINAL);
     when(scorer.isPredictionIntervalSupport()).thenReturn(false);
@@ -118,9 +120,8 @@ class ModelsApiControllerTest {
   @Test
   void verifyCapabilities_TransformedShapleyEnabled_ReturnsExpected() {
     // Given
-    List<CapabilityType> expectedCapabilities = Arrays.asList(
-        CapabilityType.SCORE,
-        CapabilityType.CONTRIBUTION_TRANSFORMED);
+    List<CapabilityType> expectedCapabilities =
+        Arrays.asList(CapabilityType.SCORE, CapabilityType.CONTRIBUTION_TRANSFORMED);
     MojoScorer scorer = mock(MojoScorer.class);
     when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
     when(scorer.isPredictionIntervalSupport()).thenReturn(false);
@@ -187,7 +188,7 @@ class ModelsApiControllerTest {
     } catch (Exception ex) {
       assertTrue(ex instanceof ResponseStatusException);
       assertTrue(ex.getCause() instanceof IllegalStateException);
-      assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ((ResponseStatusException) ex).getStatus());
+      assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ((ResponseStatusException) ex).getStatusCode());
     }
   }
 
@@ -195,8 +196,11 @@ class ModelsApiControllerTest {
   void verifyScoreMedia_ReturnsUnimplemented() {
     // Given
     ScoreMediaRequest request = mock(ScoreMediaRequest.class);
-    List<Resource> files = new ArrayList<>();
-    ModelsMediaController controller = new ModelsMediaController();
+    List<MultipartFile> files = new ArrayList<>();
+    MojoScorer scorer = mock(MojoScorer.class);
+    when(scorer.getEnabledShapleyTypes()).thenReturn(ShapleyLoadOption.TRANSFORMED);
+    when(scorer.isPredictionIntervalSupport()).thenReturn(false);
+    ModelsApiController controller = new ModelsApiController(scorer, new SampleRequestBuilder());
 
     // When & Then
     try {
@@ -204,7 +208,7 @@ class ModelsApiControllerTest {
       fail("exception is expected, but fail to raise");
     } catch (Exception ex) {
       assertTrue(ex instanceof ResponseStatusException);
-      assertEquals(HttpStatus.NOT_IMPLEMENTED, ((ResponseStatusException) ex).getStatus());
+      assertEquals(HttpStatus.NOT_IMPLEMENTED, ((ResponseStatusException) ex).getStatusCode());
     }
   }
 }

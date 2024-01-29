@@ -41,17 +41,16 @@ public class EnvironmentConfiguration {
 
   private void downloadArtifactsFromGcs(Map<String, String> env) {
     downloadFileFromGcs(getFromEnv(env, "MOJO_GCS_PATH"), Paths.get(MOJO_DOWNLOAD_PATH));
-    
+
     // Only download license key file if license key string was not provided
     if (env.getOrDefault("DRIVERLESS_AI_LICENSE_KEY", "").isEmpty()) {
       downloadFileFromGcs(getFromEnv(env, "LICENSE_GCS_PATH"), Paths.get(LICENSE_DOWNLOAD_PATH));
     }
-    
+
     // Only use pre-processing script if one is provided
     if (!env.getOrDefault("PREPROCESSING_SCRIPT_PATH", "").isEmpty()) {
       downloadFileFromGcs(
-          getFromEnv(env, "PREPROCESSING_SCRIPT_PATH"),
-          Paths.get(PREPROCESSING_SCRIPT_PATH));
+          getFromEnv(env, "PREPROCESSING_SCRIPT_PATH"), Paths.get(PREPROCESSING_SCRIPT_PATH));
     }
   }
 

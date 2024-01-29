@@ -4,9 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class ErrorUtil {
 
-  /**
-   * Translate exception type into error response code.
-   */
+  /** Translate exception type into error response code. */
   public static HttpStatus translateErrorCode(Exception exception) {
     if (exception instanceof IllegalArgumentException) {
       return HttpStatus.BAD_REQUEST;

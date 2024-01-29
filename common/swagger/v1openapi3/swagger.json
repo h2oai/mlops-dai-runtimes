@@ -1,0 +1,604 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Scoring API - v1.2.0-openapi3",
+    "description": "This is a definition of the REST API for scoring from H2O.  This API is intended to be used within DAI and eventually across all H2O scoring systems. This API combines both v1 and v1Exp in OPENAPI 3.0 spec.",
+    "contact": {
+      "email": "support@h2o.ai"
+    },
+    "license": {
+      "name": "License",
+      "url": "http://www.h2o.ai"
+    },
+    "version": "1.2.0-openapi3"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/model/id": {
+      "get": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "Returns model id",
+        "description": "Returns unique id of the model loaded in the server and used for scoring",
+        "operationId": "getModelId",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/model/schema": {
+      "get": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "Describe a model",
+        "description": "Returns information about the model used for scoring, e.g., input schema.",
+        "operationId": "getModelInfo",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Model"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/model/sample_request": {
+      "get": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "Sample scoring request",
+        "description": "Builds a sample scoring request that would pass all validations",
+        "operationId": "getSampleRequest",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreRequest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/model/capabilities": {
+      "get": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "List capabilities supported by the scorer.",
+        "description": "Returns the capabilities supported by the scorer.",
+        "operationId": "getCapabilities",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CapabilityType"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/model/score": {
+      "get": {
+        "tags": [
+          "scoring"
+        ],
+        "summary": "Score on given file",
+        "description": "Computes score of the rows in the file specified by the path in the query parameter",
+        "operationId": "getScoreByFile",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {}
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "scoring"
+        ],
+        "summary": "Score on given rows",
+        "description": "Computes score of the rows sent in the body of the post request",
+        "operationId": "getScore",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {}
+          },
+          "500": {
+            "description": "Failure operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "payload"
+      }
+    },
+    "/model/contribution": {
+      "post": {
+        "tags": [
+          "contribution"
+        ],
+        "summary": "Contribution score or Shapley values on given rows",
+        "description": "Computes contribution score with the rows sent in the body of the post request",
+        "operationId": "getContribution",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContributionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {}
+          },
+          "500": {
+            "description": "Failure operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Implementation not supported",
+            "content": {}
+          }
+        },
+        "x-codegen-request-body-name": "payload"
+      }
+    },
+    "/model/media-score": {
+      "post": {
+        "tags": [
+          "scoring"
+        ],
+        "summary": "Score model with provided media files",
+        "description": "Computes score of provided data making use of provided media files.",
+        "operationId": "getMediaScore",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "scoreMediaRequest": {
+                    "$ref": "#/components/schemas/scoreMediaRequest"
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                },
+                "required": [
+                  "scoreMediaRequest",
+                  "files"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful scoring operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "501": {
+            "description": "Implementation not supported"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Model": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/Model_properties"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/ModelSchema"
+          }
+        }
+      },
+      "Row": {
+        "type": "array",
+        "properties": {
+          "length": {
+            "type": "integer"
+          }
+        },
+        "items": {
+          "type": "string"
+        }
+      },
+      "ContributionRequest": {
+        "required": [
+          "requestShapleyValueType"
+        ],
+        "type": "object",
+        "properties": {
+          "requestShapleyValueType": {
+            "$ref": "#/components/schemas/ShapleyType"
+          },
+          "fields": {
+            "type": "array",
+            "description": "An array holding the names of fields in the order of appearance in the `rows` property. The length of `fields` has to match length of each row in `rows`. No duplicates are allowed.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "description": "An array of rows consisting the actual input data for scoring, one scoring request per row.\n",
+            "items": {
+              "$ref": "#/components/schemas/Row"
+            }
+          }
+        }
+      },
+      "ContributionResponse": {
+        "type": "object",
+        "properties": {
+          "features": {
+            "type": "array",
+            "description": "An array holding the names of fields in the order of appearance in the rows of the  `contributions` property.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contributionGroups": {
+            "type": "array",
+            "description": "An array of rows consisting of the shapley contributions output corresponding to an output group.\n",
+            "items": {
+              "$ref": "#/components/schemas/ContributionGroup"
+            }
+          }
+        }
+      },
+      "ContributionGroup": {
+        "type": "object",
+        "properties": {
+          "outputGroup": {
+            "type": "string",
+            "description": "Name of the output group. It will be populated only for multinomial models. Shapley values are not supported for third party models yet, hence this field will not be populated.\n"
+          },
+          "contributions": {
+            "type": "array",
+            "description": "An array of rows consisting of the shapley contributions output corresponding to columns in the fields\n",
+            "items": {
+              "$ref": "#/components/schemas/Row"
+            }
+          }
+        }
+      },
+      "ScoreRequest": {
+        "type": "object",
+        "properties": {
+          "requestShapleyValueType": {
+            "$ref": "#/components/schemas/ShapleyType"
+          },
+          "includeFieldsInOutput": {
+            "type": "array",
+            "description": "An array holding the list of field names to be copied from the input request row to the corresponding scoring output. It is an error to specify a field name not present in the `fields` property, except when it is equal to the `idField` property. In the latter case, the row id would be generated and returned in the response. Note that the order of items in `includeFieldsInOutput` is ignored and the specified fields are returned in the order of appearance in the input request row.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "noFieldNamesInOutput": {
+            "type": "boolean",
+            "description": "If set to `true`. The scorer will not fill response column names in the `fields` field. This is can be useful to maintain compatibility with older scorer versions or to save bandwidth.\n"
+          },
+          "idField": {
+            "type": "string",
+            "description": "Name of the field that holds a row id, e.g., a value that uniquely identifies each row of the request. The caller may specify a name of the field that is not present in fields. In which case, the scorer is allowed to generate a UUID to identify each row (e.g., for logging and monitoring purposes). To retrieve such a generated id as a part of the response, simply name it in the `includeFieldsInOutput`.\n"
+          },
+          "fields": {
+            "type": "array",
+            "description": "An array holding the names of fields in the order of appearance in the `rows` property. The length of `fields` has to match length of each row in `rows`. No duplicates are allowed.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "description": "An array of rows consisting the actual input data for scoring, one scoring request per row.\n",
+            "items": {
+              "$ref": "#/components/schemas/Row"
+            }
+          },
+          "requestPredictionIntervals": {
+            "type": "boolean",
+            "description": "If set to `true`, the scorer will try to fill field `predictionIntervals` in response if it is supported.\n"
+          }
+        }
+      },
+      "ScoreResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A unique id of the model used for scoring.\n"
+          },
+          "fields": {
+            "type": "array",
+            "description": "An array holding the names of fields in the order of appearance in the rows of the  `score` property. This field is not populated if requested by setting the `noFieldNamesInOutput` request field to `true`.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "score": {
+            "type": "array",
+            "description": "An array of rows consisting the actual scoring output. The order of rows corresponds to the order of the input request rows. Each row contains any copied input fields first (in the order of appearance in the input row). If the `idField` was specified and also listed in the `includeFieldsInOutput` but not provided in `fields`, a unique id will be generated and positioned right after all the other fields copied from the input. The scoring output follows.\n",
+            "items": {
+              "$ref": "#/components/schemas/Row"
+            }
+          },
+          "featureShapleyContributions": {
+            "$ref": "#/components/schemas/ContributionResponse"
+          },
+          "predictionIntervals": {
+            "$ref": "#/components/schemas/PredictionInterval"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string",
+            "description": "A string message containing the detail error message.\n"
+          }
+        }
+      },
+      "DataField": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string",
+            "enum": [
+              "Bool",
+              "Int32",
+              "Int64",
+              "Float32",
+              "Float64",
+              "Str",
+              "Time64"
+            ]
+          },
+          "example": {
+            "type": "string"
+          }
+        }
+      },
+      "ModelSchema": {
+        "type": "object",
+        "properties": {
+          "inputFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataField"
+            }
+          },
+          "targetFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataField"
+            }
+          },
+          "outputFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataField"
+            }
+          }
+        }
+      },
+      "ShapleyType": {
+        "type": "string",
+        "enum": [
+          "ORIGINAL",
+          "TRANSFORMED",
+          "NONE"
+        ]
+      },
+      "ScoringType": {
+        "type": "string",
+        "enum": [
+          "REGRESSION",
+          "CLASSIFICATION",
+          "BINOMIAL"
+        ]
+      },
+      "CapabilityType": {
+        "type": "string",
+        "enum": [
+          "SCORE",
+          "SCORE_PREDICTION_INTERVAL",
+          "CONTRIBUTION_ORIGINAL",
+          "CONTRIBUTION_TRANSFORMED"
+        ]
+      },
+      "Model_properties": {
+        "type": "object",
+        "properties": {
+          "scoringType": {
+            "$ref": "#/components/schemas/ScoringType"
+          },
+          "scoringResponLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PredictionInterval": {
+        "type": "object",
+        "description": "Prediction interval consist of an array of interval bound names and rows of array of bounds per bound name. Setting `requestPredictionIntervals` to true will enable populating the field. The field will be empty or an error response returned if prediction intervals are not returned or supported by the model.",
+        "properties": {
+          "fields": {
+            "$ref": "#/components/schemas/Row"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Row"
+            }
+          }
+        }
+      },
+      "scoreMediaRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ScoreRequest"
+          },
+          {
+            "properties": {
+              "mediaFields": {
+                "description": "An array holding the names of all fields which are expected to contain media files. Contents of these fields will be replaced by corresponding uploaded files where the expected values in the column must be the file names of the uploaded files.\n",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    }
+  }
+}

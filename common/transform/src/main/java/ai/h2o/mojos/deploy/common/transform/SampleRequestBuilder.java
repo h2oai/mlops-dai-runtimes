@@ -1,7 +1,5 @@
 package ai.h2o.mojos.deploy.common.transform;
 
-import static java.util.Arrays.asList;
-
 import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.runtime.api.MojoColumnMeta;
@@ -19,9 +17,10 @@ public class SampleRequestBuilder {
   /** Builds a valid {@link ScoreRequest} based on the given mojo input {@link MojoFrameMeta}. */
   public ScoreRequest build(MojoFrameMeta inputMeta) {
     ScoreRequest request = new ScoreRequest();
-    final List<String> fields = inputMeta.getColumns().stream()
-        .map(MojoColumnMeta::getColumnName)
-        .collect(Collectors.toList());
+    final List<String> fields =
+        inputMeta.getColumns().stream()
+            .map(MojoColumnMeta::getColumnName)
+            .collect(Collectors.toList());
     request.setFields(fields);
     Row row = new Row();
     for (MojoColumn.Type type : inputMeta.getColumnTypes()) {

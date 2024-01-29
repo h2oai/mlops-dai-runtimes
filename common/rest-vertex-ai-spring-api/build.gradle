@@ -1,6 +1,6 @@
 plugins {
     id 'org.springframework.boot'
-    id 'org.hidetake.swagger.generator'
+    id 'org.openapi.generator'
 }
 apply from: project(":").file('gradle/java.gradle')
 
@@ -8,19 +8,26 @@ dependencies {
     implementation group: 'io.swagger.core.v3', name: 'swagger-annotations'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
-    swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
+    implementation group: 'org.openapitools', name: 'jackson-databind-nullable'
 }
 
-swaggerSources {
-    api {
-        inputFile = file('../swagger/v1/vertex-ai-swagger.yaml')
-        code {
-            language = 'spring'
-            configFile = file('../swagger/v1/vertex_ai_swagger_codegen.json')
-            components = [models: true, apis: true]
-            dependsOn validation
-        }
-    }
+openApiValidate {
+    inputSpec = "$rootDir/common/swagger/v1/vertex-ai-swagger.json"
+    recommend = true
+}
+
+openApiGenerate {
+    generatorName = 'spring'
+    inputSpec = "$rootDir/common/swagger/v1/vertex-ai-swagger.json"
+    outputDir = "$buildDir/gen"
+    configOptions.set([
+            "useSpringBoot3": "true",
+            "interfaceOnly": "true",
+            "basePackage": "ai.h2o.mojos.deploy.common.rest.vertex.ai",
+            "configPackage": "ai.h2o.mojos.deploy.common.rest.vertex.ai.config",
+            "apiPackage": "ai.h2o.mojos.deploy.common.rest.vertex.ai.api",
+            "modelPackage": "ai.h2o.mojos.deploy.common.rest.vertex.ai.model",
+    ])
 }
 
 jar {
@@ -32,5 +39,11 @@ bootJar {
     enabled=false
 }
 
-compileJava.dependsOn swaggerSources.api.code
-sourceSets.main.java.srcDir "${swaggerSources.api.code.outputDir}/src/main/java"
+compileJava.dependsOn tasks.openApiValidate, tasks.openApiGenerate
+sourceSets {
+    main {
+        java {
+            srcDir("$buildDir/gen/src/main/java")
+        }
+    }
+}

@@ -9,8 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class GcpVertexAiApplication {
   /**
-   * Wrapper application for running local rest scorer in Google Vertex AI.
-   * Downloads pipeline.mojo and license.sig files from GCS before starting rest server.
+   * Wrapper application for running local rest scorer in Google Vertex AI. Downloads pipeline.mojo
+   * and license.sig files from GCS before starting rest server.
    *
    * @param args N/A, application only requires environment variables
    */

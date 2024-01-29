@@ -35,10 +35,10 @@ public final class MojoScorer {
   private static final Object pipelineLock = new Object();
   private static MojoPipeline pipeline;
 
-  private final ScoreRequestToMojoFrameConverter requestConverter
-          = new ScoreRequestToMojoFrameConverter();
-  private final MojoFrameToScoreResponseConverter responseConverter
-          = new MojoFrameToScoreResponseConverter();
+  private final ScoreRequestToMojoFrameConverter requestConverter =
+      new ScoreRequestToMojoFrameConverter();
+  private final MojoFrameToScoreResponseConverter responseConverter =
+      new MojoFrameToScoreResponseConverter();
   private final RequestChecker requestChecker = new RequestChecker(new SampleRequestBuilder());
 
   /** Processes a single {@link ScoreRequest} in the given AWS Lambda {@link Context}. */

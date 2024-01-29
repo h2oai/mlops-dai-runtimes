@@ -14,6 +14,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -48,8 +50,7 @@ public class ModelsApiController implements ModelApi {
 
   @Override
   public ResponseEntity<ScoreResponse> getScore(
-      ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest gcpRequest
-  ) {
+      ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest gcpRequest) {
     try {
       log.info("Got scoring request");
       // Convert GCP request to REST request
@@ -63,7 +64,7 @@ public class ModelsApiController implements ModelApi {
       return ResponseEntity.badRequest().build();
     }
   }
-  
+
   /**
    * Converts GCP Vertex AI request to REST module request.
    *
@@ -71,22 +72,21 @@ public class ModelsApiController implements ModelApi {
    *     Vertex AI request to be converted
    */
   public static ScoreRequest getRestScoreRequest(
-      ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest gcpRequest
-  ) {
+      ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest gcpRequest) {
     ScoreRequest request = new ScoreRequest();
-    
+
     if (gcpRequest.getParameters().getIncludeFieldsInOutput() != null) {
       request.setIncludeFieldsInOutput(gcpRequest.getParameters().getIncludeFieldsInOutput());
     }
-    
-    request.setNoFieldNamesInOutput(gcpRequest.getParameters().isNoFieldNamesInOutput());
+
+    request.setNoFieldNamesInOutput(gcpRequest.getParameters().getNoFieldNamesInOutput());
     request.setIdField(gcpRequest.getParameters().getIdField());
     request.setFields(gcpRequest.getParameters().getFields());
-    
+
     // Check if a pre-processing script was provided, if so, use it first
     Map<String, String> env = System.getenv();
     String preProccessingScript = env.getOrDefault("PREPROCESSING_SCRIPT_PATH", "");
-    
+
     if (!preProccessingScript.isEmpty()) {
       // Write data to file to be injested by preprocessing script
       String fileName = UUID.randomUUID().toString() + ".json";
@@ -96,7 +96,7 @@ public class ModelsApiController implements ModelApi {
       } catch (IOException e) {
         log.error("Failed writing JSON file: {}", e.getMessage());
       }
-      
+
       // Run preprocessing script on request data
       try (FileReader fileReader = new FileReader("/tmp/" + fileName);
           JsonReader reader = new JsonReader(fileReader)) {
@@ -105,10 +105,11 @@ public class ModelsApiController implements ModelApi {
         processBuilder.redirectErrorStream(true);
         Process process = processBuilder.start();
         process.waitFor();
-        
+
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        gcpRequest = gson.fromJson(reader,
-            ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest.class);
+        gcpRequest =
+            gson.fromJson(
+                reader, ai.h2o.mojos.deploy.common.rest.vertex.ai.model.ScoreRequest.class);
       } catch (JsonSyntaxException e) {
         log.error("Malformed JSON when reading from file: {}", e.getMessage());
       } catch (Exception e) {
@@ -121,46 +122,43 @@ public class ModelsApiController implements ModelApi {
         }
       }
     }
-    
-    Row row;
-    for (ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row gcpRow: 
-        gcpRequest.getInstances()
-    ) {
+
+    List<String> row;
+    for (List<String> gcpRow : gcpRequest.getInstances()) {
       row = new Row();
       for (int i = 0; i < gcpRow.size(); i++) {
         row.add(gcpRow.get(i));
       }
-      
+
       request.addRowsItem(row);
     }
-    
+
     return request;
   }
-  
+
   /**
    * Converts REST module response to GCP Vertex AI response.
    *
-   * @param restResponse {@link ai.h2o.mojos.deploy.common.rest.model.ScoreResponse} REST
-   *     module response to convert
+   * @param restResponse {@link ai.h2o.mojos.deploy.common.rest.model.ScoreResponse} REST module
+   *     response to convert
    */
   public static ScoreResponse getGcpScoreResponse(
-      ai.h2o.mojos.deploy.common.rest.model.ScoreResponse restResponse
-  ) {
+      ai.h2o.mojos.deploy.common.rest.model.ScoreResponse restResponse) {
     ScoreResponse response = new ScoreResponse();
-    
+
     response.setId(restResponse.getId());
     response.setFields(restResponse.getFields());
-    
-    ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row row;
-    for (Row restRow: restResponse.getScore()) {
-      row = new ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row();
+
+    List<String> row;
+    for (List<String> restRow : restResponse.getScore()) {
+      row = new ArrayList<>();
       for (int i = 0; i < restRow.size(); i++) {
         row.add(restRow.get(i));
       }
-      
+
       response.addPredictionsItem(row);
     }
-    
+
     return response;
   }
 }
