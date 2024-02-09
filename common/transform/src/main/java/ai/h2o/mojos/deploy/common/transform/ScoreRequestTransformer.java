@@ -50,7 +50,7 @@ public class ScoreRequestTransformer implements BiConsumer<ScoreRequest, List<Da
                               }
                               return sanitizeValue;
                             } else {
-                              logger.warn("Column '{}' can not be found in Input schema", colName);
+                              logger.debug("Column '{}' can not be found in Input schema", colName);
                               return origin;
                             }
                           })
