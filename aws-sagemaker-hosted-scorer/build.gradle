@@ -49,7 +49,7 @@ jib {
         }
     }
     container {
-        jvmFlags = defaultJibContainerJvmFlags.split(" ").each { it.trim() }
+        jvmFlags = defaultJibContainerJvmFlags.split(" ").each { it.trim() }.toList()
         ports = ['8080']
         volumes = [
                 // mojo pipeline and license file will live here
