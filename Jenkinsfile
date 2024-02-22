@@ -120,7 +120,7 @@ pipeline {
             agent { label NODE_LABEL }
             when {
                 expression {
-                    return isReleaseBranch() || isMasterBranch() || params.PUSH_DISTRIBUTION_ZIP
+                    return (isReleaseBranch() || isMasterBranch()) && params.PUSH_DISTRIBUTION_ZIP
                 }
             }
             steps {
@@ -151,7 +151,7 @@ pipeline {
         stage('5. Push Docker Images To Harbor') {
             when {
                 expression {
-                    return isReleaseBranch() || isMasterBranch() || params.PUSH_TO_HARBOR
+                    return (isReleaseBranch() || isMasterBranch()) && params.PUSH_TO_HARBOR
                 }
             }
             agent {
@@ -187,7 +187,7 @@ pipeline {
         stage('6. Push Docker Images To DockerHub') {
             when {
                 expression {
-                    return isReleaseBranch() || params.PUSH_TO_DOCKERHUB
+                    return (isReleaseBranch() || isMasterBranch()) && params.PUSH_TO_DOCKERHUB
                 }
             }
             agent {
@@ -222,7 +222,7 @@ pipeline {
         stage('7. Push Docker Images To GoogleCloud') {
             when {
                 expression {
-                    return isReleaseBranch() || params.PUSH_TO_VORVAN
+                    return (isReleaseBranch() || isMasterBranch()) && params.PUSH_TO_VORVAN
                 }
             }
             agent {
