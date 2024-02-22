@@ -63,7 +63,7 @@ jib {
         }
     }
     container {
-        jvmFlags = defaultJibContainerJvmFlags.split(" ").each { it.trim() }
+        jvmFlags = defaultJibContainerJvmFlags.split(" ").each { it.trim() }.toList()
         ports = ['8080']
         environment = [
                 // The expected path to the DAI license file.

@@ -72,7 +72,7 @@ jib {
         }
     }
     container {
-        jvmFlags = defaultJibContainerJvmFlags.split(" ").each { it.trim() }
+        jvmFlags = defaultJibContainerJvmFlags.split(" ").each { it.trim() }.toList()
         ports = ['8080']
         volumes = [
                 // For storing the mojo2 file with the model to be used for scoring.
