@@ -169,14 +169,16 @@ pipeline {
                         def imageTags = isMasterBranch() || isReleaseBranch() ? "${versionText},${gitCommitHash}" : "${gitCommitHash}"
                         withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
                             withDockerCredentials("harbor.h2o.ai", "TO_") {
-                                sh "./gradlew --init-script init.gradle jib \
-                                -Djib.to.auth.username=${TO_DOCKER_USERNAME} \
-                                -Djib.to.auth.password=${TO_DOCKER_PASSWORD} \
-                                -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
-                                -Djib.from.auth.password=${FROM_DOCKER_PASSWORD} \
-                                -Djib.to.tags=${imageTags} \
-                                -Djib.allowInsecureRegistries=true \
-                                -DsendCredentialsOverHttp=true"
+                                withEnv(["XDG_CONFIG_HOME=/tmp", "XDG_CACHE_HOME=/tmp"]) {
+                                    sh "./gradlew --init-script init.gradle jib \
+                                    -Djib.to.auth.username=${TO_DOCKER_USERNAME} \
+                                    -Djib.to.auth.password=${TO_DOCKER_PASSWORD} \
+                                    -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
+                                    -Djib.from.auth.password=${FROM_DOCKER_PASSWORD} \
+                                    -Djib.to.tags=${imageTags} \
+                                    -Djib.allowInsecureRegistries=true \
+                                    -DsendCredentialsOverHttp=true"
+                                }
                             }
                         }
                     }
@@ -205,13 +207,15 @@ pipeline {
                         def imageTags = isMasterBranch() || isReleaseBranch() ? "${versionText},${gitCommitHash}" : "${gitCommitHash}"
                         withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
                             withDockerCredentials(DOCKERHUB_CREDS, "TO_") {
-                                sh "./gradlew --init-script init.gradle jib \
-                                -Djib.to.auth.username=${TO_DOCKER_USERNAME} \
-                                -Djib.to.auth.password=${TO_DOCKER_PASSWORD} \
-                                -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
-                                -Djib.from.auth.password=${FROM_DOCKER_PASSWORD} \
-                                -Djib.to.tags=${imageTags} \
-                                -PdockerRepositoryPrefix=h2oai/"
+                                withEnv(["XDG_CONFIG_HOME=/tmp", "XDG_CACHE_HOME=/tmp"]) {
+                                    sh "./gradlew --init-script init.gradle jib \
+                                    -Djib.to.auth.username=${TO_DOCKER_USERNAME} \
+                                    -Djib.to.auth.password=${TO_DOCKER_PASSWORD} \
+                                    -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
+                                    -Djib.from.auth.password=${FROM_DOCKER_PASSWORD} \
+                                    -Djib.to.tags=${imageTags} \
+                                    -PdockerRepositoryPrefix=h2oai/"
+                                }
                             }
                         }
                     }
@@ -241,7 +245,7 @@ pipeline {
                         withDockerCredentials(DOCKERHUB_CREDS, "FROM_") {
                             withGCRCredentials(VORVAN_CRED) {
                                 def gcrCreds = readFile("${GCR_JSON_KEY}")
-                                withEnv(['TO_DOCKER_USERNAME=_json_key', "TO_DOCKER_PASSWORD=${gcrCreds}"]) {
+                                withEnv(['TO_DOCKER_USERNAME=_json_key', "TO_DOCKER_PASSWORD=${gcrCreds}", "XDG_CONFIG_HOME=/tmp", "XDG_CACHE_HOME=/tmp"]) {
                                     sh "./gradlew --init-script init.gradle jib \
                                     -Djib.from.auth.username=${FROM_DOCKER_USERNAME} \
                                     -Djib.from.auth.password=${FROM_DOCKER_PASSWORD} \
