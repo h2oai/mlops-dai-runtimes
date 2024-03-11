@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
  * request to further play with and fill with actual meaningful data.
  */
 public class SampleRequestBuilder {
-  /** Builds a valid {@link ScoreRequest} based on the given mojo input {@link MojoFrameMeta}. */
+  /**
+   * Builds a valid {@link ScoreRequest} based on the given mojo input {@link MojoFrameMeta}.
+   */
   public ScoreRequest build(MojoFrameMeta inputMeta) {
     ScoreRequest request = new ScoreRequest();
     final List<String> fields =
@@ -31,20 +33,11 @@ public class SampleRequestBuilder {
   }
 
   private static String getExampleValue(MojoColumn.Type type) {
-    switch (type) {
-      case Bool:
-        return "true";
-      case Int32:
-      case Int64:
-      case Float32:
-      case Float64:
-        return "0";
-      case Str:
-        return "text";
-      case Time64:
-        return "2018-01-01";
-      default:
-        return "";
-    }
+    return switch (type) {
+      case Bool -> "true";
+      case Int32, Int64, Float32, Float64 -> "0";
+      case Str -> "text";
+      case Time64 -> "2018-01-01";
+    };
   }
 }

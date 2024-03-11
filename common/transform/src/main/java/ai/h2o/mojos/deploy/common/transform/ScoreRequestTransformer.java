@@ -34,31 +34,25 @@ public class ScoreRequestTransformer implements BiConsumer<ScoreRequest, List<Da
       List<String> fields, List<List<String>> rows, Map<String, DataField> dataFields) {
     return rows.stream()
         .map(
-            row -> {
-              List<String> transformData =
-                  IntStream.range(0, row.size())
-                      .mapToObj(
-                          fieldIdx -> {
-                            String colName = fields.get(fieldIdx);
-                            String origin = row.get(fieldIdx);
-                            if (dataFields.containsKey(colName)) {
-                              String sanitizeValue =
-                                  Utils.sanitizeBoolean(
-                                      origin, dataFields.get(colName).getDataType());
-                              if (!sanitizeValue.equals(origin)) {
-                                logger.debug("Value '{}' parsed as '{}'", origin, sanitizeValue);
-                              }
-                              return sanitizeValue;
-                            } else {
-                              logger.debug("Column '{}' can not be found in Input schema", colName);
-                              return origin;
-                            }
-                          })
-                      .collect(Collectors.toList());
-              List<String> transformedRow = new ArrayList<>();
-              transformedRow.addAll(transformData);
-              return transformedRow;
-            })
+            row -> IntStream.range(0, row.size())
+                .mapToObj(
+                    fieldIdx -> {
+                      String colName = fields.get(fieldIdx);
+                      String origin = row.get(fieldIdx);
+                      if (dataFields.containsKey(colName)) {
+                        String sanitizeValue =
+                            Utils.sanitizeBoolean(
+                                origin, dataFields.get(colName).getDataType());
+                        if (!sanitizeValue.equals(origin)) {
+                          logger.debug("Value '{}' parsed as '{}'", origin, sanitizeValue);
+                        }
+                        return sanitizeValue;
+                      } else {
+                        logger.debug("Column '{}' can not be found in Input schema", colName);
+                        return origin;
+                      }
+                    })
+                .toList())
         .collect(Collectors.toList());
   }
 }
