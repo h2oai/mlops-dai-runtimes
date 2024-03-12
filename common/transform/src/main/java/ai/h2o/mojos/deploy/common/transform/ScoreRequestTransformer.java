@@ -1,8 +1,10 @@
 package ai.h2o.mojos.deploy.common.transform;
 
 import ai.h2o.mojos.deploy.common.rest.model.DataField;
+import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import com.google.common.collect.ImmutableMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -29,8 +31,8 @@ public class ScoreRequestTransformer implements BiConsumer<ScoreRequest, List<Da
         transformRow(scoreRequest.getFields(), scoreRequest.getRows(), dataFieldMap));
   }
 
-  private List<List<String>> transformRow(
-      List<String> fields, List<List<String>> rows, Map<String, DataField> dataFields) {
+  private List<Row> transformRow(
+      List<String> fields, List<Row> rows, Map<String, DataField> dataFields) {
     return rows.stream().map(row -> IntStream.range(0, row.size()).mapToObj(
         fieldIdx -> {
           String colName = fields.get(fieldIdx);
@@ -48,6 +50,6 @@ public class ScoreRequestTransformer implements BiConsumer<ScoreRequest, List<Da
             return origin;
           }
         }
-    ).collect(Collectors.toList())).collect(Collectors.toList());
+    ).collect(Collectors.toCollection(Row::new))).collect(Collectors.toList());
   }
 }

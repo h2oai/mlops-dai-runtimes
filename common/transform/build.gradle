@@ -5,7 +5,8 @@ plugins {
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
-    implementation project(':common:rest-java-model')
+    implementation project(':common:rest-spring-api')
+    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
     implementation group: 'com.google.guava', name: 'guava'
@@ -27,14 +28,17 @@ dependencies {
     testImplementation group: 'org.junit-pioneer', name: 'junit-pioneer', version: jupiterPioneerVersion
 }
 
-test {
-    useJUnitPlatform()
-}
-
 bootJar {
     enabled = false
 }
 
 jar {
     enabled = true
+}
+
+test {
+    useJUnitPlatform()
+
+    jvmArgs '--add-opens=java.base/java.util=ALL-UNNAMED'
+    jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
 }

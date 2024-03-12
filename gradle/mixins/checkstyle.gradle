@@ -1,5 +1,4 @@
 // Defines shared Gradle project Checkstyle analyzer configuration.
-/*
 apply plugin: 'checkstyle'
 
 checkstyle {
@@ -7,4 +6,3 @@ checkstyle {
     configFile = project(":").file("config/checkstyle/google_style.xml")
     configProperties = ["suppressionFile": project(":").file("config/checkstyle/suppressions.xml")]
 }
-*/

@@ -33,11 +33,20 @@ public class SampleRequestBuilder {
   }
 
   private static String getExampleValue(MojoColumn.Type type) {
-    return switch (type) {
-      case Bool -> "true";
-      case Int32, Int64, Float32, Float64 -> "0";
-      case Str -> "text";
-      case Time64 -> "2018-01-01";
-    };
+    switch (type) {
+      case Bool:
+        return "true";
+      case Int32:
+      case Int64:
+      case Float32:
+      case Float64:
+        return "0";
+      case Str:
+        return "text";
+      case Time64:
+        return "2018-01-01";
+      default:
+        return "";
+    }
   }
 }
