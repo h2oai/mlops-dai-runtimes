@@ -3,7 +3,6 @@ package ai.h2o.mojos.deploy.common.transform;
 import ai.h2o.mojos.deploy.common.rest.model.DataField;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import com.google.common.collect.ImmutableMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -32,27 +31,23 @@ public class ScoreRequestTransformer implements BiConsumer<ScoreRequest, List<Da
 
   private List<List<String>> transformRow(
       List<String> fields, List<List<String>> rows, Map<String, DataField> dataFields) {
-    return rows.stream()
-        .map(
-            row -> IntStream.range(0, row.size())
-                .mapToObj(
-                    fieldIdx -> {
-                      String colName = fields.get(fieldIdx);
-                      String origin = row.get(fieldIdx);
-                      if (dataFields.containsKey(colName)) {
-                        String sanitizeValue =
-                            Utils.sanitizeBoolean(
-                                origin, dataFields.get(colName).getDataType());
-                        if (!sanitizeValue.equals(origin)) {
-                          logger.debug("Value '{}' parsed as '{}'", origin, sanitizeValue);
-                        }
-                        return sanitizeValue;
-                      } else {
-                        logger.debug("Column '{}' can not be found in Input schema", colName);
-                        return origin;
-                      }
-                    })
-                .toList())
-        .collect(Collectors.toList());
+    return rows.stream().map(row -> IntStream.range(0, row.size()).mapToObj(
+        fieldIdx -> {
+          String colName = fields.get(fieldIdx);
+          String origin = row.get(fieldIdx);
+          if (dataFields.containsKey(colName)) {
+            String sanitizeValue = Utils.sanitizeBoolean(
+                origin, dataFields.get(colName).getDataType()
+            );
+            if (!sanitizeValue.equals(origin)) {
+              logger.debug("Value '{}' parsed as '{}'", origin, sanitizeValue);
+            }
+            return sanitizeValue;
+          } else {
+            logger.warn("Column '{}' can not be found in Input schema", colName);
+            return origin;
+          }
+        }
+    ).collect(Collectors.toList())).collect(Collectors.toList());
   }
 }
