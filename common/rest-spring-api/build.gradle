@@ -20,6 +20,7 @@ openApiGenerate {
     generatorName = 'spring'
     inputSpec = "$rootDir/common/swagger/v1openapi3/swagger.json"
     outputDir = "$buildDir/gen"
+    generateAliasAsModel = true
     globalProperties.set([
             "skipFormModel": "false",
     ])
