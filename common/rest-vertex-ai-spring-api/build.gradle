@@ -20,6 +20,7 @@ openApiGenerate {
     generatorName = 'spring'
     inputSpec = "$rootDir/common/swagger/v1/vertex-ai-swagger.json"
     outputDir = "$buildDir/gen"
+    generateAliasAsModel = true
     configOptions.set([
             "useSpringBoot3": "true",
             "interfaceOnly": "true",

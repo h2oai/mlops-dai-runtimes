@@ -123,7 +123,7 @@ public class ModelsApiController implements ModelApi {
       }
     }
 
-    List<String> row;
+    Row row;
     for (List<String> gcpRow : gcpRequest.getInstances()) {
       row = new Row();
       for (int i = 0; i < gcpRow.size(); i++) {
@@ -149,9 +149,9 @@ public class ModelsApiController implements ModelApi {
     response.setId(restResponse.getId());
     response.setFields(restResponse.getFields());
 
-    List<String> row;
+    ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row row;
     for (List<String> restRow : restResponse.getScore()) {
-      row = new ArrayList<>();
+      row = new ai.h2o.mojos.deploy.common.rest.vertex.ai.model.Row();
       for (int i = 0; i < restRow.size(); i++) {
         row.add(restRow.get(i));
       }
