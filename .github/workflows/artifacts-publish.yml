@@ -78,7 +78,8 @@ jobs:
     name: Push to Image Repositories
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Prepare Tags
         id: prepare_tags

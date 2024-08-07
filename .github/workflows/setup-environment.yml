@@ -26,6 +26,9 @@ jobs:
       release_version: ${{ steps.release_version.outputs.version }}
       component_version: ${{ steps.component_version.outputs.version }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Save Github Commit Hash
         id: commit_hash
         run: |
