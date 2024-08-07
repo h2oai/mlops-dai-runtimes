@@ -22,7 +22,6 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
 
   code_quality_check:
-    needs: changed_files
     uses: ./.github/workflows/code-quality-check.yml
     secrets: inherit
 
@@ -31,7 +30,6 @@ jobs:
 
   build:
     needs:
-      - changed_files
       - code_quality_check
       - setup_env
     uses: ./.github/workflows/artifacts-build.yml
