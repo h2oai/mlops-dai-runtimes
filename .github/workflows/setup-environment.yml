@@ -52,6 +52,6 @@ jobs:
       - name: Extract Gradle Component Version
         id: component_version
         run: |
-          componentVersion=$(grep version gradle.properties | grep -v '#' | sed -e 's/.*=//')
+          componentVersion=$(grep version gradle.properties | grep -v '#' | sed -e 's/.*=//' | sed 's/^ *//')
           echo "version: ${componentVersion}"
           echo "version=${componentVersion}" >> $GITHUB_OUTPUT
