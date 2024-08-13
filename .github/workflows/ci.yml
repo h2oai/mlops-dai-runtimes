@@ -32,7 +32,7 @@ jobs:
     needs:
       - code_quality_check
       - setup_env
-    uses: ./.github/workflows/artifacts-build.yml
+    uses: ./.github/workflows/image-build.yml
     secrets: inherit
     with:
       component_version: ${{ needs.setup_env.outputs.component_version }}
