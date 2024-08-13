@@ -1,8 +1,8 @@
 # Driverless AI Deployment Template for AWS Sagemaker Hosted Scorer
 
-This [template](https://github.com/h2oai/dai-deployment-templates/tree/master/aws-sagemaker-hosted-scorer) scores realtime data using Driverless AI Mojo pipeline with Java Runtime and plugs into the AWS SageMaker workflow documented [here](https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms-inference-code.html)
+This [template](https://github.com/h2oai/mlops-dai-runtimes/tree/main/aws-sagemaker-hosted-scorer) scores realtime data using Driverless AI Mojo pipeline with Java Runtime and plugs into the AWS SageMaker workflow documented [here](https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms-inference-code.html)
 
-It is a REST API which accepts one data point at a time for prediction in real-time in the hosted SageMaker environment. The user needs to provide Driverless AI license key and  model's  pipeline.mojo file for scoring, see [deploy](###deploy-to-sageMaker) section for details. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/dai-deployment-templates/blob/master/gradle.properties#L8).
+It is a REST API which accepts one data point at a time for prediction in real-time in the hosted SageMaker environment. The user needs to provide Driverless AI license key and  model's  pipeline.mojo file for scoring, see [deploy](###deploy-to-sageMaker) section for details. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/mlops-dai-runtimes/blob/main/gradle.properties#L8).
 
 
 ## Overview
@@ -80,11 +80,11 @@ Check that the endpoint is available with `aws sagemaker list-endpoints`.
 
 ### Examples
 
-There is the [examples](https://github.com/h2oai/dai-deployment-templates/tree/master/aws-sagemaker-hosted-scorer/examples) directory, which houses a sample python notebook, which 
+There is the [examples](https://github.com/h2oai/mlops-dai-runtimes/tree/main/aws-sagemaker-hosted-scorer/examples) directory, which houses a sample python notebook, which 
 utilizes the AWS Sagemaker SDK to deploy a Sagemaker model pythonically. See the notebook 
-[here](https://github.com/h2oai/dai-deployment-templates/blob/master/aws-sagemaker-hosted-scorer/examples/Sagemaker-DriverlessAI-MOJO.ipynb)
+[here](https://github.com/h2oai/mlops-dai-runtimes/blob/main/aws-sagemaker-hosted-scorer/examples/Sagemaker-DriverlessAI-MOJO.ipynb)
 
-For an example of an endpoint query being made via Python go [here](https://github.com/h2oai/dai-deployment-templates/blob/master/aws-sagemaker-hosted-scorer/examples/example_request.py)
+For an example of an endpoint query being made via Python go [here](https://github.com/h2oai/mlops-dai-runtimes/blob/main/aws-sagemaker-hosted-scorer/examples/example_request.py)
 
 ## Details
 

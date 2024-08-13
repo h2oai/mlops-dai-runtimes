@@ -1,8 +1,8 @@
 # Driverless AI Deployment Template for Local SpringBoot Scorer
 
-This [template](https://github.com/h2oai/dai-deployment-templates/tree/master/local-rest-scorer) contains sources of a generic Java scorer implementation for `Driverless AI MOJO scoring pipiline` with `Java runtime`, based on SpringBoot and its Docker image.
+This [template](https://github.com/h2oai/mlops-dai-runtimes/tree/main/local-rest-scorer) contains sources of a generic Java scorer implementation for `Driverless AI MOJO scoring pipiline` with `Java runtime`, based on SpringBoot and its Docker image.
 
-This scorer can be used to do Real-time scoring on single or multiple rows. The user needs to provide Driverless AI license key and  model's  pipeline.mojo file for scoring. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/dai-deployment-templates/blob/master/gradle.properties#L8).
+This scorer can be used to do Real-time scoring on single or multiple rows. The user needs to provide Driverless AI license key and  model's  pipeline.mojo file for scoring. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/mlops-dai-runtimes/blob/main/gradle.properties#L8).
 
 ## Building
 

@@ -1,13 +1,13 @@
 # Driverless AI Deployment Template for Local Rest SQL Scorer
 
-This [template](https://github.com/h2oai/dai-deployment-templates/tree/master/sql-jdbc-scorer) contains an implementation of generic Java implementation
+This [template](https://github.com/h2oai/mlops-dai-runtimes/tree/main/sql-jdbc-scorer) contains an implementation of generic Java implementation
 for scoring Driverless AI Mojos(
 java runtime) against a SQL database. The application runs
 as a restful service and receives requests that include a SQL query and
 additional, appropriate parameters for scoring the table that results from the
 SQL query, and writing the preditions back to the database. 
 
-The user needs to provide Driverless AI license key and  model's pipeline.mojo file for scoring. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/dai-deployment-templates/blob/master/gradle.properties).
+The user needs to provide Driverless AI license key and  model's pipeline.mojo file for scoring. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/mlops-dai-runtimes/blob/main/gradle.properties).
 
 ## Implementation
 

@@ -1,12 +1,12 @@
 # Driverless AI MOJO pipeline Deployment Template for AWS Lambda
 
-This [template](https://github.com/h2oai/dai-deployment-templates/tree/master/aws-lambda-scorer) contains scorer implementation for `Driverless AI Model MOJO pipiline` with `Java runtime` on AWS Lambda and can be used to do Real-time scoring on single or multiple rows. The structure is as follows:
+This [template](https://github.com/h2oai/mlops-dai-runtimes/tree/main/aws-lambda-scorer) contains scorer implementation for `Driverless AI Model MOJO pipiline` with `Java runtime` on AWS Lambda and can be used to do Real-time scoring on single or multiple rows. The structure is as follows:
 
 * Source of the generic lambda implementation in: `lambda-template`
 * Parameterized terraform files for pushing the lambda to AWS in:
   `terraform-recipe`
 
-The user needs to provide Driverless AI license key and  model's pipeline.mojo file for scoring. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/dai-deployment-templates/blob/master/gradle.properties).
+The user needs to provide Driverless AI license key and  model's pipeline.mojo file for scoring. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/mlops-dai-runtimes/blob/main/gradle.properties).
 
 ## Building the `lambda-template`
 

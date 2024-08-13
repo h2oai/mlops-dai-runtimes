@@ -39,68 +39,8 @@ To test builds locally, with respect to linting and styling use the following st
   - this will run the same check as in Jenkins, to check for styling/linting errors.
   - will identify issues such as missing javadoc strings etc. 
 
-## Release
 
-The deployment templates zip archives are stored in S3 at: 
-
- - *Snapshots*:
-  https://s3.console.aws.amazon.com/s3/buckets/artifacts.h2o.ai/snapshots/ai/h2o/dai-deployment-templates/
- - *Releases*:
-  https://s3.console.aws.amazon.com/s3/buckets/artifacts.h2o.ai/releases/ai/h2o/dai-deployment-templates/
-
-The push is handled by Jenkins from `master` and `release*` branches with versioning
-defined by a value in `gradle.properties`. The snapshots are versions with
-the `-SNAPSHOT` suffix in `version` value defined in `gradle.properties`.
-
-The `master` branch is expected to be a snapshot (otherwise Jenkins pipeline fails).
-The `release*` branches may be both snapshot and release versions.
-Beware that Jenkins is happy to overwrite the release artifact, if there is a new commit
-with the same version.
-
-In addition to this, we maintain GitHub releases that mirror the released artifacts. For example
-an artifact versioned `0.0.5` is tagged as `v0.0.5` with the actual release called
-`Release v0.0.5`. This step is not automated yet.
-
-### Step-by-step
-
-1. Prepare PR with two commits:
-   - First, "Release X.Y.Z" that removes the `-SNAPSHOT` suffix in `gradle.properties` form `version`.
-     The diff will look like:
-     ```diff
-     - version = 1.2.3-SNAPSHOT
-     + version = 1.2.3
-     ```
-   - Second, "Dev X.Y.(Z+1)" that bumps the version and adds the `-SNAPSHOT` suffix back to `version`
-     in `gradle.properties`. The diff will look like:
-     ```diff
-     - version = 1.2.3
-     + version = 1.2.4-SNAPSHOT
-     ```
-   - Once approved, **rebase** the PR on top of `master`, so that both the commits exist in
-     the history as separate commits.
-   - Create a release branch pointing to the first commit of the two, the release one, called `release-X.Y.Z`.
-     Once in GitHub, Jenkins will automatically pick it up and push the corresponding release packages to S3.
-   - Create a GitHub release "Release vX.Y.Z" with meaningful description, tag `vX.Y.Z`, and branch
-     `release-X.Y.Z`.
-
-### Release Lines
-
-Currently, we have two lines of releases:
-
- - *DriverlessAI 1.7.x, bleeding edge*:
- These releases are meant for the latest version of DriverlessAI and contains
- the most up to date version of the templates. 
- Git branch: `master`, release versions: `1.x.y`, immutable release branch
- names: `release-1.x.y`.
- - *DriverlessAI 1.6.x, LTS*:
- These releases are meant to support the LTS branch of DriverlessAI marked as
- `1.6.x`. Changes in this branch **must not** break compatibility, so please
- keep the Terraform version fixed.
- Git branch `support-1.6`, release versions `0.0.x`, immutable release branch
- names: `release-0.0.x`.
-
-
-### Upgrading Mojo2 Runtime
+## Upgrading Mojo2 Runtime
 
 To upgrade the mojo2 runtime dependency version, just edit the corresponding line in the
 `gradle.properties` file a push a new version of the deployment templates out as described
