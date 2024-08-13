@@ -1,13 +1,13 @@
 # Driverless AI Deployment Template for Google Cloud Run
 
-This [template](https://github.com/h2oai/dai-deployment-templates/tree/master/gcp-cloud-run) extends the implementation of Local Rest Scorer [here](https://github.com/h2oai/dai-deployment-templates/tree/master/local-rest-scorer) and scores data using Driverless AI Mojo pipeline with Java Runtime.
+This [template](https://github.com/h2oai/mlops-dai-runtimes/tree/main/gcp-cloud-run) extends the implementation of Local Rest Scorer [here](https://github.com/h2oai/mlops-dai-runtimes/tree/main/local-rest-scorer) and scores data using Driverless AI Mojo pipeline with Java Runtime.
 
 The docker image that is built by this project can be pushed to gcr.io and used for scoring
-Driverless AI Mojos in [Google Cloud Run](https://cloud.google.com/run). The user needs to provide Driverless AI license key and  model's  pipeline.mojo file as input for scoring. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/dai-deployment-templates/blob/master/gradle.properties#L8).
+Driverless AI Mojos in [Google Cloud Run](https://cloud.google.com/run). The user needs to provide Driverless AI license key and  model's  pipeline.mojo file as input for scoring. The versions of software used to create the template like mojo runtime are listed [here](https://github.com/h2oai/mlops-dai-runtimes/blob/main/gradle.properties#L8).
 
 ## Building
 
-Since there is a direct dependency on the separate, above mentioned project [local-rest-scorer](https://github.com/h2oai/dai-deployment-templates/tree/master/local-rest-scorer) 
+Since there is a direct dependency on the separate, above mentioned project [local-rest-scorer](https://github.com/h2oai/mlops-dai-runtimes/tree/main/local-rest-scorer) 
 it is best to build this project from the root directory.
 
 Make sure you are in the working directory `dai-deployment-templates`. Typing `pwd` in the terminal
@@ -46,7 +46,7 @@ There is one requirement for the container. You __MUST__ include the following e
 
 On a successful deployment to Google Cloud Run, you will be provided an endpoint that can be scored against.
 
-The api for scoring is the same as the [Local Rest Scorer](https://github.com/h2oai/dai-deployment-templates/tree/master/local-rest-scorer)
+The api for scoring is the same as the [Local Rest Scorer](https://github.com/h2oai/mlops-dai-runtimes/tree/main/local-rest-scorer)
 
 To access api information: `https://<google provided endpoint>/swagger-ui/index.html`
 
