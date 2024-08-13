@@ -12,7 +12,7 @@ updates:
       - "area/chore"
 
   - package-ecosystem: "gradle"
-    directory: "gradle/mixins/"
+    directory: "gradle/mixins/dependencies.gradle"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
