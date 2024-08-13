@@ -8,7 +8,7 @@ dependencyManagement {
             entry 'h2o-genmodel'
             entry 'h2o-genmodel-ext-xgboost'
         }
-        dependencySet(group: 'ai.h2o', version: mojoRuntimeVersion) {
+        dependencySet(group: 'ai.h2o', version: "2.8.5") {
             entry 'mojo2-runtime-api'
             entry 'mojo2-runtime-h2o3-impl'
             entry 'mojo2-runtime-impl'

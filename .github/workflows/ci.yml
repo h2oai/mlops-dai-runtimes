@@ -39,46 +39,40 @@ jobs:
 
   publish_latest_from_dev_branch:
     if: ${{ startsWith(github.ref, 'refs/heads/main') }}
-    uses: ./.github/workflows/artifacts-publish.yml
+    uses: ./.github/workflows/image-publish.yml
     needs:
       - build
       - setup_env
     secrets: inherit
     with:
-      s3_location: s3://artifacts.h2o.ai/snapshots/mlops/rest-scorer/main/${{ needs.setup_env.outputs.commit_hash }}
-      latest_s3_location: s3://artifacts.h2o.ai/snapshots/mlops/rest-scorer/main/latest
-      gcr_push_enabled: true
+      gar_push_enabled: true
       ecr_push_enabled: false
-      gcr_image_name: us-docker.pkg.dev/vorvan/dev/h2oai-modelscoring-restscorer
+      gar_image_name: us-docker.pkg.dev/vorvan/dev/h2oai-modelscoring-restscorer
       image_tags: "${{ needs.setup_env.outputs.commit_hash }},latest"
 
   publish_latest_from_release_branch:
     if: startsWith(github.ref, 'refs/heads/release/')
-    uses: ./.github/workflows/artifacts-publish.yml
+    uses: ./.github/workflows/image-publish.yml
     needs:
       - build
       - setup_env
     secrets: inherit
     with:
-      s3_location: s3://artifacts.h2o.ai/snapshots/mlops/rest-scorer/release-${{ needs.setup_env.outputs.release_base_version }}/${{ needs.setup_env.outputs.commit_hash }}
-      latest_s3_location: s3://artifacts.h2o.ai/snapshots/mlops/rest-scorer/release-${{ needs.setup_env.outputs.release_base_version }}/latest
-      gcr_push_enabled: true
+      gar_push_enabled: true
       ecr_push_enabled: false
-      gcr_image_name: us-docker.pkg.dev/vorvan/dev/h2oai-modelscoring-restscorer
+      gar_image_name: us-docker.pkg.dev/vorvan/dev/h2oai-modelscoring-restscorer
       image_tags: "${{ needs.setup_env.outputs.commit_hash }},latest-${{ needs.setup_env.outputs.release_base_version }}"
 
   publish_release:
     if: startsWith(github.ref, 'refs/tags/v')
-    uses: ./.github/workflows/artifacts-publish.yml
+    uses: ./.github/workflows/image-publish.yml
     needs:
       - build
       - setup_env
     secrets: inherit
     with:
-      s3_location: s3://artifacts.h2o.ai/releases/mlops/rest-scorer/${{ needs.setup_env.outputs.release_version }}
-      latest_s3_location: s3://artifacts.h2o.ai/releases/mlops/rest-scorer/latest
-      gcr_push_enabled: true
+      gar_push_enabled: true
       ecr_push_enabled: true
-      gcr_image_name: us-docker.pkg.dev/vorvan/dev/h2oai-modelscoring-restscorer
+      gar_image_name: us-docker.pkg.dev/vorvan/dev/h2oai-modelscoring-restscorer
       ecr_image_name: 926522735405.dkr.ecr.us-east-1.amazonaws.com/h2oai-modelscoring-restscorer
       image_tags: "v${{ needs.setup_env.outputs.release_version }}"

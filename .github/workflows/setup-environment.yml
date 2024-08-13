@@ -49,9 +49,16 @@ jobs:
           github_ref="${{ github.ref }}"
           echo "version=${github_ref#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Extract Gradle Component Version
+      - name: Save Component Version
         id: component_version
         run: |
-          componentVersion=$(grep version gradle.properties | grep -v '#' | sed -e 's/.*=//' | sed 's/^ *//')
-          echo "version: ${componentVersion}"
-          echo "version=${componentVersion}" >> $GITHUB_OUTPUT
+          if [[ "$GITHUB_REF" == refs/heads/main ]]; then
+            version="0.0.0-main.${{ steps.commit_hash.outputs.sha }}"
+          elif [[ "$GITHUB_REF" == refs/heads/release/* ]]; then
+            version="${{ steps.release_base_version.outputs.version }}-rel.${{ steps.commit_hash.outputs.sha }}"
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            version="${{ steps.release_version.outputs.version }}"
+          else
+            version=0.0.0-pr.${{ steps.commit_hash.outputs.sha }}
+          fi
+          echo "version=$version" >> $GITHUB_OUTPUT
