@@ -11,6 +11,17 @@ updates:
       - "type/update"
       - "area/chore"
 
+  - package-ecosystem: "gradle"
+    directory: "gradle/mixins/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore"
+    labels:
+      - "type/update"
+      - "area/chore"
+
   - package-ecosystem: "github-actions"
     directory: ".github/workflows"
     schedule:
