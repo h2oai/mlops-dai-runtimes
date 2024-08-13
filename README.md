@@ -45,23 +45,3 @@ To test builds locally, with respect to linting and styling use the following st
 To upgrade the mojo2 runtime dependency version, just edit the corresponding line in the
 `gradle.properties` file a push a new version of the deployment templates out as described
 above.
-
-Note that in order to be able to build against the new mojo2 runtime, the mojo2 runtime
-implementation and the api jars have to be available in the public
-Maven repository: https://mvnrepository.com/artifact/ai.h2o/mojo2-runtime-api and
-https://mvnrepository.com/artifact/ai.h2o/mojo2-runtime-impl.
-
-Both the steps are handled by the `DAI Build: mojo2` Jenkins pipeline:
-http://mr-0xc1:8080/view/H2OAI/job/mojo2/job/master/
-if the `doRelease` parameter is checked when clicking on `Build with Parameters` on
-the `master` branch (again, the master should currently contain a version without
-the `-SNAPSHOT` suffix).
-
-Note that there is an extra step to push the `mojo2-runtime-api` to the public Maven repo.
-One has to login to Sonatype using H2o public nexus credentials, manually `close`
-the appropriate staging repository with the new artifacts (usually the first one called
-`aih2o.*`, but check the contents first!), and then `release` it.
-The Maven UI takes time to display the new version, but the artifacts themselves usually
-appear in the order of seconds/minutes after the release (i.e., you will not see the new
-version on https://mvnrepository.com/artifact/ai.h2o/mojo2-runtime-api, but you will be
-able to build against it).
