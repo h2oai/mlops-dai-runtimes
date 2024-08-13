@@ -7,25 +7,16 @@ on:
         required: true
 
     inputs:
-      s3_location:
-        description: "S3 location to push template artifacts"
-        required: true
-        type: string
-      latest_s3_location:
-        description: "S3 location to push template artifacts as latest"
-        required: false
-        default: ''
-        type: string
-      gcr_push_enabled:
-        description: "Enable image push to GCR"
+      gar_push_enabled:
+        description: "Enable image push to GAR"
         required: true
         type: boolean
       ecr_push_enabled:
         description: "Enable image push to ECR"
         required: true
         type: boolean
-      gcr_image_name:
-        description: "Docker Registry and Repository for GCR"
+      gar_image_name:
+        description: "Docker Registry and Repository for GAR"
         required: false
         type: string
       ecr_image_name:
@@ -42,38 +33,6 @@ permissions:
   contents: read
 
 jobs:
-  publish_to_s3:
-    name: Push to S3 bucket
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::524466471676:role/GitHub-OIDC-Role
-          role-session-name: h2oai-mlops-python-client
-          aws-region: us-east-1
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: template
-          path: dai-deployment-templates.zip
-
-      - name: Publish wheel
-        run: |
-          aws s3 sync dai-deployment-templates.zip ${{ inputs.s3_location }}
-          if [ ${{ inputs.latest_s3_location }} != '' ]; then
-            aws s3 sync dai-deployment-templates.zip ${{ inputs.latest_s3_location }} --delete
-          fi
-
   publish_image:
     name: Push to Image Repositories
     runs-on: ubuntu-latest
@@ -87,7 +46,7 @@ jobs:
           full_tags=()
           # Split the comma-separated tags and iterate over each tag
           for tag in $(echo "${{ inputs.image_tags }}" | tr ',' ' '); do
-            if [[ "${{ inputs.gcr_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.gcr_image_name }}:${tag}"); fi
+            if [[ "${{ inputs.gar_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.gar_image_name }}:${tag}"); fi
             if [[ "${{ inputs.ecr_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.ecr_image_name }}:${tag}"); fi
           done
 
@@ -99,8 +58,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GCR
-        if: ${{ inputs.gcr_push_enabled }}
+      - name: Login to GAR
+        if: ${{ inputs.gar_push_enabled }}
         uses: docker/login-action@v3
         with:
           registry: us-docker.pkg.dev

@@ -23,22 +23,15 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build templates
         run: |
           ./gradlew --init-script init.gradle distributionZip
 
-      - name: Save template artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: template
-          path: build/dai-deployment-templates-${{ inputs.component_version }}.zip
-          compression-level: 0
-
       - name: Build images with Gradle Wrapper
         run: |
-          ./gradlew --init-script init.gradle jibBuildTar -Djib.to.image=image:latest -Djib.outputPaths.tar=/tmp/image.tar
+          ./gradlew -Pversion=${{inputs.component_version}} --init-script init.gradle jibBuildTar -Djib.to.image=image:latest -Djib.outputPaths.tar=/tmp/image.tar
 
       - name: Save image artifact
         uses: actions/upload-artifact@v4
