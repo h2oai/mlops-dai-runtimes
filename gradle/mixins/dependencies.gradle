@@ -21,7 +21,7 @@ dependencyManagement {
         dependency group: 'com.google.truth.extensions', name: 'truth-java8-extension', version: truthVersion
         dependency group: 'com.google.cloud', name: 'google-cloud-storage', version: googleStorageVersion
         dependency group: 'io.springfox', name: 'springfox-boot-starter', version: springFoxVersion
-        dependency group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat', version: springBootPluginVersion
+        dependency group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat', version: springBootVersion
         dependency group: 'io.swagger.core.v3', name: 'swagger-annotations', version: swaggerCoreVersion
         dependency group: 'io.swagger.parser.v3', name: 'swagger-parser', version: swaggerParserVersion
         dependency group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli', version: swaggerCodegenVersion
