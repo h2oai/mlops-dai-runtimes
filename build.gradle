@@ -25,30 +25,9 @@ subprojects {
     }
 }
 
-// Collect artifacts from all the deployment templates into a single ZIP to be released.
-//
-// This task is to be injected content from the individual deployment templates (in their child build.gradle files)
-// as follows:
-//
-// rootProject.distributionZip {
-//   dependsOn {ARTIFACT_BUILDING_TASK}
-//   into(this.project.path.replace(":", "/")) {
-//        from {ARTIFACT_PATH}
-//    }
-// }
-//
-// Example for a Java zip archive:
-//
-// rootProject.distributionZip {
-//   dependsOn buildZip
-//   into(this.project.path.replace(":", "/")) {
-//     from buildZip.archivePath
-//   }
-// }
-//
 task distributionZip(type: Zip) {
-    archiveName "${project.name}-${project.version}.zip"
-    destinationDir(file(buildDir))
+    archiveFileName = "${project.name}-${project.version}.zip"
+    destinationDirectory = file(buildDir)
 }
 
 task printVersion {
