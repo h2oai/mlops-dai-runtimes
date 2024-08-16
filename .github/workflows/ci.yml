@@ -9,7 +9,7 @@ on:
     branches:
       - 'main'
       - 'release/[0-9]+.[0-9]+'
-    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+    tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
 
 jobs:
   code_quality_check:
@@ -19,10 +19,10 @@ jobs:
   setup_env:
     uses: ./.github/workflows/setup-environment.yml
 
-  build:
+  build_image:
     needs:
-      - code_quality_check
       - setup_env
+      - code_quality_check
     uses: ./.github/workflows/image-build.yml
     secrets: inherit
     with:
@@ -32,8 +32,8 @@ jobs:
     if: ${{ startsWith(github.ref, 'refs/heads/main') }}
     uses: ./.github/workflows/image-publish.yml
     needs:
-      - build
       - setup_env
+      - build_image
     secrets: inherit
     with:
       gar_push_enabled: true
@@ -45,8 +45,8 @@ jobs:
     if: startsWith(github.ref, 'refs/heads/release/')
     uses: ./.github/workflows/image-publish.yml
     needs:
-      - build
       - setup_env
+      - build_image
     secrets: inherit
     with:
       gar_push_enabled: true
@@ -58,8 +58,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     uses: ./.github/workflows/image-publish.yml
     needs:
-      - build
       - setup_env
+      - build_image
     secrets: inherit
     with:
       gar_push_enabled: true
@@ -67,3 +67,32 @@ jobs:
       gar_image_name: us-docker.pkg.dev/vorvan/dev/h2oai-modelscoring-restscorer
       ecr_image_name: 926522735405.dkr.ecr.us-east-1.amazonaws.com/h2oai-modelscoring-restscorer
       image_tags: "v${{ needs.setup_env.outputs.release_version }}"
+
+  release:
+    needs:
+      - setup_env
+      - publish_release
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelogs
+        id: changelog
+        uses: requarks/changelog-action@v1.10.2
+        with:
+          token: ${{ github.token }}
+          tag: "v${{ needs.setup_env.outputs.release_version }}"
+          writeToFile: false
+
+      - name: Release action
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          allowUpdates: false
+          draft: false
+          tag: "v${{ needs.setup_env.outputs.release_version }}"
+          body: ${{ steps.changelog.outputs.changes }}
+          prerelease: false
