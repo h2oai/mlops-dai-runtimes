@@ -13,7 +13,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = 'dai-deployment-templates'
+rootProject.name = 'mlops-dai-runtimes'
 //include 'aws-lambda-scorer:lambda-template'
 //include 'aws-lambda-scorer:terraform-recipe'
 //include 'common:jdbc'
