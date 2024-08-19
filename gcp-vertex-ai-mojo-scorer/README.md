@@ -5,8 +5,8 @@ Driverless AI Mojos in GCP Vertex AI.
 
 ## Building
 
-Make sure you are in the working directory `dai-deployment-templates`. Typing `pwd` in the terminal
-shell should have a similar output to `/my/path/to/dai-deployment-templates`.
+Make sure you are in the working directory `mlops-dai-runtimes`. Typing `pwd` in the terminal
+shell should have a similar output to `/my/path/to/mlops-dai-runtimes`.
 
 You can build the Docker image in two ways. The first only includes the ability to score and the second
 includes the ability to set a preprocessing script. The difference between the two options is the base
@@ -19,7 +19,7 @@ image used is `openkbs/jre-mvn-py3:latest`. Otherwise, the base image used is `o
   ```
   and the docker image required for GCP Vertex AI will be in the directory `gcp-vertex-ai-mojo-scorer/build`:
   ```shell script
-  /path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
+  /path/to/mlops-dai-runtimes/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
   ```
 
 * Run the following command to build with preprocessing script option:
@@ -28,12 +28,12 @@ image used is `openkbs/jre-mvn-py3:latest`. Otherwise, the base image used is `o
 ```
 and the docker image required for GCP Vertex AI will be in the directory `gcp-vertex-ai-mojo-scorer/build`:
 ```shell script
-/path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
+/path/to/mlops-dai-runtimes/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
 ```
 
 * Load the resulting `jib-image.tar` file to docker
 ```shell script
-docker load < /path/to/dai-deployment-templates/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
+docker load < /path/to/mlops-dai-runtimes/gcp-vertex-ai-mojo-scorer/build/jib-image.tar
 ``` 
 
 * Follow the steps explained here in Google Documentation: https://cloud.google.com/run/docs/building/containers, to 

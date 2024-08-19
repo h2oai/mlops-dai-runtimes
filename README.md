@@ -20,7 +20,7 @@ To get the resulting distribution archive, run:
 $ ./gradlew distributionZip
 ```
 
-The result of which is `./build/dai-deployment-templates-{CURRENT_VERSION}.zip`, which is in turn integrated in
+The result of which is `./build/mlops-dai-runtimes-{CURRENT_VERSION}.zip`, which is in turn integrated in
 the DAI build and deployment process.
 
 Note that each of the templates is expected to inject its files in this archive in their respective gradle files.

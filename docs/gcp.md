@@ -10,8 +10,8 @@ Driverless AI Mojos in [Google Cloud Run](https://cloud.google.com/run). The use
 Since there is a direct dependency on the separate, above mentioned project [local-rest-scorer](https://github.com/h2oai/mlops-dai-runtimes/tree/main/local-rest-scorer) 
 it is best to build this project from the root directory.
 
-Make sure you are in the working directory `dai-deployment-templates`. Typing `pwd` in the terminal
-shell should have a similar output to `/my/path/to/dai-deployment-templates`.
+Make sure you are in the working directory `mlops-dai-runtimes`. Typing `pwd` in the terminal
+shell should have a similar output to `/my/path/to/mlops-dai-runtimes`.
 
 * Run the following command:
   
@@ -20,13 +20,13 @@ shell should have a similar output to `/my/path/to/dai-deployment-templates`.
   and the docker image required for Google Cloud Run will be in the directory `gcp-cloud-run/build`:
   
   ```
-  /path/to/dai-deployment-templates/gcp-cloud-run/build/jib-image.tar
+  /path/to/mlops-dai-runtimes/gcp-cloud-run/build/jib-image.tar
   ```
 
 * Load the resulting `jib-image.tar` file to docker:
 
   ```
-  docker load < /path/to/dai-deployment-templates/gcp-cloud-run/build/jib-image.tar
+  docker load < /path/to/mlops-dai-runtimes/gcp-cloud-run/build/jib-image.tar
   ``` 
 
 * Follow the steps explained here in Google Documentation: https://cloud.google.com/run/docs/building/containers, to 

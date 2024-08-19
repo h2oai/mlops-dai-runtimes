@@ -21,8 +21,8 @@ markdown_extensions:
   - markdown_blockdiag
   
 
-repo_url: https://github.com/h2oai/dai-deployment-templates
-repo_name: h2oai/dai-deployment-templates
+repo_url: https://github.com/h2oai/mlops-dai-runtimes
+repo_name: h2oai/mlops-dai-runtimes
 
 
 nav:
