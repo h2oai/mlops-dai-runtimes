@@ -64,7 +64,7 @@ jobs:
 
       - name: Scan all the vulnerabilities and generate JSON report
         if: always()
-        uses: aquasecurity/trivy-action@0.22.0
+        uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: image:latest
           format: 'json'
@@ -73,7 +73,7 @@ jobs:
 
       - name: Save vulnerabilities report in tabular format
         if: always()
-        uses: aquasecurity/trivy-action@0.22.0
+        uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: trivy-results.json
           scan-type: convert
@@ -83,7 +83,7 @@ jobs:
 
       - name: Display vulnerabilities report
         if: always()
-        uses: aquasecurity/trivy-action@0.22.0
+        uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: trivy-results.json
           scan-type: convert
@@ -91,7 +91,7 @@ jobs:
 
       - name: Fail on high and critical vulnerabilities
         if: always()
-        uses: aquasecurity/trivy-action@0.22.0
+        uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: trivy-results.json
           scan-type: convert
