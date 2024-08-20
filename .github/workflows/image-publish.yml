@@ -1,4 +1,4 @@
-name: Publish image and template artifact
+name: Publish Images
 
 on:
   workflow_call:
