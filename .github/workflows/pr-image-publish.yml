@@ -21,9 +21,7 @@ jobs:
 
   publish_from_pr:
     uses: ./.github/workflows/image-publish.yml
-    needs:
-      - setup_env
-      - build
+    needs: build
     secrets: inherit
     with:
       gar_push_enabled: true
