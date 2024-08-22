@@ -1,30 +1,25 @@
-name: Publish images for PRs
+name: Publish images from Feature Branches
 
 on:
   workflow_dispatch:
-    inputs:
-      pr-number:
-        description: "PR number for docker image tag"
-        required: true
-        type: string
 
 jobs:
   setup_env:
     uses: ./.github/workflows/setup-environment.yml
 
-  build:
+  build_from_branch:
     needs: setup_env
     uses: ./.github/workflows/image-build.yml
     secrets: inherit
     with:
       component_version: ${{ needs.setup_env.outputs.component_version }}
 
-  publish_from_pr:
+  publish_from_branch:
     uses: ./.github/workflows/image-publish.yml
-    needs: build
+    needs: build_from_branch
     secrets: inherit
     with:
       gar_push_enabled: true
-      gar_image_name: us-docker.pkg.dev/vorvan/dev/mlops/pull-requests/h2oai-modelscoring-restscorer
+      gar_image_name: us-docker.pkg.dev/vorvan/dev/mlops/temp/h2oai-modelscoring-restscorer
       ecr_push_enabled: false
-      image_tags: "PR-${{ inputs.pr-number }}"
+      image_tags: "${{ needs.setup_env.outputs.sanitized_branch_name }}"
