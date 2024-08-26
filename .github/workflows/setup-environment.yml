@@ -30,7 +30,7 @@ jobs:
       component_version: ${{ steps.component_version.outputs.version }}
       sanitized_branch_name: ${{ steps.sanitized_branch_name.outputs.name }}
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Save Github Commit Hash
@@ -70,5 +70,5 @@ jobs:
       - name: Save Sanitized Branch Name
         id: sanitized_branch_name
         run: |
-          name=$(echo ${{ github.head_ref }} | sed -r 's/\//-/g')
+          name=$(echo $(git rev-parse --abbrev-ref HEAD) | sed -r 's/\//-/g')
           echo "name=$name" >> $GITHUB_OUTPUT
