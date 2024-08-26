@@ -15,6 +15,9 @@ on:
       component_version:
         description: "Gradle component version, such as 1.2.3"
         value: ${{ jobs.setup_env.outputs.component_version }}
+      sanitized_branch_name:
+        description: "Branch name where / is replaced by -"
+        value: ${{ jobs.setup_env.outputs.sanitized_branch_name }}
 
 jobs:
   setup_env:
@@ -25,6 +28,7 @@ jobs:
       release_base_version: ${{ steps.release_base_version.outputs.version }}
       release_version: ${{ steps.release_version.outputs.version }}
       component_version: ${{ steps.component_version.outputs.version }}
+      sanitized_branch_name: ${{ steps.sanitized_branch_name.outputs.name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,3 +66,9 @@ jobs:
             version=0.0.0-pr.${{ steps.commit_hash.outputs.sha }}
           fi
           echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Save Sanitized Branch Name
+        id: sanitized_branch_name
+        run: |
+          name=$(echo ${{ github.head_ref }} | sed -r 's/\//-/g')
+          echo "name=$name" >> $GITHUB_OUTPUT
