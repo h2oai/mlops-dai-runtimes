@@ -2,10 +2,16 @@ name: Code Analysis
 
 on:
   workflow_call:
+    inputs:
+      if:
+        description: Whether to run the workflow (workaround for required status checks issue)
+        type: boolean
+        default: true
 
 jobs:
   code_quality_check:
     name: Linters
+    if: ${{ inputs.if }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

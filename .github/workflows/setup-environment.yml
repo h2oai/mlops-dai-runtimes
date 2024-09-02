@@ -15,6 +15,9 @@ on:
       component_version:
         description: "Gradle component version, such as 1.2.3"
         value: ${{ jobs.setup_env.outputs.component_version }}
+      bypass_changed_files:
+        description: "True whether we should run all jobs regardless of changed files output"
+        value: ${{ jobs.setup_env.outputs.bypass_changed_files }}
       sanitized_branch_name:
         description: "Branch name where / is replaced by -"
         value: ${{ jobs.setup_env.outputs.sanitized_branch_name }}
@@ -28,7 +31,8 @@ jobs:
       release_base_version: ${{ steps.release_base_version.outputs.version }}
       release_version: ${{ steps.release_version.outputs.version }}
       component_version: ${{ steps.component_version.outputs.version }}
-      sanitized_branch_name: ${{ steps.sanitized_branch_name.outputs.name }}
+      sanitized_branch_name: ${{ steps.sanitized_branch_name.outputs.na
+      bypass_changed_files: ${{ steps.bypass_changed_files.outputs.bypass }}me }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -52,6 +56,20 @@ jobs:
         run: |
           github_ref="${{ github.ref }}"
           echo "version=${github_ref#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Check if we should by pass changed files
+        id: bypass_changed_files
+        run: |
+          if [[ "${{ github.event.created }}" == "true" &&  "$GITHUB_REF" == refs/heads/release/* ]]; then
+            echo "Release branch has been created, by-passing changed files ..."
+            bypass='true'
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "Release tag has been pushed, by-passing changed files ..."
+            bypass='true'
+          else
+            bypass='false'
+          fi
+          echo "bypass=$bypass" >> $GITHUB_OUTPUT
 
       - name: Save Component Version
         id: component_version

@@ -12,12 +12,46 @@ on:
     tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
 
 jobs:
-  code_quality_check:
-    uses: ./.github/workflows/code-quality-check.yml
-    secrets: inherit
+  changed_files:
+    runs-on: ubuntu-latest
+    outputs:
+      modified: ${{ steps.changes.outputs.src }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            src:
+              - .github/workflows/**
+              - aws-lambda-scorer/**
+              - aws-sagemaker-hosted-scorer/**     
+              - aws-sagemaker-hosted-scorer-cpp/**
+              - common/**                          
+              - config/**
+              - gcp-cloud-run/**                   
+              - gcp-vertex-ai-mojo-scorer/**
+              - gradle/**
+              - hive-mojo-scorer/** 
+              - kdb-mojo-scorer/**
+              - local-rest-scorer/** 
+              - sql-jdbc-scorer/**
+              - build.gradle
+              - gradlew 
 
   setup_env:
     uses: ./.github/workflows/setup-environment.yml
+
+  code_quality_check:
+    needs:
+      - changed_files
+      - setup_env
+    uses: ./.github/workflows/code-quality-check.yml
+    secrets: inherit
+    with:
+        if: ${{ needs.setup_env.outputs.bypass_changed_files == 'true' || needs.changed_files.outputs.modified == 'true' }}
 
   build_image:
     needs:
@@ -27,6 +61,7 @@ jobs:
     secrets: inherit
     with:
       component_version: ${{ needs.setup_env.outputs.component_version }}
+      if: ${{ needs.setup_env.outputs.bypass_changed_files == 'true' || needs.changed_files.outputs.modified == 'true' }}
 
   publish_latest_from_dev_branch:
     if: ${{ startsWith(github.ref, 'refs/heads/main') }}
