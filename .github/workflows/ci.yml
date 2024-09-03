@@ -54,14 +54,17 @@ jobs:
         if: ${{ needs.setup_env.outputs.bypass_changed_files == 'true' || needs.changed_files.outputs.modified == 'true' }}
 
   build_image:
+    uses: ./.github/workflows/image-build.yml
     needs:
+      - changed_files
       - setup_env
       - code_quality_check
-    uses: ./.github/workflows/image-build.yml
     secrets: inherit
     with:
       component_version: ${{ needs.setup_env.outputs.component_version }}
       if: ${{ needs.setup_env.outputs.bypass_changed_files == 'true' || needs.changed_files.outputs.modified == 'true' }}
+    # The `! failure()` condition runs when the parent jobs completed successfully or were skipped.
+    if: ${{ ! failure() }}
 
   publish_latest_from_dev_branch:
     if: ${{ startsWith(github.ref, 'refs/heads/main') }}
