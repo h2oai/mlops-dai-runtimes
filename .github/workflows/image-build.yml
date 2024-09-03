@@ -3,6 +3,10 @@ name: Build Images
 on:
   workflow_call:
     inputs:
+      if:
+        description: Whether to run the workflow (workaround for required status checks issue)
+        type: boolean
+        default: true
       component_version:
         description: Gradle component version
         type: string
@@ -11,6 +15,7 @@ on:
 jobs:
   build:
     name: Build Image
+    if: ${{ inputs.if }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
