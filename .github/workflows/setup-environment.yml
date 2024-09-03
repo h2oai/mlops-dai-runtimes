@@ -31,8 +31,8 @@ jobs:
       release_base_version: ${{ steps.release_base_version.outputs.version }}
       release_version: ${{ steps.release_version.outputs.version }}
       component_version: ${{ steps.component_version.outputs.version }}
-      sanitized_branch_name: ${{ steps.sanitized_branch_name.outputs.na
-      bypass_changed_files: ${{ steps.bypass_changed_files.outputs.bypass }}me }}
+      sanitized_branch_name: ${{ steps.sanitized_branch_name.outputs.name }}
+      bypass_changed_files: ${{ steps.bypass_changed_files.outputs.bypass }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
