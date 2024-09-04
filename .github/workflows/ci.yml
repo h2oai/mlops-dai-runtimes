@@ -66,6 +66,12 @@ jobs:
     # The `! failure()` condition runs when the parent jobs completed successfully or were skipped.
     if: ${{ ! failure() }}
 
+  security_scan:
+      name: Security Scan
+      uses: ./.github/workflows/component-scan.yml
+      needs: build_image
+      secrets: inherit
+
   publish_latest_from_dev_branch:
     if: ${{ startsWith(github.ref, 'refs/heads/main') }}
     uses: ./.github/workflows/image-publish.yml

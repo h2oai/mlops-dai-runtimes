@@ -1,0 +1,243 @@
+name: Security Scan
+
+on:
+  workflow_call:
+
+env:
+  CODE_OWNERS: '<@U047W9ULVQ9>'
+
+jobs:
+  trivy_scan:
+    name: Trivy Scan
+    runs-on: ubuntu-latest
+    outputs:
+      job: ${{ steps.publish.outputs.job }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: image
+          path: /tmp
+
+      - name: Load image
+        run: docker load -i /tmp/image.tar
+
+      - name: Scan all the vulnerabilities and generate JSON report
+        if: always()
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: image:latest
+          format: 'json'
+          vuln-type: 'os,library'
+          output: 'trivy-results.json'
+
+      - name: Save vulnerabilities report in tabular format
+        if: always()
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: trivy-results.json
+          scan-type: convert
+          vuln-type: ''
+          format: 'table'
+          output: 'trivy-results.txt'
+
+      - name: Display vulnerabilities report
+        if: always()
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: trivy-results.json
+          scan-type: convert
+          vuln-type: ''
+
+      - name: Fail on high and critical vulnerabilities
+        if: always()
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: trivy-results.json
+          scan-type: convert
+          exit-code: '1'
+          vuln-type: ''
+          severity: 'HIGH,CRITICAL'
+
+      - name: Publish scan report
+        if: always()
+        id: publish
+        run: |
+          api_url="https://api.github.com/repos/h2oai/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }}/jobs"
+          job_id=$(curl -s -H "Authorization: token ${{ github.token }}" "$api_url" | jq -r '.jobs[] | select(.name == "Security Scan / Trivy Scan") | .id')
+          job_url_suffix="/actions/runs/${{ github.run_id }}/job/$job_id#step:7:17"
+          echo "job=${job_url_suffix}" >> $GITHUB_OUTPUT
+
+      - name: Upload report for notifications
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-results
+          path: trivy-results.txt
+
+  prisma_scan:
+    name: Prisma Scan
+    runs-on: ubuntu-latest
+    outputs:
+      job: ${{ steps.publish.outputs.job }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: image
+          path: /tmp
+
+      - name: Load image
+        run: docker load -i /tmp/image.tar
+
+      - name: VPN Connection
+        uses: Twingate/github-action@V1.1
+        with:
+          service-key: ${{ secrets.TWINGATE_SERVICE_KEY }}
+
+      - name: Prisma Cloud image scan
+        uses: PaloAltoNetworks/prisma-cloud-scan@v1.6.7
+        with:
+          pcc_console_url: http://mr-0xz1.h2o.local:8081/
+          pcc_user: ${{ secrets.PCC_USER }}
+          pcc_pass: ${{ secrets.PCC_PASS }}
+          image_name: image:latest
+          results_file: pcc_scan_results.json
+
+      - name: Upload report for notifications
+        uses: actions/upload-artifact@v4
+        with:
+          name: prisma-results
+          path: pcc_scan_results.json
+
+      - name: Verify report results
+        run: |
+          high=$(jq '.results[0].vulnerabilityDistribution.high' pcc_scan_results.json)
+          critical=$(jq '.results[0].vulnerabilityDistribution.critical' pcc_scan_results.json)
+          if [[ $high -gt 0 || $critical -gt 0 ]]; then
+            exit 1
+          fi
+          echo "No high or critical vulnerabilities found."
+
+      - name: Publish scan report
+        if: always()
+        id: publish
+        run: |
+          api_url="https://api.github.com/repos/h2oai/${{ github.event.repository.name }}/actions/runs/${{ github.run_id }}/jobs"
+          job_id=$(curl -s -H "Authorization: token ${{ github.token }}" "$api_url" | jq -r '.jobs[] | select(.name == "Security Scan / Prisma Scan") | .id')
+          job_url_suffix="/actions/runs/${{ github.run_id }}/job/$job_id#step:5:18"
+          echo "job=${job_url_suffix}" >> $GITHUB_OUTPUT
+
+  notify:
+    name: Notify
+    needs:
+      - trivy_scan
+      - prisma_scan
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-results'
+          merge-multiple: true
+
+      - name: Summarize the criticality count
+        run: |
+          trivy_total=0
+          trivy_low=0
+          trivy_medium=0
+          trivy_high=0
+          trivy_critical=0          
+          while IFS= read -r line; do
+            if [[ $line =~ Total:\ ([0-9]+)\ \(UNKNOWN:\ [0-9]+,\ LOW:\ ([0-9]+),\ MEDIUM:\ ([0-9]+),\ HIGH:\ ([0-9]+),\ CRITICAL:\ ([0-9]+)\) ]]; then
+              trivy_total=$((trivy_total + ${BASH_REMATCH[1]}))
+              trivy_low=$((trivy_low + ${BASH_REMATCH[2]}))
+              trivy_medium=$((trivy_medium + ${BASH_REMATCH[3]}))
+              trivy_high=$((trivy_high + ${BASH_REMATCH[4]}))
+              trivy_critical=$((trivy_critical + ${BASH_REMATCH[5]}))
+            fi
+          done < "trivy-results.txt"          
+          echo "TRIVY_SUMMARY='Total: $trivy_total (LOW: $trivy_low, MEDIUM: $trivy_medium, HIGH: $trivy_high, CRITICAL: $trivy_critical)'" >> $GITHUB_ENV
+
+          prisma_total=$(jq '.results[0].vulnerabilityDistribution.total' pcc_scan_results.json)
+          prisma_low=$(jq '.results[0].vulnerabilityDistribution.low' pcc_scan_results.json)
+          prisma_medium=$(jq '.results[0].vulnerabilityDistribution.medium' pcc_scan_results.json)
+          prisma_high=$(jq '.results[0].vulnerabilityDistribution.high' pcc_scan_results.json)
+          prisma_critical=$(jq '.results[0].vulnerabilityDistribution.critical' pcc_scan_results.json)
+          echo "PRISMA_SUMMARY='Total: $prisma_total (LOW: $prisma_low, MEDIUM: $prisma_medium, HIGH: $prisma_high, CRITICAL: $prisma_critical)'" >> $GITHUB_ENV
+
+      - name: Comment the results to the PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('#### Vulnerabilities have been detected')
+            })
+
+            const output = `#### Vulnerabilities have been detected.
+
+            \`\`\`
+            Trivy: ${process.env.TRIVY_SUMMARY}
+            Prisma: ${process.env.PRISMA_SUMMARY}
+            \`\`\`
+
+            @${{ github.actor }}, please review the following reports: [**Trivy**](https://github.com/h2oai/${{ github.event.repository.name }}${{ needs.trivy_scan.outputs.job }}), [**Prisma**](https://github.com/h2oai/${{ github.event.repository.name }}${{ needs.prisma_scan.outputs.job }})`;
+
+            if (botComment) {
+              github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: output
+            })
+            } else {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              })
+            }
+
+      - name: Send Notification to Slack
+        if: ${{ startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/heads/release/') }}
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text": "Trivy Vulnerability Report",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*DAI Runtimes* \n_Vulnerabilities have been detected on the `${{ github.ref_name }}` branch_"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "> *Trivy :: `${{ env.TRIVY_SUMMARY }}`*\n> *Prisma :: `${{ env.PRISMA_SUMMARY }}`*"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ env.CODE_OWNERS }}, please review the following reports: <https://github.com/h2oai/${{ github.event.repository.name }}${{ needs.trivy_scan.outputs.job }}|_Trivy_>, <https://github.com/h2oai/${{ github.event.repository.name }}${{ needs.prisma_scan.outputs.job }}|_Prisma_>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.H2O_OPS_SLACK_BOT_TOKEN }}
