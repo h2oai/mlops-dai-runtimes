@@ -16,7 +16,9 @@ jobs:
 
   publish_from_branch:
     uses: ./.github/workflows/image-publish.yml
-    needs: build_from_branch
+    needs:
+      - setup_env
+      - build_from_branch
     secrets: inherit
     with:
       gar_push_enabled: true
