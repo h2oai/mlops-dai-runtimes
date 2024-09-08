@@ -43,6 +43,7 @@ bootRun {
 bootJar {
     mainClass = 'ai.h2o.mojos.deploy.local.rest.ScorerApplication'
     archiveClassifier = 'boot'
+    archiveVersion = ''
 }
 
 jar {
