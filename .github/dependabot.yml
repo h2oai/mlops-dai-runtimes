@@ -21,3 +21,13 @@ updates:
     labels:
       - "type/update"
       - "area/chore"
+
+  - package-ecosystem: "docker"
+    directory: "local-rest-scorer/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore"
+    labels:
+      - "type/update"

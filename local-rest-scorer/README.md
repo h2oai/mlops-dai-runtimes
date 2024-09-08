@@ -275,12 +275,7 @@ Generation of this Docker image is plugged into the build process of this projec
 Run the following command in the root project directory to run the `build` process.
 
 ```bash
-./gradlew :local-rest-scorer:jibDockerBuild
-```
-
-Verify that the Docker image was created, and take note of the version created.
-```bash
-docker images --format "{{.Repository}} \t {{.Tag}}" | grep "h2oai/rest-scorer"
+docker build -t rest-scorer .
 ```
 
 ### Run Container
