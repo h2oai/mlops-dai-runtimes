@@ -20,4 +20,4 @@ VOLUME /mojos
 VOLUME /secrets
 EXPOSE 8080
 ENV DRIVERLESS_AI_LICENSE_FILE="/secrets/license.sig"
-CMD ["java", "org.springframework.boot.loader.launch.JarLauncher"]
+CMD ["java", "-Dmojo.path=/mojos/pipeline.mojo", "--add-opens=java.base/java.lang=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED", "org.springframework.boot.loader.launch.JarLauncher"]
