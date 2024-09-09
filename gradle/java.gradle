@@ -4,3 +4,11 @@ apply from: project(":").file('gradle/java_no_style.gradle')
 
 apply from: project(":").file('gradle/mixins/checkstyle.gradle')
 apply from: project(":").file('gradle/mixins/errorprone.gradle')
+apply plugin: 'java'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.ADOPTIUM
+    }
+}
