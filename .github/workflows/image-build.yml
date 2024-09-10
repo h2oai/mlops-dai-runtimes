@@ -30,13 +30,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build templates
-        run: |
-          ./gradlew --init-script init.gradle distributionZip
-
       - name: Build images with Gradle Wrapper
         run: |
-          ./gradlew -Pversion=${{inputs.component_version}} --init-script init.gradle jibBuildTar -Djib.to.image=image:latest -Djib.outputPaths.tar=/tmp/image.tar
+          ./gradlew :local-rest-scorer:build -Pversion=${{ inputs.component_version }} -x check  --init-script init.gradle
+          docker build -t image:latest -f local-rest-scorer/Dockerfile local-rest-scorer
+
+      - name: Save docker image
+        run:  docker save image:latest > /tmp/image.tar
 
       - name: Save image artifact
         uses: actions/upload-artifact@v4

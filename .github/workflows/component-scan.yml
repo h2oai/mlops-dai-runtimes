@@ -220,7 +220,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*DAI Runtimes* \n_Vulnerabilities have been detected on the `${{ github.ref_name }}` branch_"
+                    "text": "*Java MOJO Runtime* \n_Vulnerabilities have been detected on the `${{ github.ref_name }}` branch_"
                   }
                 },
                 {

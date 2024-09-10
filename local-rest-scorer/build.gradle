@@ -1,5 +1,4 @@
 plugins {
-    id 'com.google.cloud.tools.jib'
     id 'org.springframework.boot'
 }
 apply from: project(":").file('gradle/java.gradle')
@@ -44,6 +43,7 @@ bootRun {
 bootJar {
     mainClass = 'ai.h2o.mojos.deploy.local.rest.ScorerApplication'
     archiveClassifier = 'boot'
+    archiveVersion = ''
 }
 
 jar {
@@ -57,38 +57,3 @@ rootProject.distributionZip {
         from bootJar.archivePath
     }
 }
-
-// Docker image configuration.
-jib {
-    from {
-        image = javaBaseImage
-    }
-    to {
-        image = dockerRepositoryPrefix + 'rest-scorer'
-        tags = [version]
-        auth {
-            username = System.getenv('TO_DOCKER_USERNAME') ?: ''
-            password = System.getenv('TO_DOCKER_PASSWORD') ?: ''
-        }
-    }
-    container {
-        jvmFlags = defaultJibContainerJvmFlags.split(" ").each { it.trim() }.toList()
-        user = 1001
-        ports = ['8080']
-        volumes = [
-                // For storing the mojo2 file with the model to be used for scoring.
-                '/mojos',
-                // For the DAI license file.
-                '/secrets',
-        ]
-        environment = [
-                // The expected path to the DAI license file.
-                DRIVERLESS_AI_LICENSE_FILE: '/secrets/license.sig',
-        ]
-    }
-}
-
-// Make docker TAR build part of the build task to ensure the image can be built.
-// No pushing anywhere (not even to local docker). To push to local docker run task `jibDockerBuild` instead.
-// To push to harbor use task `jib`, credentials will be needed though.
-tasks.build.dependsOn tasks.jibBuildTar
