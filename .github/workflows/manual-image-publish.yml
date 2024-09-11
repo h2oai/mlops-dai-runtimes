@@ -25,3 +25,4 @@ jobs:
       gar_image_name: us-docker.pkg.dev/vorvan/mlops-dev/h2oai-modelscoring-restscorer
       ecr_push_enabled: false
       image_tags: "${{ needs.setup_env.outputs.sanitized_branch_name }}-${{ needs.setup_env.outputs.commit_hash }}"
+
