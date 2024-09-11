@@ -40,9 +40,14 @@ jobs:
       - name: Save Github Commit Hash
         id: commit_hash
         run: |
-          if ${{ github.event_name == 'pull_request' }}; then echo "sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT; fi
-          if ${{ github.event_name == 'push' }}; then echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT; fi
-          if ${{ github.event_name == 'workflow_dispatch' }}; then echo "sha=$(git rev-parse --short=7 "$GITHUB_SHA")" >> $GITHUB_OUTPUT; fi
+          if ${{ github.event_name == 'pull_request' }}; then
+            sha=${{ github.event.pull_request.head.sha }}
+          elif ${{ github.event_name == 'push' }}; then
+            sha=${{ github.sha }}
+          else
+            sha=$(git rev-parse --short=7 "$GITHUB_SHA")
+          fi
+          echo "sha=$sha" >> $GITHUB_OUTPUT
 
       - name: Save Github Release Base Version
         id: release_base_version
