@@ -5,9 +5,15 @@ on:
     - cron: '30 2 * * 1-5'
 
 jobs:
+  setup_env:
+    uses: ./.github/workflows/setup-environment.yml
+
   build:
     uses: ./.github/workflows/image-build.yml
+    needs: setup_env
     secrets: inherit
+    with:
+      component_version: ${{ needs.setup_env.outputs.component_version }}
 
   security_scan:
     name: Security Scan

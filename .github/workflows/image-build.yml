@@ -9,8 +9,8 @@ on:
         default: true
       component_version:
         description: Gradle component version
+        required: true
         type: string
-        default: true
 
 jobs:
   build:
