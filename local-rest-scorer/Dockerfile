@@ -10,7 +10,8 @@ FROM cgr.dev/chainguard/wolfi-base:latest@sha256:0f1d81605bda6e2388c3c7f731700d8
 RUN apk add openjdk-17-jre bash coreutils
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk
 ENV PATH="$JAVA_HOME/bin:$PATH"
-USER nonroot
+# wolfi-base defines nonroot user under the following uid:gid
+USER 65532:65532
 WORKDIR /app
 COPY --from=builder --chown=nonroot:nonroot /app/dependencies/ ./
 COPY --from=builder --chown=nonroot:nonroot /app/spring-boot-loader/ ./
