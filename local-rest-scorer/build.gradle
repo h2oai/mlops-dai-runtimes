@@ -4,6 +4,11 @@ plugins {
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
+    implementation('org.springframework:spring-webmvc') {
+        version {
+            strictly '6.1.13'
+        }
+    }
     runtimeOnly    group: 'org.springframework.boot', name: 'spring-boot-properties-migrator'
     implementation project(':common:rest-spring-api')
     implementation project(':common:transform')
