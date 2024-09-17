@@ -40,6 +40,7 @@ jobs:
               - sql-jdbc-scorer/**
               - build.gradle
               - gradlew 
+              - gradle.properties
 
   setup_env:
     uses: ./.github/workflows/setup-environment.yml
