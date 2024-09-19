@@ -2,25 +2,32 @@ name: Publish Images
 
 on:
   workflow_call:
-    secrets:
-      GCR_JSON_KEY:
-        required: true
-
     inputs:
-      gar_push_enabled:
-        description: "Enable image push to GAR"
+      ecr_mlops_push_enabled:
+        description: "Enable image push to MLOps ECR"
         required: true
         type: boolean
-      ecr_push_enabled:
-        description: "Enable image push to ECR"
+      ecr_h2o_push_enabled:
+        description: "Enable image push to H2O ECR"
         required: true
         type: boolean
-      gar_image_name:
-        description: "Docker Registry and Repository for GAR"
+      ecr_mc_push_enabled:
+        description: "Enable image push to MC ECR"
+        required: true
+        type: boolean
+      ecr_mlops_image_name:
+        description: "Docker Registry and Repository for MLOps ECR"
+        default: "004258836109.dkr.ecr.us-east-1.amazonaws.com/h2oai-modelscoring-restscorer"
         required: false
         type: string
-      ecr_image_name:
+      ecr_h2o_image_name:
+        description: "Docker Registry and Repository for H2O ECR"
+        default: "353750902984.dkr.ecr.us-east-1.amazonaws.com/h2oai-modelscoring-restscorer"
+        required: false
+        type: string
+      ecr_mc_image_name:
         description: "Docker Registry and Repository for MC ECR"
+        default: "926522735405.dkr.ecr.us-east-1.amazonaws.com/h2oai-modelscoring-restscorer"
         required: false
         type: string
       image_tags:
@@ -46,8 +53,9 @@ jobs:
           full_tags=()
           # Split the comma-separated tags and iterate over each tag
           for tag in $(echo "${{ inputs.image_tags }}" | tr ',' ' '); do
-            if [[ "${{ inputs.gar_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.gar_image_name }}:${tag}"); fi
-            if [[ "${{ inputs.ecr_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.ecr_image_name }}:${tag}"); fi
+            if [[ "${{ inputs.ecr_mlops_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.ecr_mlops_image_name }}:${tag}"); fi
+            if [[ "${{ inputs.ecr_h2o_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.ecr_h2o_image_name }}:${tag}"); fi
+            if [[ "${{ inputs.ecr_mc_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.ecr_mc_image_name }}:${tag}"); fi
           done
 
           # Join the full tags array into a single string separated by commas
@@ -58,24 +66,40 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GAR
-        if: ${{ inputs.gar_push_enabled }}
-        uses: docker/login-action@v3
-        with:
-          registry: us-docker.pkg.dev
-          username: _json_key
-          password: ${{ secrets.GCR_JSON_KEY }}
-
-      - name: Configure MC AWS credentials
-        if: ${{ inputs.ecr_push_enabled }}
+      - name: Configure MLOps AWS credentials
+        if: ${{ inputs.ecr_mlops_push_enabled }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::926522735405:role/h2o-github-oidc-ecr-role
-          role-session-name: h2oai-external-adapter-MC-ECR
+          role-to-assume: arn:aws:iam::004258836109:role/GitHub-OIDC-Role
+          role-session-name: mlops-dai-runtimes
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
-        if: ${{ inputs.ecr_push_enabled }}
+        if: ${{ inputs.ecr_mlops_push_enabled }}
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Configure H2O AWS credentials
+        if: ${{ inputs.ecr_h2o_push_enabled }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::353750902984:role/GitHub-OIDC-Role
+          role-session-name: mlops-dai-runtimes
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        if: ${{ inputs.ecr_h2o_push_enabled }}
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Configure MC AWS credentials
+        if: ${{ inputs.ecr_mc_push_enabled }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::926522735405:role/h2o-github-oidc-ecr-role
+          role-session-name: mlops-dai-runtimes-MC-ECR
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        if: ${{ inputs.ecr_mc_push_enabled }}
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Download artifact

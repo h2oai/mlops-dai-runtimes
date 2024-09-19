@@ -21,7 +21,7 @@ jobs:
       - build_from_branch
     secrets: inherit
     with:
-      gar_push_enabled: true
-      gar_image_name: us-docker.pkg.dev/vorvan/mlops-dev/h2oai-modelscoring-restscorer
-      ecr_push_enabled: false
-      image_tags: "${{ needs.setup_env.outputs.sanitized_branch_name }}-${{ needs.setup_env.outputs.commit_hash }}"
+      ecr_mlops_push_enabled: true
+      ecr_h2o_push_enabled: false
+      ecr_mc_push_enabled: false
+      image_tags: "branch-${{ needs.setup_env.outputs.sanitized_branch_name }}-${{ needs.setup_env.outputs.commit_hash }}"
