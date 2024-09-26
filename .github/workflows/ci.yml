@@ -62,7 +62,7 @@ jobs:
       - build_image
     secrets: inherit
     with:
-      ecr_mlops_push_enabled: true
+      ecr_mlops_push_enabled: false
       ecr_h2o_push_enabled: true
       ecr_mc_push_enabled: true
       image_tags: "v${{ needs.setup_env.outputs.release_version }}"
