@@ -30,6 +30,9 @@ jobs:
           format: 'json'
           vuln-type: 'os,library'
           output: 'trivy-results.json'
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db:1
 
       - name: Save vulnerabilities report in tabular format
         if: always()
