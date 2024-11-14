@@ -27,40 +27,44 @@ jobs:
         uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: image:latest
-          format: 'json'
           vuln-type: 'os,library'
-          output: 'trivy-results.json'
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db:1
+          TRIVY_FORMAT: json
+          TRIVY_OUTPUT: 'trivy-results.json'
 
       - name: Save vulnerabilities report in tabular format
         if: always()
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: trivy-results.json
+          scan-ref: trivy-results.json
           scan-type: convert
-          vuln-type: ''
-          format: 'table'
-          output: 'trivy-results.txt'
+        env:
+          TRIVY_FORMAT: table
+          TRIVY_OUTPUT: 'trivy-results.txt'
 
       - name: Display vulnerabilities report
         if: always()
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: trivy-results.json
+          scan-ref: trivy-results.json
           scan-type: convert
-          vuln-type: ''
+        env:
+          TRIVY_FORMAT: table
+          TRIVY_OUTPUT: ''
 
       - name: Fail on high and critical vulnerabilities
         if: always()
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: trivy-results.json
+          scan-ref: trivy-results.json
           scan-type: convert
           exit-code: '1'
-          vuln-type: ''
           severity: 'HIGH,CRITICAL'
+        env:
+          TRIVY_FORMAT: table
+          TRIVY_OUTPUT: ''
 
       - name: Publish scan report
         if: always()
