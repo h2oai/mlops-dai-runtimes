@@ -218,33 +218,21 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/heads/release/') }}
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          method: chat.postMessage
+          token: ${{ secrets.H2O_OPS_SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Trivy Vulnerability Report",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Java MOJO Runtime* \n_Vulnerabilities have been detected on the `${{ github.ref_name }}` branch_"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "> *Trivy :: `${{ env.TRIVY_SUMMARY }}`*\n> *Prisma :: `${{ env.PRISMA_SUMMARY }}`*"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "${{ env.CODE_OWNERS }}, please review the following reports: <https://github.com/h2oai/${{ github.event.repository.name }}${{ needs.trivy_scan.outputs.job }}|_Trivy_>, <https://github.com/h2oai/${{ github.event.repository.name }}${{ needs.prisma_scan.outputs.job }}|_Prisma_>"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.H2O_OPS_SLACK_BOT_TOKEN }}
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "Trivy Vulnerability Report"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Java MOJO Runtime* \n_Vulnerabilities have been detected on the `${{ github.ref_name }}` branch_"
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "> *Trivy :: `${{ env.TRIVY_SUMMARY }}`*\n> *Prisma :: `${{ env.PRISMA_SUMMARY }}`*"
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "${{ env.CODE_OWNERS }}, please review the following reports: <https://github.com/h2oai/${{ github.event.repository.name }}${{ needs.trivy_scan.outputs.job }}|_Trivy_>, <https://github.com/h2oai/${{ github.event.repository.name }}${{ needs.prisma_scan.outputs.job }}|_Prisma_>"
