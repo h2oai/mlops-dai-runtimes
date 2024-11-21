@@ -49,6 +49,21 @@ paths:
           description: Successful operation
           schema:
             $ref: '#/definitions/Model'
+  '/readyz':
+    get:
+      tags:
+        - health
+      summary: Readiness check
+      description: Checks if the model schema can be retrieved successfully.
+      operationId: readinessCheck
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Model is ready
+        '500':
+          description: Model not ready
+  
   '/model/sample_request':
     get:
       tags:

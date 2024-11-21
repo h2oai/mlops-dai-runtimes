@@ -44,6 +44,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Model'
+  /readyz:
+    get:
+      tags:
+        - health
+      summary: Readiness check
+      description: Checks if the model schema can be retrieved successfully.
+      operationId: readinessCheck
+      responses:
+        "200":
+          description: Model is ready
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Model not ready
+          content:
+            application/json:
+              schema:
+                type: string
   /model/sample_request:
     get:
       tags:

@@ -27,3 +27,6 @@ terraform.tfstate*
 
 ###
 .DS_Store
+
+# VSCode
+.vscode/
