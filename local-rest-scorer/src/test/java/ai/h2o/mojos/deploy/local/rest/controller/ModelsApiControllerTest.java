@@ -61,6 +61,39 @@ class ModelsApiControllerTest {
   }
 
   @Test
+  void readinessCheck_WhenModelInfoSucceeds_ReturnsOk() {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
+
+    // When
+    ResponseEntity<String> response = controller.readinessCheck();
+
+    // Then
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals("Ready", response.getBody());
+  }
+
+  @Test
+  void readinessCheck_WhenModelInfoFails_ReturnsError() {
+    // Given
+    MojoScorer scorer = mock(MojoScorer.class);
+    ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder) {
+      @Override
+      public ResponseEntity<Model> getModelInfo() {
+        throw new RuntimeException("Failed to get model info");
+      }
+    };
+
+    // When
+    ResponseEntity<String> response = controller.readinessCheck();
+
+    // Then
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    assertEquals("Not Ready", response.getBody());
+  }
+
+  @Test
   void verifyCapabilities_DefaultShapley_ReturnsExpected() {
     // Given
     List<CapabilityType> expectedCapabilities = Arrays.asList(CapabilityType.SCORE);
