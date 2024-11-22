@@ -63,7 +63,7 @@ rootProject.distributionZip {
 // Spotless Configuration
 spotless {
     java {
-        googleJavaFormat() // Use Google Java Format
-        target 'src/**/*.java' // Define the target files
+        googleJavaFormat()
+        target 'src/**/*.java'
     }
 }
