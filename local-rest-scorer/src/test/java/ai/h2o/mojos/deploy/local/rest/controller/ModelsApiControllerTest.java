@@ -58,7 +58,6 @@ class ModelsApiControllerTest {
         .thenReturn(mojoPipeline);
   }
 
-
   @Test
   void verifyCapabilities_DefaultShapley_ReturnsExpected() {
     // Given
