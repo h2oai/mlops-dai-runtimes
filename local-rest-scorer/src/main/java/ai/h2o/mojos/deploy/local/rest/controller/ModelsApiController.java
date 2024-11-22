@@ -68,17 +68,6 @@ public class ModelsApiController implements ModelApi {
     return ResponseEntity.ok(scorer.getModelInfo().id(getScorerModelId()));
   }
 
-  // @Override
-  // public ResponseEntity<String> getReadyz() {
-  //   try {
-  //     // Attempt to retrieve the model schema
-  //     scorer.getModelInfo().getSchema();
-  //     return ResponseEntity.ok().body("Ready");
-  //   } catch (Exception e) {
-  //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Not ready");
-  //   }
-  // }
-
   @Override
   public ResponseEntity<String> getModelId() {
     return ResponseEntity.ok(getScorerModelId());
