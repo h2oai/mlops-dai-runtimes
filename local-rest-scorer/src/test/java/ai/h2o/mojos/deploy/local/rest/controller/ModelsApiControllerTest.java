@@ -58,38 +58,6 @@ class ModelsApiControllerTest {
         .thenReturn(mojoPipeline);
   }
 
-  // @Test
-  // void readyz_WhenModelInfoSucceeds_ReturnsOk() {
-  //   // Given
-  //   MojoScorer scorer = mock(MojoScorer.class);
-
-  //   Model model = new Model();
-  //   model.setSchema(new ModelSchema());
-  //   when(scorer.getModelInfo()).thenReturn(model);
-  //   ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
-
-  //   // When
-  //   ResponseEntity<String> response = controller.getReadyz();
-
-  //   // Then
-  //   assertEquals(HttpStatus.OK, response.getStatusCode());
-  //   assertEquals("Ready", response.getBody());
-  // }
-
-  // @Test
-  // void readyz_WhenModelInfoFails_ReturnsError() {
-  //   // Given
-  //   MojoScorer scorer = mock(MojoScorer.class);
-  //   when(scorer.getModelInfo()).thenThrow(new RuntimeException("Failed to get model info"));
-  //   ModelsApiController controller = new ModelsApiController(scorer, sampleRequestBuilder);
-
-  //   // When
-  //   ResponseEntity<String> response = controller.getReadyz();
-
-  //   // Then
-  //   assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-  //   assertEquals("Not ready", response.getBody());
-  // }
 
   @Test
   void verifyCapabilities_DefaultShapley_ReturnsExpected() {
