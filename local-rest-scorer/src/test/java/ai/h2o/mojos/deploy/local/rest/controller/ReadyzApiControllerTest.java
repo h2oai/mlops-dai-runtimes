@@ -22,7 +22,7 @@ class ReadyzApiControllerTest {
   @InjectMocks private ReadyzApiController controller;
 
   @Test
-  void getReadyz_WhenModelInfoSucceeds_ReturnsOk() {
+  void getReadyz_WhenModelSchemaSucceeds_ReturnsOk() {
     Model model = new Model();
     model.setSchema(new ModelSchema());
     when(scorer.getModelInfo()).thenReturn(model);
@@ -34,7 +34,7 @@ class ReadyzApiControllerTest {
   }
 
   @Test
-  void getReadyz_WhenModelInfoFails_ReturnsError() {
+  void getReadyz_WhenModelSchemaFails_ReturnsError() {
     when(scorer.getModelInfo()).thenThrow(new RuntimeException("Test error"));
 
     ResponseEntity<String> response = controller.getReadyz();
