@@ -50,7 +50,7 @@ paths:
         - health
       summary: Readiness check
       description: Checks if the model schema can be retrieved successfully.
-      operationId: readinessCheck
+      operationId: getReadyz
       responses:
         "200":
           description: Model is ready

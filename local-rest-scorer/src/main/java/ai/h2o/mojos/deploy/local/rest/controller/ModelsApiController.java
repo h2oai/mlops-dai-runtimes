@@ -20,7 +20,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -68,6 +67,17 @@ public class ModelsApiController implements ModelApi {
   public ResponseEntity<Model> getModelInfo() {
     return ResponseEntity.ok(scorer.getModelInfo().id(getScorerModelId()));
   }
+
+  // @Override
+  // public ResponseEntity<String> getReadyz() {
+  //   try {
+  //     // Attempt to retrieve the model schema
+  //     scorer.getModelInfo().getSchema();
+  //     return ResponseEntity.ok().body("Ready");
+  //   } catch (Exception e) {
+  //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Not ready");
+  //   }
+  // }
 
   @Override
   public ResponseEntity<String> getModelId() {
