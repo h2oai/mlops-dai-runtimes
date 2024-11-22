@@ -1,4 +1,4 @@
-FROM cgr.dev/chainguard/wolfi-base:latest@sha256:3221f96f52fca0020fa6f404b0370d132403be6b3736d8dd92275ccd72129c1f AS builder
+FROM cgr.dev/chainguard/wolfi-base:latest@sha256:b3dd9cf08283b959c6a0a3c833e68b2882a50129930215060154b43ae6a3e81c AS builder
 RUN apk add openjdk-17 bash coreutils
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk
 ENV PATH="$JAVA_HOME/bin:$PATH"
@@ -6,7 +6,7 @@ WORKDIR /app
 COPY build/libs/local-rest-scorer-boot.jar application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
-FROM cgr.dev/chainguard/wolfi-base:latest@sha256:3221f96f52fca0020fa6f404b0370d132403be6b3736d8dd92275ccd72129c1f
+FROM cgr.dev/chainguard/wolfi-base:latest@sha256:b3dd9cf08283b959c6a0a3c833e68b2882a50129930215060154b43ae6a3e81c
 RUN apk add openjdk-17-jre bash coreutils
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk
 ENV PATH="$JAVA_HOME/bin:$PATH"
