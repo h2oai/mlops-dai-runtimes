@@ -5,7 +5,6 @@ import ai.h2o.mojos.deploy.common.rest.model.ModelSchema;
 import ai.h2o.mojos.deploy.common.transform.MojoScorer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +15,6 @@ public class ReadyzApiController implements ReadyzApi {
   private final MojoScorer scorer;
   private static final Logger log = LoggerFactory.getLogger(ReadyzApiController.class);
 
-  @Autowired
   public ReadyzApiController(MojoScorer scorer) {
     this.scorer = scorer;
   }
