@@ -1,6 +1,8 @@
 plugins {
     id 'org.springframework.boot'
+    id 'com.diffplug.spotless' version '6.22.0'
 }
+
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
@@ -55,5 +57,13 @@ rootProject.distributionZip {
     dependsOn bootJar
     into(this.project.path.replace(":", "/")) {
         from bootJar.archivePath
+    }
+}
+
+// Spotless Configuration
+spotless {
+    java {
+        googleJavaFormat()
+        target 'src/**/*.java'
     }
 }
