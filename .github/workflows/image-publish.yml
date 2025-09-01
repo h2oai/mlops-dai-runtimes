@@ -3,10 +3,6 @@ name: Publish Images
 on:
   workflow_call:
     inputs:
-      ecr_mlops_push_enabled:
-        description: "Enable image push to MLOps ECR"
-        required: true
-        type: boolean
       ecr_h2o_push_enabled:
         description: "Enable image push to H2O ECR"
         required: true
@@ -15,11 +11,6 @@ on:
         description: "Enable image push to MC ECR"
         required: true
         type: boolean
-      ecr_mlops_image_name:
-        description: "Docker Registry and Repository for MLOps ECR"
-        default: "004258836109.dkr.ecr.us-east-1.amazonaws.com/h2oai-modelscoring-restscorer"
-        required: false
-        type: string
       ecr_h2o_image_name:
         description: "Docker Registry and Repository for H2O ECR"
         default: "353750902984.dkr.ecr.us-east-1.amazonaws.com/h2oai-modelscoring-restscorer"
@@ -53,7 +44,6 @@ jobs:
           full_tags=()
           # Split the comma-separated tags and iterate over each tag
           for tag in $(echo "${{ inputs.image_tags }}" | tr ',' ' '); do
-            if [[ "${{ inputs.ecr_mlops_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.ecr_mlops_image_name }}:${tag}"); fi
             if [[ "${{ inputs.ecr_h2o_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.ecr_h2o_image_name }}:${tag}"); fi
             if [[ "${{ inputs.ecr_mc_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.ecr_mc_image_name }}:${tag}"); fi
           done
@@ -65,18 +55,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Configure MLOps AWS credentials
-        if: ${{ inputs.ecr_mlops_push_enabled }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::004258836109:role/GitHub-OIDC-Role
-          role-session-name: mlops-dai-runtimes
-          aws-region: us-east-1
-
-      - name: Login to Amazon ECR
-        if: ${{ inputs.ecr_mlops_push_enabled }}
-        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Configure H2O AWS credentials
         if: ${{ inputs.ecr_h2o_push_enabled }}

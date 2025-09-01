@@ -36,8 +36,7 @@ jobs:
       - build_image
     secrets: inherit
     with:
-      ecr_mlops_push_enabled: true
-      ecr_h2o_push_enabled: false
+      ecr_h2o_push_enabled: true
       ecr_mc_push_enabled: false
       image_tags: "sha-${{ needs.setup_env.outputs.commit_hash }},latest"
 
@@ -49,8 +48,7 @@ jobs:
       - build_image
     secrets: inherit
     with:
-      ecr_mlops_push_enabled: true
-      ecr_h2o_push_enabled: false
+      ecr_h2o_push_enabled: true
       ecr_mc_push_enabled: false
       image_tags: "sha-${{ needs.setup_env.outputs.commit_hash }},latest-${{ needs.setup_env.outputs.release_base_version }}"
 
@@ -62,7 +60,6 @@ jobs:
       - build_image
     secrets: inherit
     with:
-      ecr_mlops_push_enabled: false
       ecr_h2o_push_enabled: true
       ecr_mc_push_enabled: true
       image_tags: "v${{ needs.setup_env.outputs.release_version }}"
