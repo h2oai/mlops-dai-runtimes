@@ -16,7 +16,11 @@ dependencies {
     implementation group: 'io.springfox', name: 'springfox-boot-starter', version: springFoxVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat'
-
+    implementation("org.apache.tomcat.embed:tomcat-embed-core") {
+        version {
+            strictly '10.1.44'
+        }
+    }
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
     implementation group: 'jakarta.servlet', name: 'jakarta.servlet-api'
 
